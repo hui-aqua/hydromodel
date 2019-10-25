@@ -109,7 +109,7 @@ class HydroMorison:
         return F
 
 
-# for functions used in the current file
+# four functions used in the current file
 def Cal_linecenter(p1, p2):
     px = (p2[0] + p1[0]) / 2.0
     py = (p2[1] + p1[1]) / 2.0

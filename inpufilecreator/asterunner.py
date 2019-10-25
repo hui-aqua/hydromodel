@@ -6,7 +6,7 @@ email hui.cheng@uis.no
 import os
 import sys
 sys.path.append(
-    '/home/hui/GitCode/AllCodeRepository/coderepository/CodeAsterModule/inputfilescreator'
+    '/home/hui/GitCode/aqua/hydromodel/inpufilecreator'
 )
 import creamodule as cme
 cme.Sn = 0.194     # net solidity
