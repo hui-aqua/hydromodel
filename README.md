@@ -1,4 +1,6 @@
 # Hydrodynamic study on aquaculture cage with Code_Aster
+---now it is a private project
+
 summarize the hydrodynamic model for the aquaculture net
 ## Environments 
 This folder contains the wave theory with reference article.
