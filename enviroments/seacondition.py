@@ -33,10 +33,9 @@ class Airywave:
         s0 = 'The environment is airy wave (deep water) wave condition and the specific parameters are:\n'
         s1 = 'water Depth= ' + str(self.waterDepth) + ' m\n'
         s2 = 'wave Period= ' + str(self.wavePeriod) + ' s\n'
-        s5 = 'wave Period(G)= ' + str(np.sqrt(2 * pi * self.waveLength / 9.81)) + ' s\n'
         s3 = 'wave Length= ' + str(self.waveLength) + ' m\n'
         s4 = 'wave Height= ' + str(self.waveHeight) + ' m\n'
-        S = s0 + s1 + s2 + s3 + s4 + s5
+        S = s0 + s1 + s2 + s3 + s4
         return S
 
     def Get_Velo(self, posi, time):
@@ -91,9 +90,10 @@ class Stocks2wave(Airywave):
     def __str__(self):
         s0 = 'The environment is stokes second order wave theory condition and the specific parameters are:\n'
         s1 = 'water Depth= ' + str(self.waterDepth) + ' m\n'
+        s2 = 'wave Period= ' + str(self.wavePeriod) + ' s\n'
         s3 = 'wave Length= ' + str(self.waveLength) + ' m\n'
         s4 = 'wave Height= ' + str(self.waveHeight) + ' m\n'
-        S = s0 + s1 + s3 + s4
+        S = s0 + s1 + s2 + s3 + s4
         return S
 
     def Get_Velo(self, posi, time):
