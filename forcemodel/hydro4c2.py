@@ -19,36 +19,33 @@ refa = 1  # constant reduction factor
 
 # >>> revise 06.05.2019. change the b --> b-dwhyo. to
 #    to reduce the calculation overlaping on the knot.
+# >>>>>>>>>>>>>>>>>>>>>next section>>>>>>>>>>>>>>>>>>>>>
+# The following is shielding effect
+# >>>>>>>>>>>>>>>>>>>>hui.cheng@uis.no>>>>>>>31.03.2019>
+# >>>>>>>>>>>>>>>>>>>>update>>>>>>>>>>>>>>>>>03.04.2019>
+def Cal_shie_screen_elem(POSI, elem, U):
+    elem_shie = []
+    for i in range(len(elem)):
+        if np.dot(
+                Cal_tricenter(
+                    POSI[elem[i][0]],
+                    POSI[elem[i][1]],
+                    POSI[elem[i][2]],
+                ), U) > 0:
+            elem_shie.append(i)
+    return elem_shie
 
-class Net2NetWake:
-    def __init__(self, posi, hydroelement, U, cagecenter):
-        self.posi = []
-        self.hydroelement = []
-        self.U = []
-        self.cagecenter = np.zeros((3, 1))
-        self.elem_shie=[]
 
-    def getpaneslinwake(self, posi, hydroelement, U):
-        elem_shie = []
-        for i in range(len(self.hydroelement)):
-            elmentcenter = Cal_tricenter(self.posi[self.hydroelement[i][0]],
-                                          self.posi[self.hydroelement[i][1]],
-                                          self.posi[self.hydroelement[i][2]])
-            vectortocagecenter = (elmentcenter - self.cagecenter)
-            if np.dot(vectortocagecenter, U) < 0:
-                elem_shie.append(i)
-        return self.elem_shie
-
-    def getlinesinwake(self, posi, hydroelement, U):
-        elem_shie = []
-        for i in range(len(self.hydroelement)):
-            elmentcenter = Cal_linecenter(
-                self.posi[int(self.hydroelement[i][0])],
-                self.posi[int(self.hydroelement[i][1])])
-            vectortocagecenter = (elmentcenter - self.cagecenter)
-            if np.dot(vectortocagecenter, U) < 0:
-                elem_shie.append(i)
-        return self.elem_shie
+def Cal_shie_line_elem(POSI, elem, U):
+    elem_shie = []
+    for i in range(len(elem)):
+        if np.dot(Cal_linecenter(
+                POSI[int(elem[i][0])],
+                POSI[int(elem[i][1])],
+        ), U) > 0:
+            elem_shie.append(i)
+    # this means the line element center is in the back part of the netcage
+    return elem_shie
 
 
 # ###############  blevins ployfitting#################
@@ -115,7 +112,6 @@ def Get_velo(tabreu):  # to get the velocity
 
 
 # the line element is generate by meshcreator
-# This function is not used anymore
 # def Cal_connection(POSI, thre):
 #     elem = []
 #     for i in range(len(POSI)):
@@ -208,7 +204,8 @@ def Cal_FM1(POSI, LINE, U, Sn, ref):
         a = Cal_orientation(POSI[int(LINE[i][0])], POSI[int(LINE[i][1])])
         if i in ref:
             Ueff = 0.8 * (U)
-        ft = 0.5 * row * dwmeshc * (b - dwmeshc) * Ct * pow(np.dot(a, Ueff),2) * a
+        ft = 0.5 * row * dwmeshc * (b - dwmeshc) * Ct * pow(np.dot(a, Ueff),
+                                                            2) * a
         fn = 0.5 * row * dwmeshc * (b - dwmeshc) * Cn * (
                 Ueff - np.dot(a, Ueff) * a) * np.linalg.norm(
             (Ueff - np.dot(a, Ueff) * a))

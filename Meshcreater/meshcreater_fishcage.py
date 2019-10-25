@@ -64,6 +64,25 @@ import os
 cwd = os.getcwd()
 np.savetxt('lineconnections.txt', con)
 
+
+def Cal_screen(POSI, elem, are):  # todo: auto generate the screen element
+    sur = []
+    for i in range(len(elem)):
+        for j in range(len(elem)):
+            twoli = set([elem[i][0], elem[i][1], elem[j][0], elem[j][1]])
+            if len(set(twoli)) == 3:
+                ele = [k for k in twoli]
+                ele.sort()
+                a1 = Cal_distence(POSI[ele[0]], POSI[ele[1]])
+                a2 = Cal_distence(POSI[ele[0]], POSI[ele[2]])
+                a3 = Cal_distence(POSI[ele[1]], POSI[ele[2]])
+                s = (a1 + a2 + a3) / 2
+                K = np.sqrt(s * (s - a1) * (s - a2) * (s - a3))
+                if K > are * 0.9:
+                    if ele not in sur:
+                        sur.append(ele)
+    return sur
+
 isDone = Mesh_1.Compute()
 # nameing  the group
 
