@@ -109,6 +109,68 @@ class HydroMorison:
         return F
 
 
+class HydroScreen:
+    """
+    For Screen hydrodynamic models, the code needs the panel' potions \n
+    and the connections.  \n
+    Thus, the input variable is the matrix of nodes and the connetions. \n
+    In addition, the solidity and constant flow reduction are also needed.
+    """
+
+    def __init__(self, posimatrix, hydroelem, solidity, dwh=0.0, dw0=0.0):
+        self.posi = posimatrix  # the position matrix [[x1,y1,z1][x2,y2,z2]]
+        self.hydroelem = hydroelem  # the connections of the twines[[p1,p2][p2,p3]]
+        self.dwh = dwh  # used for the force calculation (reference area)
+        # can be a consistent number or a list
+        self.dw0 = dw0  # used for the hydrodynamic coefficients
+        # can be a consistent number or a list
+        self.Sn = solidity
+
+    def S1(self, U):
+        # from Aarsnes model(1990) the Sn should be less than 0.35
+        # Reynolds number in range from 1400 to 1800
+        num_node = len(self.posi)
+        F = np.zeros((num_node, 3))  # force on nodes
+        for j in range(len(self.hydroelem)):
+            Ueff = U
+            elementIndex = [int(k) for k in self.hydroelem[j]]
+            elementIndex.sort()
+            for i in range(len(elementIndex)):
+                elementIndex.pop(i)
+                a1 = Cal_orientation(self.posi[elementIndex[0]], self.posi[elementIndex[1]])
+                a2 = Cal_orientation(self.posi[elementIndex[0]], self.posi[elementIndex[1]])
+                ba1 = Cal_distence(self.posi[elementIndex[0]], self.posi[elementIndex[1]])
+                ba2 = Cal_distence(self.posi[elementIndex[0]], self.posi[elementIndex[1]])
+                surN = np.cross(a1, a2) / np.linalg.norm(np.cross(a1, a2))
+                if np.dot(surN, Ueff) < 0:
+                    surN = -surN
+                # the normal vector of the net plane in positive with current direction
+                surL = np.cross(np.cross(Ueff, surN), Ueff) / \
+                       np.linalg.norm(np.cross(np.cross(Ueff, surN), Ueff) + 0.000000001)
+
+                surA = 0.5 * np.linalg.norm(np.cross(a1 * ba1, a2 * ba2))
+                cosalpha = abs(np.dot(surN, Ueff) / np.linalg.norm(Ueff))
+                sinalpha = np.linalg.norm(np.cross(surN, Ueff)) / np.linalg.norm(Ueff)
+                Cd = 0.04 + (-0.04 + self.Sn - 1.24 * pow(self.Sn, 2) +
+                             13.7 * pow(self.Sn, 3)) * cosalpha
+                Cl = (0.57 * self.Sn - 3.54 * pow(self.Sn, 2) +
+                      10.1 * pow(self.Sn, 3)) * 2 * sinalpha * cosalpha
+                wake = Net2NetWake(self.posi, self.hydroelem, U, self.Sn)
+                ref = wake.getpaneslinwake()
+                if i in ref:
+                    Ueff = U * wake.reductionfactorblvin(np.arccos(cosalpha))
+                fd = 0.5 * row * surA * Cd * np.linalg.norm(Ueff) * Ueff
+                fl = 0.5 * row * surA * Cl * pow(np.linalg.norm(Ueff), 2) * surL
+                F[elementIndex[0]] = F[elementIndex[0]] + (fd + fl) / 6
+                F[elementIndex[1]] = F[elementIndex[1]] + (fd + fl) / 6
+                F[elementIndex[2]] = F[elementIndex[2]] + (fd + fl) / 6
+                elementIndex = [int(k) for k in self.hydroelem[j]]
+        return F
+
+
+
+
+
 # four functions used in the current file
 def Cal_linecenter(p1, p2):
     px = (p2[0] + p1[0]) / 2.0
@@ -160,3 +222,37 @@ def Get_velo(tabreu):  # to get the velocity
     VX3 = CxT2.values()['DZ']
     VITE = np.array([VX1, VX2, VX3])
     return np.transpose(VITE)
+
+# Might mot use
+#     # if set(elementIndex) == 3:  # only three point for the screen.
+#     #     newEIndex = [k for k in set(elementIndex)]  # the new set of element index
+#     #     newEIndex.sort()
+#     a1 = Cal_orientation(self.posi[newEIndex[0]], self.posi[newEIndex[1]])
+#     a2 = Cal_orientation(self.posi[newEIndex[0]], self.posi[newEIndex[1]])
+#     ba1 = Cal_distence(self.posi[newEIndex[0]], self.posi[newEIndex[1]])
+#     ba2 = Cal_distence(self.posi[newEIndex[0]], self.posi[newEIndex[1]])
+#     surN = np.cross(a1, a2) / np.linalg.norm(np.cross(a1, a2))
+#     if np.dot(surN, Ueff) < 0:
+#         surN = -surN
+#     # the normal vector of the net plane in positive with current direction
+#     surL = np.cross(np.cross(Ueff, surN), Ueff) / \
+#            np.linalg.norm(np.cross(np.cross(Ueff, surN), Ueff) + 0.000000001)
+#
+#     surA = 0.5 * np.linalg.norm(np.cross(a1 * ba1, a2 * ba2))
+#     cosalpha = abs(np.dot(surN, Ueff) / np.linalg.norm(Ueff))
+#     sinalpha = np.linalg.norm(np.cross(surN, Ueff)) / np.linalg.norm(Ueff)
+#     Cd = 0.04 + (-0.04 + self.Sn - 1.24 * pow(self.Sn, 2) +
+#                  13.7 * pow(self.Sn, 3)) * cosalpha
+#     Cl = (0.57 * self.Sn - 3.54 * pow(self.Sn, 2) +
+#           10.1 * pow(self.Sn, 3)) * 2 * sinalpha * cosalpha
+#     wake = Net2NetWake(self.posi, self.hydroelem, U, self.Sn)
+#     ref = wake.getpaneslinwake()
+#     if i in ref:
+#         Ueff = U * wake.reductionfactorblvin(np.arccos(cosalpha))
+#     fd = 0.5 * row * surA * Cd * np.linalg.norm(Ueff) * Ueff
+#     fl = 0.5 * row * surA * Cl * pow(np.linalg.norm(Ueff), 2) * surL
+#     F[newEIndex[0]] = F[newEIndex[0]] + (fd + fl) / 3
+#     F[newEIndex[1]] = F[newEIndex[1]] + (fd + fl) / 3
+#     F[newEIndex[2]] = F[newEIndex[2]] + (fd + fl) / 3
+#
+# else:
