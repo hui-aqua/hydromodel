@@ -1,68 +1,81 @@
 # -*- coding: utf-8 -*-
 '''
 The center of the floating collar is (0,0,0)
-Fish cage is along the Z- irection
+Fish cage is along the Z- direction
 Z=0 is the free surface
 Z<0 is the water zone
 Z>0 is the air zone
 The fish cage is a cylindrical shape
 !! the sinker points are added manually 
 Because it is dependent on individual cage.
+This code can be executed by the following command in terminal:
+
+/opt/salome2019/appli_V2019_univ/salome -t ~/GitCode/aqua/hydromodel/Meshcreater/meshcreater_fishcage.py
+
+or:
+
+/opt/salome2019/appli_V2019_univ/salome -t meshcreater_fishcage.py
+
 Any question please email: hui.cheng@uis.no
+
 '''
+import os
+
 # define the fish cage shape
 import numpy as np
 from numpy import pi
-D = 15  # [m]  fish cage diameter
-H = 30  # [m]  fish cage height
-L = 1.5  # [m]  bar length
-NT = 72  # it can use int(pi*D/L)   # Number of the nodes in circumference
-NT=int(pi*D/L)
-NN = 20  # it can use int(H/L)      # Number-1 of the nodes in the height
-NN=int(H/L)
-p = np.zeros([(NN + 1) * NT, 3])
 
-# generate the point coordinates matrix
+D = 50.0  # [m]  fish cage diameter
+H = 30.0  # [m]  fish cage height
+# L = 1.5  # [m]  bar length
+NT = 30  # it can use int(pi*D/L)   # Number of the nodes in circumference
+# NT = int(pi * D / L)
+NN = 20  # it can use int(H/L)      # Number-1 of the nodes in the height
+# NN = int(H / L)
+p = []
+cagebottomcenter = [0, 0, -H]
+
+# generate the point coordinates matrix for the net
 for i in range(0, NT):
     for j in range(0, NN + 1):
-        p[i + j * NT, :] = [
-            D / 2 * np.cos(i * 2 * pi / NT), D / 2 * np.sin(i * 2 * pi / NT),
-            -j * L
-        ]
+        p.append([D / 2 * np.cos(i * 2 * pi / float(NT)), D / 2 * np.sin(i * 2 * pi / float(NT)), -j * H / float(NN)])
+p.append(cagebottomcenter)
 
 # the below is the commond in the Mesh, Salome.
 # the mesh creater script
-import sys
 import salome
+
 salome.salome_init()
 theStudy = salome.myStudy
-import SMESH, SALOMEDS
+import SMESH
 from salome.smesh import smeshBuilder
+
 smesh = smeshBuilder.New(theStudy)
 Mesh_1 = smesh.Mesh()
 
 # add the pints into geometry
 for i in range(len(p)):
-    nodeID = Mesh_1.AddNode(float(p[i, 0]), float(p[i, 1]), float(p[i, 2]))
-    
+    nodeID = Mesh_1.AddNode(float(p[i][0]), float(p[i][1]), float(p[i][2]))
+
 # add the horizontial line into geometry
-con=[]
+con = []
 for i in range(1, NT + 1):
     for j in range(0, NN + 1):
         if i == NT:
             edge = Mesh_1.AddEdge([i + j * NT, 1 + i + (j - 1) * NT])
-            con.append([i + j * NT-1, 1 + i + (j - 1) * NT-1])
+            con.append([i + j * NT - 1, 1 + i + (j - 1) * NT - 1])
         else:
             edge = Mesh_1.AddEdge([i + j * NT, 1 + i + j * NT])
-            con.append([i + j * NT-1, 1 + i + j * NT-1])
+            con.append([i + j * NT - 1, 1 + i + j * NT - 1])
 # add the vertical line into geometry
 for i in range(1, NT + 1):
     for j in range(0, NN):
         edge = Mesh_1.AddEdge([i + j * NT, i + (j + 1) * NT])
-        con.append([i + j * NT-1, i + (j + 1) * NT-1])
-import os
+        con.append([i + j * NT - 1, i + (j + 1) * NT - 1])
+
+cwd = "/home/hui/GitCode/aqua/hydromodel"
 cwd = os.getcwd()
-np.savetxt('lineconnections.txt', con)
+np.savetxt(cwd + '/lineconnections.txt', con)
 
 
 def Cal_screen(POSI, elem, are):  # todo: auto generate the screen element
@@ -82,6 +95,7 @@ def Cal_screen(POSI, elem, are):  # todo: auto generate the screen element
                     if ele not in sur:
                         sur.append(ele)
     return sur
+
 
 isDone = Mesh_1.Compute()
 # nameing  the group
@@ -115,3 +129,5 @@ for i in range(1, (NN + 1) * NT + 1):
     node1 = Mesh_1.CreateEmptyGroup(SMESH.NODE, 'node%s' % i)
     nbAdd = node1.Add([i])
     smesh.SetName(node1, 'node%s' % i)
+
+Mesh_1.ExportMED(cwd + "/MyMesh.med")

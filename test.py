@@ -51,3 +51,18 @@ print("the length of k is", len(k))
 # print(y.calculatepi(2))
 
 print(1.2 * np.ones((10, 1)))
+D = 50.0  # [m]  fish cage diameter
+H = 30.0  # [m]  fish cage height
+# L = 1.5  # [m]  bar length
+NT = 30  # it can use int(pi*D/L)   # Number of the nodes in circumference
+# NT = int(pi * D / L)
+NN = 20  # it can use int(H/L)      # Number-1 of the nodes in the height
+# NN = int(H / L)
+p = []
+cagebottomcenter = [0, 0, -H]
+
+# generate the point coordinates matrix for the net
+for i in range(0, NT):
+    for j in range(0, NN + 1):
+        p.append([D / 2 * np.cos(i * 2 * pi / float(NT)), D / 2 * np.sin(i * 2 * pi / float(NT)), -j * H / float(NN)])
+p.append(cagebottomcenter)
