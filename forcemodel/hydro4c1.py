@@ -1,13 +1,9 @@
 # writer: hui.cheng@uis.no
 import numpy as np
 from numpy import pi
-
-# it must define in the comm file
 row = 1025  # kg/m3   sea water density
-Kinvis = 1.004e-6  # when the water tempreture is 20 degree.
-Dynvis = 1.002e-3  # when the water tempreture is 20 degree.
-
-
+Kinvis = 1.004e-6  # when the water temperature is 20 degree.
+Dynvis = 1.002e-3  # when the water temperature is 20 degree.
 class Net2NetWake:
     def __init__(self, posi, hydroelement, U, Sn):
         self.posi = []  # a list of all the nodes for net
@@ -57,15 +53,15 @@ class Net2NetWake:
         else:
             coe = self.coe30
         for i in range(len(coe) - 1):
-            refa += coe[i] * pow(abs(alf), 7 - i)
+            refa += coe[i] * pow(abs(alf), 7 - i)  # polynomial fitting
         return refa + 0.825
 
 
 class HydroMorison:
     """
-    For Morison hydrodyanmic models, the code needs the nodes' potions \n
-    and the connetions.  \n
-    Thus, the input variable is the matrix of nodes and the connetions. \n
+    For Morison hydrodynamic models, the code needs the nodes' potions \n
+    and the connections.  \n
+    Thus, the input variable is the matrix of nodes and the connections. \n
     In addition, the solidity and constant flow reduction are also needed.
     """
 
@@ -108,6 +104,35 @@ class HydroMorison:
             F[int(self.line[i][1])] = F[int(self.line[i][1])] + 0.5 * (fn + ft)
         return F
 
+    def M2(self, U):
+        # ref is a list of which elements in the wake region
+        # ref. J.S. Bessonneau and D. Marichal. 1998 # cd=1.2,ct=0.1.
+        num_node = len(self.posi)
+        num_line = len(self.line)
+        if len(self.dwh) == 1:
+            dwh = self.dwh * np.ones((num_line, 1))
+        # if len(self.dw0) == 1:
+        #     dw0 = self.dw0 * np.ones((num_line, 1))
+        Ct = 0.1
+        Cn = 1.3
+        wake = Net2NetWake(self.posi, self.hydroelem, U, self.Sn)
+        ref = wake.getlinesinwake()
+        a = []  # oriention for the cable
+        b = []  # cable length
+        F = np.zeros((num_node, 3))  # force on nodes
+        for i in range(num_line):
+            Ueff = U
+            b = Cal_distence(self.posi[self.line[i][0]], self.posi[self.line[i][1]])
+            a = Cal_orientation(self.posi[self.line[i][0]], self.posi[self.line[i][1]])
+            if i in ref:
+                Ueff = 0.8 * U
+            ft = 0.5 * row * dwh[i] * (b - dwh[i]) * Ct * pow(np.dot(a, Ueff), 2) * a
+            fn = 0.5 * row * dwh[i] * (b - dwh[i]) * Cn * (
+                    Ueff - np.dot(a, Ueff) * a) * np.linalg.norm(
+                (Ueff - np.dot(a, Ueff) * a))
+            F[int(self.line[i][0])] = F[int(self.line[i][0])] + 0.5 * (fn + ft)
+            F[int(self.line[i][1])] = F[int(self.line[i][1])] + 0.5 * (fn + ft)
+        return F
 
 class HydroScreen:
     """
