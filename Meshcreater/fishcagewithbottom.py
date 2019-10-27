@@ -1,5 +1,4 @@
-# -*- coding: utf-8 -*-
-'''
+"""
 The center of the floating collar is (0,0,0)
 Fish cage is along the Z- direction
 Z=0 is the free surface
@@ -18,9 +17,9 @@ or:
 
 /opt/salome2019/appli_V2019_univ/salome -t fishcagewithbottom.py
 
-Any question please email: hui.cheng@uis.no
+Any questions about this code, please email: hui.cheng@uis.no
 
-'''
+"""
 import os
 
 # define the fish cage shape

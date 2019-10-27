@@ -1,4 +1,8 @@
-# writer: hui.cheng@uis.no
+"""
+A module can be used to calculate the hydrodynamic forces on nets in Code_Aster.
+To use this module, one should be import this into the input file for calculations.
+Any questions about this code, please email: hui.cheng@uis.no
+"""
 import numpy as np
 from numpy import pi
 row = 1025  # kg/m3   sea water density
