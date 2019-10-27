@@ -104,12 +104,13 @@ smesh.SetName(twines, 'twines')
 allnodes = Mesh_1.CreateEmptyGroup(SMESH.NODE, 'allnodes')
 nbAdd = allnodes.AddFrom(Mesh_1.GetMesh())
 smesh.SetName(allnodes, 'allnodes')
-# todo check the nameing process
-# define the fixed points, the reaction forces are calculated based on fixed points.
-fixed = Mesh_1.CreateEmptyGroup(SMESH.NODE, 'fixed')
-nbAdd = fixed.Add([i for i in range(NT + 1)])
-smesh.SetName(fixed, 'fixed')
 
+# define the topnodes, the reaction forces are calculated based on topnodes.
+fixed = Mesh_1.CreateEmptyGroup(SMESH.NODE, 'topnodes')
+nbAdd = fixed.Add([i for i in range(NT + 1)])
+smesh.SetName(fixed, 'topnodes')
+
+# todo check the nameing process
 # bottom ring will keep the cage and add the sink forces
 bottomring = Mesh_1.CreateEmptyGroup(SMESH.EDGE, 'bottomring')
 nbAdd = bottomring.Add([i for i in range(1 + NN, 1 + (NT) * (NN + 1), NN + 1)])
