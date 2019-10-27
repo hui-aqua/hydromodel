@@ -1,24 +1,25 @@
-# -*- coding: utf-8 -*-
-'''
+"""
 The center of the floating collar is (0,0,0)
 Fish cage is along the Z- direction
 Z=0 is the free surface
 Z<0 is the water zone
 Z>0 is the air zone
 The fish cage is a cylindrical shape
-!! the sinker points are added manually 
+The fish cage has a bottom, and the bottom can be flat or cone shape
+ (according to the "cagebottomcenter" at line 37)
+
 Because it is dependent on individual cage.
 This code can be executed by the following command in terminal:
 
-/opt/salome2019/appli_V2019_univ/salome -t ~/GitCode/aqua/hydromodel/Meshcreater/meshcreater_fishcage.py
+/opt/salome2019/appli_V2019_univ/salome -t ~/GitCode/aqua/hydromodel/Meshcreater/fishcagewithbottom.py
 
 or:
 
-/opt/salome2019/appli_V2019_univ/salome -t meshcreater_fishcage.py
+/opt/salome2019/appli_V2019_univ/salome -t fishcagewithbottom.py
 
-Any question please email: hui.cheng@uis.no
+Any questions about this code, please email: hui.cheng@uis.no
 
-'''
+"""
 import os
 
 # define the fish cage shape
@@ -30,14 +31,14 @@ H = 30.0  # [m]  fish cage height
 # L = 1.5  # [m]  bar length
 NT = 30  # it can use int(pi*D/L)   # Number of the nodes in circumference
 # NT = int(pi * D / L)
-NN = 20  # it can use int(H/L)      # Number-1 of the nodes in the height
+NN = 20  # it can use int(H/L)      # number of section in the height, thus, the nodes should be NN+1
 # NN = int(H / L)
 p = []
 cagebottomcenter = [0, 0, -H]
 
 # generate the point coordinates matrix for the net
-for i in range(0, NT):
-    for j in range(0, NN + 1):
+for j in range(0, NN + 1):
+    for i in range(0, NT):
         p.append([D / 2 * np.cos(i * 2 * pi / float(NT)), D / 2 * np.sin(i * 2 * pi / float(NT)), -j * H / float(NN)])
 p.append(cagebottomcenter)
 
@@ -57,44 +58,39 @@ Mesh_1 = smesh.Mesh()
 for i in range(len(p)):
     nodeID = Mesh_1.AddNode(float(p[i][0]), float(p[i][1]), float(p[i][2]))
 
-# add the horizontial line into geometry
+
 con = []
-for i in range(1, NT + 1):
+sur = []
+for i in range(1, NT + 1):  # todo check con and sur
     for j in range(0, NN + 1):
-        if i == NT:
-            edge = Mesh_1.AddEdge([i + j * NT, 1 + i + (j - 1) * NT])
-            con.append([i + j * NT - 1, 1 + i + (j - 1) * NT - 1])
+        if j == NN:
+            edge = Mesh_1.AddEdge([i + j * NT, len(p)])  # add the vertical line into geometry
+            con.append([i + j * NT - 1, len(p) - 1])  # add the vertical line into geometry
+            if i == NT:
+                edge = Mesh_1.AddEdge([i + j * NT, 1 + i + (j - 1) * NT])  # add the horizontal line into geometry
+                con.append([i + j * NT - 1, 1 + i + (j - 1) * NT - 1])  # add the horizontal line into geometry
+                sur.append([i + j * NT - 1, 1 + i + (j - 1) * NT - 1, len(p) - 1, len(p) - 1])
+            else:
+                edge = Mesh_1.AddEdge([i + j * NT, 1 + i + j * NT])  # add the horizontal line into geometry
+                con.append([i + j * NT - 1, 1 + i + j * NT - 1])  # add the horizontal line into geometry
+                sur.append([i + j * NT - 1, 1 + i + j * NT - 1, len(p) - 1, len(p) - 1])
         else:
-            edge = Mesh_1.AddEdge([i + j * NT, 1 + i + j * NT])
-            con.append([i + j * NT - 1, 1 + i + j * NT - 1])
-# add the vertical line into geometry
-for i in range(1, NT + 1):
-    for j in range(0, NN):
-        edge = Mesh_1.AddEdge([i + j * NT, i + (j + 1) * NT])
-        con.append([i + j * NT - 1, i + (j + 1) * NT - 1])
+            edge = Mesh_1.AddEdge([i + j * NT, i + (j + 1) * NT])  # add the vertical line into geometry
+            con.append([i + j * NT - 1, i + (j + 1) * NT - 1])  # add the vertical line into geometry
+            if i == NT:
+                edge = Mesh_1.AddEdge([i + j * NT, 1 + i + (j - 1) * NT])  # add the horizontal line into geometry
+                con.append([i + j * NT - 1, 1 + i + (j - 1) * NT - 1])  # add the horizontal line into geometry
+                sur.append([i + j * NT - 1, 1 + i + (j - 1) * NT - 1, i + j * NT - 1, i + (j + 1) * NT - 1])
+            else:
+                edge = Mesh_1.AddEdge([i + j * NT, 1 + i + j * NT])  # add the horizontal line into geometry
+                con.append([i + j * NT - 1, 1 + i + j * NT - 1])  # add the horizontal line into geometry
+                sur.append([i + j * NT - 1, 1 + i + j * NT - 1, len(p) - 1, len(p) - 1])
+
 
 cwd = "/home/hui/GitCode/aqua/hydromodel"
 cwd = os.getcwd()
-np.savetxt(cwd + '/lineconnections.txt', con)
-
-
-def Cal_screen(POSI, elem, are):  # todo: auto generate the screen element
-    sur = []
-    for i in range(len(elem)):
-        for j in range(len(elem)):
-            twoli = set([elem[i][0], elem[i][1], elem[j][0], elem[j][1]])
-            if len(set(twoli)) == 3:
-                ele = [k for k in twoli]
-                ele.sort()
-                a1 = Cal_distence(POSI[ele[0]], POSI[ele[1]])
-                a2 = Cal_distence(POSI[ele[0]], POSI[ele[2]])
-                a3 = Cal_distence(POSI[ele[1]], POSI[ele[2]])
-                s = (a1 + a2 + a3) / 2
-                K = np.sqrt(s * (s - a1) * (s - a2) * (s - a3))
-                if K > are * 0.9:
-                    if ele not in sur:
-                        sur.append(ele)
-    return sur
+np.savetxt(cwd + '/lines.txt', con)
+np.savetxt(cwd + '/surfaces.txt', sur)
 
 
 isDone = Mesh_1.Compute()
@@ -108,7 +104,7 @@ smesh.SetName(twines, 'twines')
 allnodes = Mesh_1.CreateEmptyGroup(SMESH.NODE, 'allnodes')
 nbAdd = allnodes.AddFrom(Mesh_1.GetMesh())
 smesh.SetName(allnodes, 'allnodes')
-
+# todo check the nameing process
 # define the fixed points, the reaction forces are calculated based on fixed points.
 fixed = Mesh_1.CreateEmptyGroup(SMESH.NODE, 'fixed')
 nbAdd = fixed.Add([i for i in range(NT + 1)])
