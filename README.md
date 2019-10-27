@@ -1,5 +1,5 @@
 # Hydrodynamic study on aquaculture cage with Code_Aster
----now it is a private project
+---now it is not ready for release.
 
 summarize the hydrodynamic model for the aquaculture net
 ## Environments 
