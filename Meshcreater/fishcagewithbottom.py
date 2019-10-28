@@ -26,12 +26,15 @@ import os
 import numpy as np
 from numpy import pi
 
-D = 50.0  # [m]  fish cage diameter
-H = 30.0  # [m]  fish cage height
+print("This script can generate a cylindrical fish cage with a bottom")
+D = float(input("\nInput your cage diameter [m] \n"))
+# D = 50.0  # [m]  fish cage diameter
+H = float(input("\nInput your cage height [m] \n"))
+# H = 30.0  # [m]  fish cage height
 # L = 1.5  # [m]  bar length
 NT = 30  # it can use int(pi*D/L)   # Number of the nodes in circumference
 # NT = int(pi * D / L)
-NN = 20  # it can use int(H/L)      # number of section in the height, thus, the nodes should be NN+1
+NN = 15  # it can use int(H/L)      # number of section in the height, thus, the nodes should be NN+1
 # NN = int(H / L)
 p = []
 cagebottomcenter = [0, 0, -H]
@@ -127,4 +130,4 @@ for i in range(1, (NN + 1) * NT + 1):
     nbAdd = node1.Add([i])
     smesh.SetName(node1, 'node%s' % i)
 
-Mesh_1.ExportMED(cwd + "/MyMesh.med")
+Mesh_1.ExportMED(cwd + "/CFG" + str(D) + "X" + str(H) + ".med")
