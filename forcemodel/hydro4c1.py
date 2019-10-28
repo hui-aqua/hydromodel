@@ -4,10 +4,12 @@ To use this module, one should be import this into the input file for calculatio
 Any questions about this code, please email: hui.cheng@uis.no
 """
 import numpy as np
-from numpy import pi
+
 row = 1025  # kg/m3   sea water density
 Kinvis = 1.004e-6  # when the water temperature is 20 degree.
 Dynvis = 1.002e-3  # when the water temperature is 20 degree.
+
+
 class Net2NetWake:
     def __init__(self, posi, hydroelement, U, Sn):
         self.posi = []  # a list of all the nodes for net
@@ -138,6 +140,7 @@ class HydroMorison:
             F[int(self.line[i][1])] = F[int(self.line[i][1])] + 0.5 * (fn + ft)
         return F
 
+
 class HydroScreen:
     """
     For Screen hydrodynamic models, the code needs the panel' potions \n
@@ -146,58 +149,72 @@ class HydroScreen:
     In addition, the solidity and constant flow reduction are also needed.
     """
 
-    def __init__(self, posimatrix, hydroelem, solidity, dwh=0.0, dw0=0.0):
+    def __init__(self, posimatrix, hydroelems, solidity, dwh=0.0, dw0=0.0):
         self.posi = posimatrix  # the position matrix [[x1,y1,z1][x2,y2,z2]]
-        self.hydroelem = hydroelem  # the connections of the twines[[p1,p2][p2,p3]]
+        self.hydroelems = hydroelems.tolist()  # the connections of the twines[[p1,p2][p2,p3]]
         self.dwh = dwh  # used for the force calculation (reference area)
         # can be a consistent number or a list
         self.dw0 = dw0  # used for the hydrodynamic coefficients
         # can be a consistent number or a list
         self.Sn = solidity
 
+    def Cal_element(self, eachpanel, origvelo):
+        # because the mesh construction, the first two node cannot have same index
+        a1 = Cal_orientation(self.posi[eachpanel[0]], self.posi[eachpanel[1]])
+        a2 = Cal_orientation(self.posi[eachpanel[0]], self.posi[eachpanel[1]])
+        ba1 = Cal_distence(self.posi[eachpanel[0]], self.posi[eachpanel[1]])
+        ba2 = Cal_distence(self.posi[eachpanel[0]], self.posi[eachpanel[1]])
+        surN = np.cross(a1, a2) / np.linalg.norm(np.cross(a1, a2))
+        surA = 0.5 * np.linalg.norm(np.cross(a1 * ba1, a2 * ba2))
+        if np.dot(surN, origvelo) < 0:
+            surN = -surN
+        surL = np.cross(np.cross(origvelo, surN), origvelo) / \
+               np.linalg.norm(np.cross(np.cross(origvelo, surN), origvelo) + 0.000000001)
+
+        cosalpha = abs(np.dot(surN, origvelo) / np.linalg.norm(origvelo))
+        alpha = np.arccos(cosalpha)
+        return alpha, surN, surL, surA
+
     def S1(self, U):
         # from Aarsnes model(1990) the Sn should be less than 0.35
         # Reynolds number in range from 1400 to 1800
         num_node = len(self.posi)
         F = np.zeros((num_node, 3))  # force on nodes
-        for j in range(len(self.hydroelem)):
-            Ueff = U
-            elementIndex = [int(k) for k in self.hydroelem[j]]
-            elementIndex.sort()
-            for i in range(len(elementIndex)):
-                elementIndex.pop(i)
-                a1 = Cal_orientation(self.posi[elementIndex[0]], self.posi[elementIndex[1]])
-                a2 = Cal_orientation(self.posi[elementIndex[0]], self.posi[elementIndex[1]])
-                ba1 = Cal_distence(self.posi[elementIndex[0]], self.posi[elementIndex[1]])
-                ba2 = Cal_distence(self.posi[elementIndex[0]], self.posi[elementIndex[1]])
-                surN = np.cross(a1, a2) / np.linalg.norm(np.cross(a1, a2))
-                if np.dot(surN, Ueff) < 0:
-                    surN = -surN
-                # the normal vector of the net plane in positive with current direction
-                surL = np.cross(np.cross(Ueff, surN), Ueff) / \
-                       np.linalg.norm(np.cross(np.cross(Ueff, surN), Ueff) + 0.000000001)
-
-                surA = 0.5 * np.linalg.norm(np.cross(a1 * ba1, a2 * ba2))
-                cosalpha = abs(np.dot(surN, Ueff) / np.linalg.norm(Ueff))
-                sinalpha = np.linalg.norm(np.cross(surN, Ueff)) / np.linalg.norm(Ueff)
+        wake = Net2NetWake(self.posi, self.hydroelems, U, self.Sn)
+        ref = wake.getpaneslinwake()
+        for panel in self.hydroelems:
+            alpha, surN, surL, surA = self.Cal_element(panel, U)
+            set([int(k) for k in set(panel)])
+            if self.hydroelems.index(panel) in ref:
+                Ueff = U * wake.reductionfactorblvin(alpha)
+            else:
+                Ueff = U
+            if len([int(k) for k in set(panel)]) == 3:  # triangle
+                nodes = [k for k in set([int(k) for k in set(panel)])]
                 Cd = 0.04 + (-0.04 + self.Sn - 1.24 * pow(self.Sn, 2) +
-                             13.7 * pow(self.Sn, 3)) * cosalpha
+                             13.7 * pow(self.Sn, 3)) * np.cos(alpha)
                 Cl = (0.57 * self.Sn - 3.54 * pow(self.Sn, 2) +
-                      10.1 * pow(self.Sn, 3)) * 2 * sinalpha * cosalpha
-                wake = Net2NetWake(self.posi, self.hydroelem, U, self.Sn)
-                ref = wake.getpaneslinwake()
-                if i in ref:
-                    Ueff = U * wake.reductionfactorblvin(np.arccos(cosalpha))
+                      10.1 * pow(self.Sn, 3)) * np.sin(2 * alpha)
                 fd = 0.5 * row * surA * Cd * np.linalg.norm(Ueff) * Ueff
                 fl = 0.5 * row * surA * Cl * pow(np.linalg.norm(Ueff), 2) * surL
-                F[elementIndex[0]] = F[elementIndex[0]] + (fd + fl) / 6
-                F[elementIndex[1]] = F[elementIndex[1]] + (fd + fl) / 6
-                F[elementIndex[2]] = F[elementIndex[2]] + (fd + fl) / 6
-                elementIndex = [int(k) for k in self.hydroelem[j]]
+                F[nodes[0]] = F[nodes[0]] + (fd + fl) / 3
+                F[nodes[1]] = F[nodes[1]] + (fd + fl) / 3
+                F[nodes[2]] = F[nodes[2]] + (fd + fl) / 3
+            else:
+                for i in range(len(panel)):  # square
+                    nodes = [int(k) for k in panel]
+                    panel = nodes.pop(i)
+                    alpha, surN, surL, surA = self.Cal_element(panel, U)
+                    Cd = 0.04 + (-0.04 + self.Sn - 1.24 * pow(self.Sn, 2) +
+                                 13.7 * pow(self.Sn, 3)) * np.cos(alpha)
+                    Cl = (0.57 * self.Sn - 3.54 * pow(self.Sn, 2) +
+                          10.1 * pow(self.Sn, 3)) * np.sin(2 * alpha)
+                    fd = 0.5 * row * surA * Cd * np.linalg.norm(Ueff) * Ueff
+                    fl = 0.5 * row * surA * Cl * pow(np.linalg.norm(Ueff), 2) * surL
+                    F[nodes[0]] = F[nodes[0]] + (fd + fl) / 6
+                    F[nodes[1]] = F[nodes[1]] + (fd + fl) / 6
+                    F[nodes[2]] = F[nodes[2]] + (fd + fl) / 6
         return F
-
-
-
 
 
 # four functions used in the current file

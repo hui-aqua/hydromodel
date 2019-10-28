@@ -50,3 +50,11 @@ print("the length of k is", len(k))
 # y.printname()
 # print(y.calculatepi(2))
 
+def func(x):
+    y0 = x + 1
+    y1 = x * 3
+    y2 = y0 ** 3 / pi
+    return y0, y1, y2
+
+
+e1, e2, e3 = func(15)

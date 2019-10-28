@@ -4,6 +4,7 @@ os.system("clear")
 modellist = [
     "fishcagewithbottom",
     "fishcagewithoutbottom",
+    "squarefishcage",
     "trawlnet",
     "fishcagewithmooringsystem"]  # add more models if it is ready
 
