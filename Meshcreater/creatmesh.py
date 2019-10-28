@@ -30,9 +30,9 @@ os.system("clear")
 print("This program is not ready to release for commercial usages.\n"
       "Any questions about this program, please email: hui.cheng@uis.no\n")
 printmodel()
-modelkey = input("\nPress the index number to choose the model or 'CTRL+C' to exit : \n")
+modelkey = input("\nPress the index number to choose the model or 'CTRL+C' to exit: ")
 while not int(modelkey) in range(len(modellist)):
-    modelkey = input("\nPlease choose the model in the above list \n")
+    modelkey = input("\nPlease choose the model in the above list: ")
 
 os.system("clear")
 modelbank = "/home/hui/GitCode/aqua/hydromodel/Meshcreater/"
