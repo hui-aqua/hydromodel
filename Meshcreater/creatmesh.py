@@ -1,7 +1,5 @@
 import os
-
 os.system("clear")
-
 modellist = ["fishcagewithbottom",
              "fishcagewithoutbottom",
              "trawlnet",
@@ -12,7 +10,6 @@ def printmodel():
     print("Currently, the available numerical models are:")
     for model in modellist:
         print(str(modellist.index(model)) + " " + model)
-
 
 appath = input("The default path for salome2019 is: \t/opt/salome2019/appli_V2019_univ/salome \n"
                "If your salome is located in this path, you can press '1' and enter \n\n"
@@ -35,7 +32,7 @@ print("This program is not ready to release for commercial usages.\n"
 printmodel()
 modelkey = input("\nPress the index number to choose the model or 'CTRL+C' to exit : \n")
 while not int(modelkey) in range(len(modellist)):
-    modelkey = input("\nPlease choose the model in the above list : \n")
+    modelkey = input("\nPlease choose the model in the above list \n")
 
 os.system("clear")
 modelbank = "/home/hui/GitCode/aqua/hydromodel/Meshcreater/"

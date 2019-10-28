@@ -90,7 +90,6 @@ for i in range(1, NT + 1):  # todo check con and sur
                 sur.append([i + j * NT - 1, 1 + i + j * NT - 1, len(p) - 1, len(p) - 1])
 
 
-cwd = "/home/hui/GitCode/aqua/hydromodel"
 cwd = os.getcwd()
 np.savetxt(cwd + '/lines.txt', con)
 np.savetxt(cwd + '/surfaces.txt', sur)
