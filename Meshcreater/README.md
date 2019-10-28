@@ -3,7 +3,7 @@ This folder contains different numerical models, which are named according to it
 The script can be run by the following command in terminal:
 
 ```
-/opt/salome2019/appli_V2019_univ/salome -t fishcagewithbottom.py
+python3 creatmesh.py
 ```
 The code and generate three files, one is mesh file end with .med; 
 One is line connection file witch can be used to calculate the hydrodynamic forces based on Morison models;
