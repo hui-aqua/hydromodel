@@ -64,7 +64,7 @@ for i in range(len(p)):
 
 con = []
 sur = []
-for i in range(1, NT + 1):  # todo check con and sur
+for i in range(1, NT + 1):
     for j in range(0, NN + 1):
         if j == NN:
             edge = Mesh_1.AddEdge([i + j * NT, len(p)])  # add the vertical line into geometry
@@ -83,11 +83,11 @@ for i in range(1, NT + 1):  # todo check con and sur
             if i == NT:
                 edge = Mesh_1.AddEdge([i + j * NT, 1 + i + (j - 1) * NT])  # add the horizontal line into geometry
                 con.append([i + j * NT - 1, 1 + i + (j - 1) * NT - 1])  # add the horizontal line into geometry
-                sur.append([i + j * NT - 1, 1 + i + (j - 1) * NT - 1, i + j * NT - 1, i + (j + 1) * NT - 1])
+                sur.append([i + j * NT - 1, 1 + i + (j - 1) * NT - 1, i + (j + 1) * NT - 1, 1 + i + j * NT - 1])
             else:
                 edge = Mesh_1.AddEdge([i + j * NT, 1 + i + j * NT])  # add the horizontal line into geometry
                 con.append([i + j * NT - 1, 1 + i + j * NT - 1])  # add the horizontal line into geometry
-                sur.append([i + j * NT - 1, 1 + i + j * NT - 1, len(p) - 1, len(p) - 1])
+                sur.append([i + j * NT - 1, 1 + i + j * NT - 1, i + (j + 1) * NT - 1, 1 + i + (j + 1) * NT - 1])
 
 
 cwd = os.getcwd()

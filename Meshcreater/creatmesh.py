@@ -1,9 +1,11 @@
 import os
+
 os.system("clear")
-modellist = ["fishcagewithbottom",
-             "fishcagewithoutbottom",
-             "trawlnet",
-             "fishcagewithmooringsystem"]  # add more models if it is ready
+modellist = [
+    "fishcagewithbottom",
+    "fishcagewithoutbottom",
+    "trawlnet",
+    "fishcagewithmooringsystem"]  # add more models if it is ready
 
 
 def printmodel():
@@ -11,11 +13,13 @@ def printmodel():
     for model in modellist:
         print(str(modellist.index(model)) + " " + model)
 
-appath = input("The default path for salome2019 is: \t/opt/salome2019/appli_V2019_univ/salome \n"
-               "If your salome is located in this path, you can press '1' and enter \n\n"
-               "The default path for salome2018 is: \t/opt/salome2018/appli_V2018.0.1_public/salome \n"
-               "If your salome is located in this path, you can press '2' and enter \n\n"
-               "Please input you path to salome in your computer \n")
+
+appath = input(
+    "The default path for salome2019 is: \t/opt/salome2019/appli_V2019_univ/salome \n"
+    "If your salome is located in this path, you can press '1' and enter \n\n"
+    "The default path for salome2018 is: \t/opt/salome2018/appli_V2018.0.1_public/salome \n"
+    "If your salome is located in this path, you can press '2' and enter \n\n"
+    "Please input you path to salome in your computer \n")
 if appath == str(1):
     appath = "/opt/salome2019/appli_V2019_univ/salome"
 if appath == str(2):
