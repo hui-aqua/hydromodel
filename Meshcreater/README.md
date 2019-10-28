@@ -13,10 +13,19 @@ Any questions about this code, please email: hui.cheng@uis.no
 
 The available numerical models are:
 
-- cylindrical fish cage with bottom 
-The fish cage is a cylindrical shape. And it has a bottom which can be either flat or cone shape
- (according to the "cagebottomcenter" at line 37)
- 
-trawlnet.py:
+- Cylindrical fish cage with bottom
 
-Generate the mesh file for trawl net, The node and line connection are read from external files.
+    The fish cage is a cylindrical shape. And it has a bottom which can be either flat or cone shape
+ (according to the "cagebottomcenter" )
+ 
+ - Cylindrical fish cage without bottom
+
+    The fish cage is a cylindrical shape. And it has a bottom which can be either flat or cone shape
+ (according to the "cagebottomcenter" )
+
+- trawl net
+
+    Generate the mesh file for trawl net, The node and line connection are read from external files.
+
+- Cylindrical fish cage with mooring system
+- Squared fish cage with(out) bottom with(out) mooring system
