@@ -11,11 +11,10 @@ The last on is the surface connection file, which can be used to calculate the h
 
 Any questions about this code, please email: hui.cheng@uis.no
 
-- fishcagewithbottom.py:
- 
-The fish cage is a cylindrical shape
- 
-The fish cage has a bottom, and the bottom can be flat or cone shape
+The available numerical models are:
+
+- cylindrical fish cage with bottom 
+The fish cage is a cylindrical shape. And it has a bottom which can be either flat or cone shape
  (according to the "cagebottomcenter" at line 37)
  
 trawlnet.py:
