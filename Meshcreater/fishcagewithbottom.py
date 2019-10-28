@@ -32,9 +32,9 @@ D = float(input("\nInput your cage diameter [m] \n"))
 H = float(input("\nInput your cage height [m] \n"))
 # H = 30.0  # [m]  fish cage height
 # L = 1.5  # [m]  bar length
-NT = 30  # it can use int(pi*D/L)   # Number of the nodes in circumference
+NT = 10  # it can use int(pi*D/L)   # Number of the nodes in circumference
 # NT = int(pi * D / L)
-NN = 15  # it can use int(H/L)      # number of section in the height, thus, the nodes should be NN+1
+NN = 6  # it can use int(H/L)      # number of section in the height, thus, the nodes should be NN+1
 # NN = int(H / L)
 p = []
 cagebottomcenter = [0, 0, -H]
@@ -96,37 +96,47 @@ np.savetxt(cwd + '/surfaces.txt', sur)
 
 
 isDone = Mesh_1.Compute()
-# nameing  the group
-
-# defaults nname for all the twines and nodes.
-twines = Mesh_1.CreateEmptyGroup(SMESH.EDGE, 'twines')
-nbAdd = twines.AddFrom(Mesh_1.GetMesh())
-smesh.SetName(twines, 'twines')
-
+# naming  the group
+# GROUP_NO
 allnodes = Mesh_1.CreateEmptyGroup(SMESH.NODE, 'allnodes')
 nbAdd = allnodes.AddFrom(Mesh_1.GetMesh())
 smesh.SetName(allnodes, 'allnodes')
 
 # define the topnodes, the reaction forces are calculated based on topnodes.
-fixed = Mesh_1.CreateEmptyGroup(SMESH.NODE, 'topnodes')
-nbAdd = fixed.Add([i for i in range(NT + 1)])
-smesh.SetName(fixed, 'topnodes')
+topnodes = Mesh_1.CreateEmptyGroup(SMESH.NODE, 'topnodes')
+nbAdd = topnodes.Add([i for i in range(NT + 1)])
+smesh.SetName(topnodes, 'topnodes')
 
-# todo check the nameing process
-# bottom ring will keep the cage and add the sink forces
-bottomring = Mesh_1.CreateEmptyGroup(SMESH.EDGE, 'bottomring')
-nbAdd = bottomring.Add([i for i in range(1 + NN, 1 + (NT) * (NN + 1), NN + 1)])
-smesh.SetName(bottomring, 'bottomring')
+# define the nodes on bottom ring
+bottomnodes = Mesh_1.CreateEmptyGroup(SMESH.NODE, 'bottomnodes')
+nbAdd = bottomnodes.Add([i for i in range(NT * NN + 1, NT * (NN + 1) + 1)])
+smesh.SetName(bottomnodes, 'bottomnodes')
 
-# the top ring to keep ths shape of the fish cage.
-topring = Mesh_1.CreateEmptyGroup(SMESH.EDGE, 'topring')
-nbAdd = topring.Add([i for i in range(1, 1 + (NT) * (NN + 1), NN + 1)])
-smesh.SetName(topring, 'topring')
+# define the node on the bottom tip
+bottomtip = Mesh_1.CreateEmptyGroup(SMESH.NODE, 'bottomtip')
+nbAdd = bottomtip.Add([len(p)])
+smesh.SetName(bottomtip, 'bottomtip')
 
 # generate the name for each node to assign the hycxrodynamic forces.
-for i in range(1, (NN + 1) * NT + 1):
+for i in range(1, len(p) + 1):
     node1 = Mesh_1.CreateEmptyGroup(SMESH.NODE, 'node%s' % i)
     nbAdd = node1.Add([i])
     smesh.SetName(node1, 'node%s' % i)
+
+# GROUP_MA
+# defaults names for all the twines and nodes.
+twines = Mesh_1.CreateEmptyGroup(SMESH.EDGE, 'twines')
+nbAdd = twines.AddFrom(Mesh_1.GetMesh())
+smesh.SetName(twines, 'twines')
+
+# the top ring to keep ths shape of the fish cage.
+topring = Mesh_1.CreateEmptyGroup(SMESH.EDGE, 'topring')
+nbAdd = topring.Add([i for i in range(2, len(con) + 1, 2 * NN + 2)])
+smesh.SetName(topring, 'topring')
+
+# bottom ring will keep the cage and add the sink forces
+bottomring = Mesh_1.CreateEmptyGroup(SMESH.EDGE, 'bottomring')
+nbAdd = bottomring.Add([i for i in range(2 * (1 + NN), len(con) + 1, 2 * (NN + 1))])
+smesh.SetName(bottomring, 'bottomring')
 
 Mesh_1.ExportMED(cwd + "/CFG" + str(D) + "X" + str(H) + ".med")
