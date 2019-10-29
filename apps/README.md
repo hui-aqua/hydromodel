@@ -1,10 +1,15 @@
-# Mesh creator
-This folder contains different numerical models, which are named according to its shape.
-The script can be run by the following command in terminal:
+# Apps for aquaculture and fishing usage
 
+This folder contains different applications that can make the simulation easier. 
+The app's name indicates it functionality. An example of running the app is shown as below:
 ```
 python3 creatmesh.py
 ```
+List of application:
+
+-
+
+
 The code and generate three files, one is mesh file end with .med; 
 One is line connection file witch can be used to calculate the hydrodynamic forces based on Morison models;
 The last on is the surface connection file, which can be used to calculate the hydrodynamic forces according to Screen models.
