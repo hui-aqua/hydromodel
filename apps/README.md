@@ -7,7 +7,13 @@ python3 creatmesh.py
 ```
 List of application:
 
--
+- creatmesh
+
+- allrun
+
+- allclean
+
+
 
 
 The code and generate three files, one is mesh file end with .med; 
