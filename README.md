@@ -1,6 +1,6 @@
 # Hydrodynamic study on aquaculture cage with Code_Aster
----now it is not ready for release.
-[![Codacy Badge](https://api.codacy.com/project/badge/Grade/19931a0cd13143c29c7b26795031bc1f)](https://www.codacy.com/manual/hui-aqua/hydromodel?utm_source=github.com&amp;utm_medium=referral&amp;utm_content=hui-aqua/hydromodel&amp;utm_campaign=Badge_Grade)
+
+[![Codacy Badge](https://api.codacy.com/project/badge/Grade/19931a0cd13143c29c7b26795031bc1f)](https://www.codacy.com/manual/hui-aqua/hydromodel?utm_source=github.com&amp;utm_medium=referral&amp;utm_content=hui-aqua/hydromodel&amp;utm_campaign=Badge_Grade)---now it is not ready for release.
 summarize the hydrodynamic model for the aquaculture net
 ## Environments 
 This folder contains the wave theory with reference article.
