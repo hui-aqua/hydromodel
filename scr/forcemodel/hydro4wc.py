@@ -17,7 +17,7 @@ Dynvis = 1.002e-3  # when the water tempreture is 20 degree.
 refa = 1  # constant reduction factor
 
 # >>> revise 06.05.2019. change the b --> b-dwhyo. to
-#    to reduce the calculation overlaping on the knot.
+# to reduce the calculation overlaping on the knot.
 # ## to get the position  in the code aster#####################################
 def Cal_shie_screen_elem(POSI, elem, U):
     elem_shie = []
