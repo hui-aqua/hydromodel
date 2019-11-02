@@ -28,16 +28,17 @@ from numpy import pi
 
 print("This script can generate a cylindrical fish cage with a bottom")
 D = float(input("\nInput your cage diameter [m] \n"))
-# D = 50.0  # [m]  fish cage diameter
 H = float(input("\nInput your cage height [m] \n"))
-# H = 30.0  # [m]  fish cage height
-# L = 1.5  # [m]  bar length
+Dtip = float(input("\nInput your bottom weight depth [m] \n"))
 NT = 10  # it can use int(pi*D/L)   # Number of the nodes in circumference
 # NT = int(pi * D / L)
 NN = 6  # it can use int(H/L)      # number of section in the height, thus, the nodes should be NN+1
 # NN = int(H / L)
+cagebottomcenter = [0, 0, -Dtip]
+
 p = []
-cagebottomcenter = [0, 0, -H]
+con = []
+sur = []
 
 # generate the point coordinates matrix for the net
 for j in range(0, NN + 1):
@@ -61,9 +62,6 @@ Mesh_1 = smesh.Mesh()
 for i in range(len(p)):
     nodeID = Mesh_1.AddNode(float(p[i][0]), float(p[i][1]), float(p[i][2]))
 
-
-con = []
-sur = []
 for i in range(1, NT + 1):
     for j in range(0, NN + 1):
         if j == NN:

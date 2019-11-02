@@ -40,5 +40,5 @@ while not int(modelkey) in range(len(modellist)):
     modelkey = input("\nPlease choose the model in the above list: ")
 
 os.system("clear")
-modelbank = "/home/hui/GitCode/aqua/hydromodel/Meshcreater/"
+modelbank = "/home/hui/GitCode/aqua/scr/Meshcreater/"
 os.system(appath + " -t " + modelbank + modellist[int(modelkey)] + ".py")
