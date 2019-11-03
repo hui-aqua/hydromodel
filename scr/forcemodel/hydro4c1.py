@@ -84,11 +84,7 @@ class HydroMorison:
         # ref is a list of which elements in the wake region
         # ref. J.S. Bessonneau and D. Marichal. 1998 # cd=1.2,ct=0.1.
         num_node = len(self.posi)
-        num_line = len(self.line)
-        if len(self.dwh) == 1:
-            dwh = self.dwh * np.ones((num_line, 1))
-        # if len(self.dw0) == 1:
-        #     dw0 = self.dw0 * np.ones((num_line, 1))
+        num_line = len(self.hydroelem)
         Ct = 0.1
         Cn = 1.2
         wake = Net2NetWake(self.posi, self.hydroelem, U, self.Sn)
@@ -96,23 +92,21 @@ class HydroMorison:
         F = np.zeros((num_node, 3))  # force on nodes
         for i in range(num_line):
             Ueff = U
-            b = Cal_distence(self.posi[self.line[i][0]], self.posi[self.line[i][1]])
-            a = Cal_orientation(self.posi[self.line[i][0]], self.posi[self.line[i][1]])
+            b = Cal_distence(self.posi[int(self.hydroelem[i][0])], self.posi[int(self.hydroelem[i][1])])
+            a = Cal_orientation(self.posi[int(self.hydroelem[i][0])], self.posi[int(self.hydroelem[i][1])])
             if i in ref:
                 Ueff = 0.8 * U
-            ft = 0.5 * row * dwh[i] * (b - dwh[i]) * Ct * pow(np.dot(a, Ueff), 2) * a
-            fn = 0.5 * row * dwh[i] * (b - dwh[i]) * Cn * (
+            ft = 0.5 * row * self.dwh * (b - self.dwh) * Ct * pow(np.dot(a, Ueff), 2) * a
+            fn = 0.5 * row * self.dwh * (b - self.dwh) * Cn * (
                     Ueff - np.dot(a, Ueff) * a) * np.linalg.norm(
                 (Ueff - np.dot(a, Ueff) * a))
-            F[int(self.line[i][0])] = F[int(self.line[i][0])] + 0.5 * (fn + ft)
-            F[int(self.line[i][1])] = F[int(self.line[i][1])] + 0.5 * (fn + ft)
+            F[int(self.hydroelem[i][0])] = F[int(self.hydroelem[i][0])] + 0.5 * (fn + ft)
+            F[int(self.hydroelem[i][1])] = F[int(self.hydroelem[i][1])] + 0.5 * (fn + ft)
         return F
 
     def M2(self, U):  # constant drag coefficient value 1.3
         num_node = len(self.posi)
-        num_line = len(self.line)
-        if len(self.dwh) == 1:
-            dwh = self.dwh * np.ones((num_line, 1))
+        num_line = len(self.hydroelem)
         Ct = 0.1
         Cn = 1.3
         wake = Net2NetWake(self.posi, self.hydroelem, U, self.Sn)
@@ -121,16 +115,16 @@ class HydroMorison:
         F = np.zeros((num_node, 3))  # force on nodes
         for i in range(num_line):
             Ueff = U
-            b = Cal_distence(self.posi[self.line[i][0]], self.posi[self.line[i][1]])
-            a = Cal_orientation(self.posi[self.line[i][0]], self.posi[self.line[i][1]])
+            b = Cal_distence(self.posi[int(self.hydroelem[i][0])], self.posi[int(self.hydroelem[i][1])])
+            a = Cal_orientation(self.posi[int(self.hydroelem[i][0])], self.posi[int(self.hydroelem[i][1])])
             if i in ref:
                 Ueff = 0.8 * U
-            ft = 0.5 * row * dwh[i] * (b - dwh[i]) * Ct * pow(np.dot(a, Ueff), 2) * a
-            fn = 0.5 * row * dwh[i] * (b - dwh[i]) * Cn * (
+            ft = 0.5 * row * self.dwh * (b - self.dwh) * Ct * pow(np.dot(a, Ueff), 2) * a
+            fn = 0.5 * row * self.dwh * (b - self.dwh) * Cn * (
                     Ueff - np.dot(a, Ueff) * a) * np.linalg.norm(
                 (Ueff - np.dot(a, Ueff) * a))
-            F[int(self.line[i][0])] = F[int(self.line[i][0])] + 0.5 * (fn + ft)
-            F[int(self.line[i][1])] = F[int(self.line[i][1])] + 0.5 * (fn + ft)
+            F[int(self.hydroelem[i][0])] = F[int(self.hydroelem[i][0])] + 0.5 * (fn + ft)
+            F[int(self.hydroelem[i][1])] = F[int(self.hydroelem[i][1])] + 0.5 * (fn + ft)
         return F
 
 
