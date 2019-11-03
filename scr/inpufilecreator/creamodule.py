@@ -1,20 +1,17 @@
 # writer: hui.cheng@uis.no
 # Groupname:
-# GROUP_NO: allnodes, sinkers
-# GROUP_MA: bottomframe, twines, topring
-# cwd is the working place
-# NUMBER OF NODE=1512
-# NUMBER OF TWINE=2952
+# GROUP_NO: allnodes, topnodes, bottomnodes, (bottomtip), node[i]
+# GROUP_MA: twines, topring, bottomring
 import random as rd
+import numpy as np
 Sn = 0.194
 dw = 2.42e-3
 a = 0.0255
 weight = 4.48
 E = 40000000
-import numpy as np
 
-meshinfo = np.loadtxt("meshinfo.txt")
-netinfo = np.loadtxt("netinfo.txt")
+meshinfo =  # todo read the dictionary txt to a dictionary
+netinfo = np.loadtxt("netinfo.txt")  # todo put the net information as a input dictionary
 
 
 def CR_comm(cwd):

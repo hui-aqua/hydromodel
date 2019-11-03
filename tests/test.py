@@ -58,3 +58,24 @@ def func(x):
 
 
 e1, e2, e3 = func(15)
+meshinfo = {
+    "horizontal element length": float(11),
+    "vertical element length": float(34),
+    "cone element length": np.sqrt(34),
+    "number of nodes": 123,
+    "number of lines": 21,
+    "number of surfaces": 12
+}
+import pickle
+
+f = open("file.pkl", "wb")
+pickle.dump(meshinfo, f)
+f.close()
+
+pkl_file = open('file.pkl', 'rb')
+meshinfo2 = pickle.load(pkl_file)
+pkl_file.close()
+
+f = open("dict.txt", "w")
+f.write(str(meshinfo))
+f.close()

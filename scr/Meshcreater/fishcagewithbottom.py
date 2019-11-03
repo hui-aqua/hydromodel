@@ -25,7 +25,6 @@ import os
 # define the fish cage shape
 import numpy as np
 from numpy import pi
-
 print("\nThis script can generate a cylindrical fish cage with a bottom")
 D = float(input("\nInput your cage diameter [m] \n"))
 H = float(input("\nInput your cage height [m] \n"))
@@ -93,16 +92,17 @@ for i in range(1, NT + 1):
 cwd = os.getcwd()
 np.savetxt(cwd + '/lines.txt', con)
 np.savetxt(cwd + '/surfaces.txt', sur)
-meshinfo = [
-    float(pi * D / NT),
-    float(H / NN),
-    np.sqrt(pow(Dtip - D, 2) + pow(D / 2.0, 2)),
-    len(p),
-    len(con),
-    len(sur)
-]
-np.savetxt(cwd + '/meshinfo.txt', meshinfo)
-# length in horizontial, length in vertical, length in cone
+meshinfo = {
+    "horizontal element length": float(pi * D / NT),
+    "vertical element length": float(H / NN),
+    "cone element length": np.sqrt(pow(Dtip - D, 2) + pow(D / 2.0, 2)),
+    "number of nodes": len(p),
+    "number of lines": len(con),
+    "number of surfaces": len(sur)
+}
+f = open("meshinfo.txt", "w")
+f.write(str(meshinfo))
+f.close()
 
 isDone = Mesh_1.Compute()
 # naming  the group
