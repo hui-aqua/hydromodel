@@ -1,5 +1,4 @@
 """
-this is a input file creator for code aster
 writer hui cheng
 email hui.cheng@uis.no
 """
@@ -23,6 +22,10 @@ os.system("mv *.txt ./asterinput/")
 os.system("mv *.med ./asterinput/")
 cme.CR_comm(cwd)
 cme.CR_export(cwd, meshfile)
-time.sleep(1.4)
+print("\n"
+      "\n"
+      "Currently, this code is not ready for release\n"
+      "Any questions about this code, please email: hui.cheng@uis.no")
+time.sleep(1.5)
 os.system("source /opt/aster144/etc/codeaster/profile.sh")
 os.system("as_run ./asterinput/ASTERRUN.export")
