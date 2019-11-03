@@ -4,6 +4,7 @@ writer hui cheng
 email hui.cheng@uis.no
 """
 import os
+import time
 import sys
 sys.path.append(
     '/home/hui/GitCode/aqua/scr/inpufilecreator'
@@ -22,5 +23,6 @@ os.system("mv *.txt ./asterinput/")
 os.system("mv *.med ./asterinput/")
 cme.CR_comm(cwd)
 cme.CR_export(cwd, meshfile)
+time.sleep(1.4)
 os.system("source /opt/aster144/etc/codeaster/profile.sh")
 os.system("as_run ./asterinput/ASTERRUN.export")
