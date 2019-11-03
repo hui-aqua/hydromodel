@@ -11,20 +11,21 @@ dw = 2.42e-3
 a = 0.0255
 weight = 4.48
 E = 40000000
+import numpy as np
+
+meshinfo = np.loadtxt("meshinfo.txt")
+netinfo = np.loadtxt("netinfo.txt")
 
 
-
-def CR_comm(filename, cwd, hm):
-
-    output_file = open('./inputfiles/' + filename, 'w')
-    # for the enviromentsetting
+def CR_comm(cwd):
+    output_file = open('./asterinput/ASTER1.comm', 'w')
     output_file.write(
         '''
 import sys
-sys.path.append("/home/hui/GitCode/aqua/hydromodel/forcemodel")
-import hydro4c1 as hy
 import numpy as np
 from numpy import pi
+sys.path.append("/home/hui/GitCode/aqua/scr/forcemodel")
+import hydro4c1 as hy
 cwd="''' + cwd + '''/"
 U=[0.10,0,0]              # current velocity[0.12 0.26 0.39 0.50 0.65 0.76 0.93]
 wei=''' + str(weight) + '''                  # [N] sinker weight in the water
@@ -91,7 +92,7 @@ selfwigh = AFFE_CHAR_MECA(PESANTEUR=_F(DIRECTION=(0.0, 0.0, -1.0),
 buoyF= AFFE_CHAR_MECA(FORCE_NODALE=_F(GROUP_NO=('allnodes'),
                                       FZ=Fbuoy), 
                       MODELE=model)
-itimes=1100    
+itimes=110    
 dt=0.1       # Physically it simulates 110s
 tend=itimes*dt
 
@@ -100,7 +101,7 @@ listr = DEFI_LIST_REEL(DEBUT=0.0,
 
 times = DEFI_LIST_INST(DEFI_LIST=_F(LIST_INST=listr,PAS_MINI=1e-8),
                        METHODE='AUTO')
-NODEnumber=1512
+NODEnumber=''' + str(int(meshinfo[3])) + '''
 Fnh= np.zeros((NODEnumber,3)) # initial hydrodynamic forces=0
 l=['None']*((len(Fnh)+1))
 
@@ -138,7 +139,7 @@ FIN()
     output_file.write('\n')
     output_file.close()
 
-    output_file = open("./inputfiles/assignF.comm", 'w')
+    output_file = open("./asterinput/ASTER2.comm", 'w')
     # for the enviromentsetting
     output_file.write('''
 for i in range (1,len(Fnh)+1):
@@ -222,22 +223,15 @@ tblp = POST_RELEVE_T(ACTION=(_F(OPERATION='EXTRACTION',   # For Extraction of va
 if k < itimes-1:
     del Fnh
 posi=hy.Get_posi(tblp)
-if k==1:
-    np.savetxt(cwd+'resufiles/positionsinstillwater1.txt', posi)
-if k==2:
-    np.savetxt(cwd+'resufiles/positionsinstillwater2.txt', posi)
 if k%10==0:
-    np.savetxt(cwd+'resufiles/posi'+str((k)*dt)+'.txt', posi)
+    np.savetxt(cwd+'asteroutput/posi'+str((k)*dt)+'.txt', posi)
 if k==0:
-    con=hy.Cal_connection(posi,L)
-    np.savetxt(cwd+'/initialcondition/initialpositions.txt', posi)
+    con=np.loadtxt(cwd+'/asterinput/lines.txt')
+    sur=np.loadtxt(cwd+'/asterinput/surfaces.txt')
+    np.savetxt(cwd+'/asteroutput/initialpositions.txt', posi)
 U=np.array([np.fix(k*dt/10.0)/10.0+0.1,0.0,0.0])
 hymo=hy.HydroMorison(posi,con,0.2,0.252,0.002252)
 Fnh=hymo.M1(U)
-''')
-
-
-    output_file.write('''
 # np.savetxt(cwd+'Fh1'+str((1+k)*dt)+'.txt', Fnh)    
 DETRUIRE(CONCEPT=_F( NOM=(tblp)))
 if k < itimes-1:
@@ -249,12 +243,11 @@ if k < itimes-1:
     output_file.close()
 
 
-def CR_export(filename1, fn2, cwd):
+def CR_export(cwd, mesh):
     suffix = rd.randint(1, 10000)
-    output_file = open('./inputfiles/' + filename1, 'w')
+    output_file = open('./asterinput/ASTERRUN.export', 'w')
     # for the enviromentsetting
-    output_file.write('''
-P actions make_etude
+    output_file.write('''P actions make_etude
 P aster_root /opt/aster144
 P consbtc oui
 P corefilesize unlimited
@@ -265,14 +258,13 @@ P facmtps 1
 P lang en
 P mclient UiS.D202
 P memjob 5224448
-P memory_limit 5102.0
 P mode interactif
 P mpi_nbcpu 1
 P mpi_nbnoeud 1
 P nbmaxnook 5
 P ncpus 10
 P noeud localhost
-P nomjob astkrun
+P nomjob astk
 P origine ASTK 2019.0.final
 P platform LINUX64
 P profastk hui@UiS.D202:''' + cwd + '''/run.astk
@@ -280,47 +272,31 @@ P protocol_copyfrom asrun.plugins.server.SCPServer
 P protocol_copyto asrun.plugins.server.SCPServer
 P protocol_exec asrun.plugins.server.SSHServer
 P proxy_dir /tmp
-P rep_trav /tmp/hui-UiS-interactif_1''' + str(suffix) + '''
 P serveur localhost
 P soumbtc oui
-P time_limit 90000.0
 P tpsjob 1501
 P uclient hui
-P username huicheng
-P version testing
+P username hui
+P version stable
 A args 
 A memjeveux 637.75
 A tpmax 90000.0
-F mmed ''' + cwd + '''/case3.med D  20
-F comm ''' + cwd + '''/inputfiles/''' + fn2 + ''' D  1
-F comm ''' + cwd + '''/inputfiles/assignF.comm D  91
-F rmed ''' + cwd + '''/resufiles/paravisresults.rmed R  80
-F resu ''' + cwd + '''/resufiles/reactionforce.txt R  8
-F mess ''' + cwd + '''/resufiles/mess.log R  6    \n''')
+P classe 
+P depart 
+P after_job 
+P distrib 
+P exectool 
+P multiple 
+P only_nook 
+P rep_trav /tmp/hui-UiS-interactif_1''' + str(suffix) + '''
+F mmed ''' + cwd + '''/asterinput/''' + str(mesh) + ''' D 20
+F comm ''' + cwd + '''/asterinput/ASTER1.comm D 1
+F comm ''' + cwd + '''/asterinput/ASTER2.comm D 91
+F rmed ''' + cwd + '''/asteroutput/paravisresults.rmed R 80
+F resu ''' + cwd + '''/asteroutput/reactionforce.txt R 8
+F mess ''' + cwd + '''/asteroutput/mess.log R 6\n''')
     output_file.write('\n')
     output_file.close()
 
-
-# F mess ''' + cwd + '''/resufiles/mess.log R  6
-
-
-def CR_shscript(fn):
-    output_file = open("runit.sh", 'w')
-    # for the enviromentsetting
-    output_file.write('''
-echo "\t\t\t  Hello user!\n\t\t   This is a new terminal.\n\tDONOT CLOSE ME, OR THE CALCULATION WILL STOP!\nIt will close automatically when the calculation is finished.\nYou can minimize this terminal to make it runs in background.\n\n\nDesign for Code_Aster\nEmail: hui.cheng@uis.no" | boxes -d boy
-
-echo -n "Press any key to continue or 'CTRL+C' to exit : \n"
-read var_name
-echo "Here we go!..."                                                  
-sleep 2s
-
-cd inputfiles
-source /opt/aster144/etc/codeaster/profile.sh
-as_run ''' + fn + '''    
-    \n''')
-    output_file.write('\n')
-    output_file.close()
-
-
-
+# P memory_limit 5102.0
+# P time_limit 90000.0

@@ -6,7 +6,10 @@ email hui.cheng@uis.no
 import os
 import sys
 
-inputkey = input("\nPlease make sure you want to clean working tree, or press 'CTRL+C' to exit")
-os.system("mv /inputfiles/*.med ")
+print("\nPlease make sure you want to clean working tree, ALL the relevant files will be removed \n")
+os.system("echo -n 'Press any key to continue or 'CTRL+C' to exit : \n'")
+os.system("read var_name")
 os.system("rm -rf asterinput/ ")
 os.system("rm -rf asteroutput/ ")
+os.system("rm -rf *.txt ")
+os.system("rm -rf *.med ")

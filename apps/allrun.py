@@ -9,16 +9,18 @@ sys.path.append(
     '/home/hui/GitCode/aqua/scr/inpufilecreator'
 )
 import creamodule as cme
-
 cwd = os.getcwd()
-os.mkdir("resufiles")
-os.mkdir("inputfiles")
-os.system("mv lines.txt ./inputfiles/")
-os.system("mv surfaces.txt ./inputfiles/")
-os.system("mv *.med ./inputfiles/")
-
-FileName1 = "test.comm"
-FileName2 = "test.export"
-cme.CR_comm(FileName1, cwd)
-cme.CR_export(FileName2, FileName1, cwd)
-cme.CR_shscript(FileName2)
+if not os.path.exists("asterinput"):
+    os.mkdir("asterinput")
+if not os.path.exists("asteroutput"):
+    os.mkdir("asteroutput")
+files = os.listdir(cwd)
+for i in files:
+    if os.path.splitext(i)[1] == ".med":
+        meshfile = str(i)
+os.system("mv *.txt ./asterinput/")
+os.system("mv *.med ./asterinput/")
+cme.CR_comm(cwd)
+cme.CR_export(cwd, meshfile)
+os.system("source /opt/aster144/etc/codeaster/profile.sh")
+os.system("as_run ./asterinput/ASTERRUN.export")

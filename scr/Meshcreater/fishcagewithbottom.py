@@ -93,7 +93,15 @@ for i in range(1, NT + 1):
 cwd = os.getcwd()
 np.savetxt(cwd + '/lines.txt', con)
 np.savetxt(cwd + '/surfaces.txt', sur)
-np.savetxt(cwd + '/elementlength.txt', [float(pi * D / NT), float(H / NN), np.sqrt(pow(Dtip - D, 2) + pow(D / 2.0, 2))])
+meshinfo = [
+    float(pi * D / NT),
+    float(H / NN),
+    np.sqrt(pow(Dtip - D, 2) + pow(D / 2.0, 2)),
+    len(p),
+    len(con),
+    len(sur)
+]
+np.savetxt(cwd + '/meshinfo.txt', meshinfo)
 # length in horizontial, length in vertical, length in cone
 
 isDone = Mesh_1.Compute()
