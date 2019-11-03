@@ -66,16 +66,14 @@ meshinfo = {
     "number of lines": 21,
     "number of surfaces": 12
 }
-import pickle
 
-f = open("file.pkl", "wb")
-pickle.dump(meshinfo, f)
-f.close()
+with open('myfile.txt', 'w') as f:
+    print(meshinfo, file=f)
 
-pkl_file = open('file.pkl', 'rb')
-meshinfo2 = pickle.load(pkl_file)
-pkl_file.close()
-
-f = open("dict.txt", "w")
+f = open("meshinfomation.txt", "w")
 f.write(str(meshinfo))
 f.close()
+
+with open('meshinfomation.txt', 'r') as f:
+    content = f.read();
+    dic = eval(content)

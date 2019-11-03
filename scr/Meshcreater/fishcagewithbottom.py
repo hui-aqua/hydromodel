@@ -29,7 +29,7 @@ print("\nThis script can generate a cylindrical fish cage with a bottom")
 D = float(input("\nInput your cage diameter [m] \n"))
 H = float(input("\nInput your cage height [m] \n"))
 Dtip = float(input("\nInput your bottom weight depth [m] \n"))
-NT = 10  # it can use int(pi*D/L)   # Number of the nodes in circumference
+NT = 20  # it can use int(pi*D/L)   # Number of the nodes in circumference
 
 NN = 6  # it can use int(H/L)      # number of section in the height, thus, the nodes should be NN+1
 cagebottomcenter = [0, 0, -Dtip]
@@ -93,14 +93,15 @@ cwd = os.getcwd()
 np.savetxt(cwd + '/lines.txt', con)
 np.savetxt(cwd + '/surfaces.txt', sur)
 meshinfo = {
-    "horizontal element length": float(pi * D / NT),
-    "vertical element length": float(H / NN),
-    "cone element length": np.sqrt(pow(Dtip - D, 2) + pow(D / 2.0, 2)),
-    "number of nodes": len(p),
-    "number of lines": len(con),
-    "number of surfaces": len(sur)
+    "horizontalElementLength": float(pi * D / NT),
+    "verticalElementLength": float(H / NN),
+    "coneElementLength": np.sqrt(pow(Dtip - D, 2) + pow(D / 2.0, 2)),
+    "numberOfNodes": len(p),
+    "numberOfLines": len(con),
+    "numberOfSurfaces": len(sur)
 }
-f = open("meshinfo.txt", "w")
+
+f = open(cwd + "/meshinfomation.txt", "w")
 f.write(str(meshinfo))
 f.close()
 
