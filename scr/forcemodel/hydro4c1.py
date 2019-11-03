@@ -71,7 +71,7 @@ class HydroMorison:
     In addition, the solidity and constant flow reduction are also needed.
     """
 
-    def __init__(self, posimatrix, hydroelem, solidity, dwh=0.0, dw0=0.0):
+    def __init__(self, posimatrix, hydroelem, current, solidity, dwh=0.0, dw0=0.0):
         self.posi = posimatrix  # the position matrix [[x1,y1,z1][x2,y2,z2]]
         self.hydroelem = hydroelem  # the connections of the twines[[p1,p2][p2,p3]]
         self.dwh = dwh  # used for the force calculation (reference area)
@@ -79,22 +79,22 @@ class HydroMorison:
         self.dw0 = dw0  # used for the hydrodynamic coefficients
         # can be a consistent number or a list
         self.Sn = solidity
+        wake = Net2NetWake(self.posi, self.hydroelem, current, self.Sn)
+        self.ref = wake.getlinesinwake()
 
-    def M1(self, U):
+    def M1(self, realtimeposi, U):
         # ref is a list of which elements in the wake region
         # ref. J.S. Bessonneau and D. Marichal. 1998 # cd=1.2,ct=0.1.
         num_node = len(self.posi)
         num_line = len(self.hydroelem)
         Ct = 0.1
         Cn = 1.2
-        wake = Net2NetWake(self.posi, self.hydroelem, U, self.Sn)
-        ref = wake.getlinesinwake()
         F = np.zeros((num_node, 3))  # force on nodes
         for i in range(num_line):
             Ueff = U
-            b = Cal_distence(self.posi[int(self.hydroelem[i][0])], self.posi[int(self.hydroelem[i][1])])
-            a = Cal_orientation(self.posi[int(self.hydroelem[i][0])], self.posi[int(self.hydroelem[i][1])])
-            if i in ref:
+            b = Cal_distence(realtimeposi[int(self.hydroelem[i][0])], realtimeposi[int(self.hydroelem[i][1])])
+            a = Cal_orientation(realtimeposi[int(self.hydroelem[i][0])], realtimeposi[int(self.hydroelem[i][1])])
+            if i in self.ref:
                 Ueff = 0.8 * U
             ft = 0.5 * row * self.dwh * (b - self.dwh) * Ct * pow(np.dot(a, Ueff), 2) * a
             fn = 0.5 * row * self.dwh * (b - self.dwh) * Cn * (

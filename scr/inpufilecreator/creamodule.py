@@ -223,9 +223,11 @@ if k==0:
     con=np.loadtxt(cwd+'/asterinput/lines.txt')
     sur=np.loadtxt(cwd+'/asterinput/surfaces.txt')
     np.savetxt(cwd+'/asteroutput/initialpositions.txt', posi)
+    hymo=hy.HydroMorison(posi,con,U,''' + str(netinfo['Sn']) + ''',''' + str(dwh) + ''',''' + str(
+        netinfo['twineDiameter']) + ''')
 # U=np.array([np.fix(k*dt/10.0)/10.0+0.1,0.0,0.0])
-hymo=hy.HydroMorison(posi,con,''' + str(netinfo['Sn']) + ''',''' + str(dwh) + ''',''' + str(netinfo['twineDiameter']) + ''')
-Fnh=hymo.M1(U)
+
+Fnh=hymo.M1(posi,U)
 # np.savetxt(cwd+'Fh1'+str((1+k)*dt)+'.txt', Fnh)    
 DETRUIRE(CONCEPT=_F( NOM=(tblp)))
 if k < itimes-1:
