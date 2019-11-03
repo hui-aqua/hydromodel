@@ -25,16 +25,11 @@ import os
 import numpy as np
 from numpy import pi
 
-print("This script can generate a cylindrical fish cage with a bottom")
+print("\nThis script can generate a cylindrical fish cage without a bottom")
 D = float(input("\nInput your cage diameter [m] \n"))
-# D = 50.0  # [m]  fish cage diameter
 H = float(input("\nInput your cage height [m] \n"))
-# H = 30.0  # [m]  fish cage height
-# L = 1.5  # [m]  bar length
 NT = 10  # it can use int(pi*D/L)   # Number of the nodes in circumference
-# NT = int(pi * D / L)
 NN = 6  # it can use int(H/L)      # number of section in the height, thus, the nodes should be NN+1
-# NN = int(H / L)
 p = []
 
 # generate the point coordinates matrix for the net
@@ -65,25 +60,27 @@ for i in range(1, NT + 1):
         if j == NN:
             if i == NT:
                 edge = Mesh_1.AddEdge([i + j * NT, 1 + i + (j - 1) * NT])  # add the horizontal line into geometry
-                con.append([i + j * NT - 1, 1 + i + (j - 1) * NT - 1])  # add the horizontal line into geometry
+                con.append([i + j * NT - 1, 1 + i + (j - 1) * NT - 1])  # add the horizontal line into con
             else:
                 edge = Mesh_1.AddEdge([i + j * NT, 1 + i + j * NT])  # add the horizontal line into geometry
-                con.append([i + j * NT - 1, 1 + i + j * NT - 1])  # add the horizontal line into geometry
+                con.append([i + j * NT - 1, 1 + i + j * NT - 1])  # add the horizontal line into con
         else:
             edge = Mesh_1.AddEdge([i + j * NT, i + (j + 1) * NT])  # add the vertical line into geometry
-            con.append([i + j * NT - 1, i + (j + 1) * NT - 1])  # add the vertical line into geometry
+            con.append([i + j * NT - 1, i + (j + 1) * NT - 1])  # add the vertical line into con
             if i == NT:
                 edge = Mesh_1.AddEdge([i + j * NT, 1 + i + (j - 1) * NT])  # add the horizontal line into geometry
-                con.append([i + j * NT - 1, 1 + i + (j - 1) * NT - 1])  # add the horizontal line into geometry
+                con.append([i + j * NT - 1, 1 + i + (j - 1) * NT - 1])  # add the horizontal line into con
                 sur.append([i + j * NT - 1, 1 + i + (j - 1) * NT - 1, i + (j + 1) * NT - 1, 1 + i + j * NT - 1])
+                # add the horizontal surface into sur
             else:
                 edge = Mesh_1.AddEdge([i + j * NT, 1 + i + j * NT])  # add the horizontal line into geometry
-                con.append([i + j * NT - 1, 1 + i + j * NT - 1])  # add the horizontal line into geometry
+                con.append([i + j * NT - 1, 1 + i + j * NT - 1])  # add the horizontal line into con
                 sur.append([i + j * NT - 1, 1 + i + j * NT - 1, i + (j + 1) * NT - 1, 1 + i + (j + 1) * NT - 1])
-
+                # add the horizontal surface into sur
 cwd = os.getcwd()
 np.savetxt(cwd + '/lines.txt', con)
 np.savetxt(cwd + '/surfaces.txt', sur)
+np.savetxt(cwd + '/elementlength.txt', [float(pi * D / NT), float(H / NN)])
 
 isDone = Mesh_1.Compute()
 # naming  the group
@@ -124,4 +121,4 @@ bottomring = Mesh_1.CreateEmptyGroup(SMESH.EDGE, 'bottomring')
 nbAdd = bottomring.Add([i for i in range(2 * NN + 1, len(con) + 1, 2 * NN + 1)])
 smesh.SetName(bottomring, 'bottomring')
 
-Mesh_1.ExportMED(cwd + "/CFG" + str(D) + "X" + str(H) + ".med")
+Mesh_1.ExportMED(cwd + "/CFGNB" + str(D) + "X" + str(H) + ".med")
