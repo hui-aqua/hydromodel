@@ -25,12 +25,12 @@ import os
 # define the fish cage shape
 import numpy as np
 from numpy import pi
+
 print("\nThis script can generate a cylindrical fish cage with a bottom")
 D = float(input("\nInput your cage diameter [m] \n"))
 H = float(input("\nInput your cage height [m] \n"))
 Dtip = float(input("\nInput your bottom weight depth [m] \n"))
 NT = 20  # it can use int(pi*D/L)   # Number of the nodes in circumference
-
 NN = 6  # it can use int(H/L)      # number of section in the height, thus, the nodes should be NN+1
 cagebottomcenter = [0, 0, -Dtip]
 
@@ -99,7 +99,9 @@ meshinfo = {
     "numberOfSurfaces": len(sur),
     "netLines": con,
     "netSurfaces": sur,
-    "netNodes": p
+    "netNodes": p,
+    "NN": NN,
+    "NT": NT,
 }
 f = open(cwd + "/meshinfomation.txt", "w")
 f.write(str(meshinfo))
