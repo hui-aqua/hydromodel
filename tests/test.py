@@ -26,6 +26,7 @@ plt.show()
 k = np.linspace(1, 5, 10)
 print("the length of k is", len(k))
 
+
 # class Person:
 #     def __init__(self, fname, lname):
 #         self.firstname = fname
@@ -58,22 +59,62 @@ def func(x):
 
 
 e1, e2, e3 = func(15)
-meshinfo = {
-    "horizontal element length": float(11),
-    "vertical element length": float(34),
-    "cone element length": np.sqrt(34),
-    "number of nodes": 123,
-    "number of lines": 21,
-    "number of surfaces": 12
-}
 
-with open('myfile.txt', 'w') as f:
-    print(meshinfo, file=f)
+D = 2
+H = 1.8
+Dtip = 2
+NT = 10  # it can use int(pi*D/L)   # Number of the nodes in circumference
+# NT = int(pi * D / L)
+NN = 6
+p = []
+con = []
+sur = []
+cagebottomcenter = [0, 0, -Dtip]
+
+for j in range(0, NN + 1):
+    for i in range(0, NT):
+        p.append([D / 2 * np.cos(i * 2 * pi / float(NT)), D / 2 * np.sin(i * 2 * pi / float(NT)), -j * H / float(NN)])
+p.append(cagebottomcenter)
+
+for i in range(1, NT + 1):
+    for j in range(0, NN + 1):
+        if j == NN:
+            con.append([i + j * NT - 1, len(p) - 1])  # add the vertical line into geometry
+            if i == NT:
+                con.append([i + j * NT - 1, 1 + i + (j - 1) * NT - 1])  # add the horizontal line into geometry
+                sur.append([i + j * NT - 1, 1 + i + (j - 1) * NT - 1, len(p) - 1, len(p) - 1])
+                # add the cone surface into sur
+            else:
+                con.append([i + j * NT - 1, 1 + i + j * NT - 1])  # add the horizontal line into geometry
+                sur.append([i + j * NT - 1, 1 + i + j * NT - 1, len(p) - 1, len(p) - 1])
+                # add the cone surface into sur
+        else:
+            con.append([i + j * NT - 1, i + (j + 1) * NT - 1])  # add the vertical line into geometry
+            if i == NT:
+                con.append([i + j * NT - 1, 1 + i + (j - 1) * NT - 1])  # add the horizontal line into geometry
+                sur.append([i + j * NT - 1, 1 + i + (j - 1) * NT - 1, i + (j + 1) * NT - 1, 1 + i + j * NT - 1])
+                # add the horizontal surface into sur
+            else:
+                con.append([i + j * NT - 1, 1 + i + j * NT - 1])  # add the horizontal line into geometry
+                sur.append([i + j * NT - 1, 1 + i + j * NT - 1, i + (j + 1) * NT - 1, 1 + i + (j + 1) * NT - 1])
+                # add the horizontal surface into sur
+
+meshinfo = {
+    "horizontalElementLength": float(pi * D / NT),
+    "verticalElementLength": float(H / NN),
+    "coneElementLength": np.sqrt(pow(Dtip - D, 2) + pow(D / 2.0, 2)),
+    "numberOfNodes": len(p),
+    "numberOfLines": len(con),
+    "numberOfSurfaces": len(sur),
+    "netLines": con,
+    "netSurfaces": sur,
+    "netNodes": p
+}
 
 f = open("meshinfomation.txt", "w")
 f.write(str(meshinfo))
 f.close()
 
 with open('meshinfomation.txt', 'r') as f:
-    content = f.read();
+    content = f.read()
     dic = eval(content)

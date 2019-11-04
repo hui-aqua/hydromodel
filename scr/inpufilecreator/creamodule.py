@@ -220,8 +220,8 @@ posi=hy.Get_posi(tblp)
 if k%10==0:
     np.savetxt(cwd+'asteroutput/posi'+str((k)*dt)+'.txt', posi)
 if k==0:
-    con=np.loadtxt(cwd+'/asterinput/lines.txt')
-    sur=np.loadtxt(cwd+'/asterinput/surfaces.txt')
+    con=''' + str(meshinfo['netLines']) + ''' 
+    sur=''' + str(meshinfo['netSurfaces']) + '''
     np.savetxt(cwd+'/asteroutput/initialpositions.txt', posi)
     hymo=hy.HydroMorison(posi,con,U,''' + str(netinfo['Sn']) + ''',''' + str(dwh) + ''',''' + str(
         netinfo['twineDiameter']) + ''')
@@ -238,6 +238,8 @@ if k < itimes-1:
     output_file.write('\n')
     output_file.close()
 
+
+# todo check whether con and sur can work
 
 def CR_export(cwd, mesh):
     suffix = rd.randint(1, 10000)

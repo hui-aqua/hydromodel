@@ -90,17 +90,17 @@ for i in range(1, NT + 1):
                 # add the horizontal surface into sur
 
 cwd = os.getcwd()
-np.savetxt(cwd + '/lines.txt', con)
-np.savetxt(cwd + '/surfaces.txt', sur)
 meshinfo = {
     "horizontalElementLength": float(pi * D / NT),
     "verticalElementLength": float(H / NN),
     "coneElementLength": np.sqrt(pow(Dtip - D, 2) + pow(D / 2.0, 2)),
     "numberOfNodes": len(p),
     "numberOfLines": len(con),
-    "numberOfSurfaces": len(sur)
+    "numberOfSurfaces": len(sur),
+    "netLines": con,
+    "netSurfaces": sur,
+    "netNodes": p
 }
-
 f = open(cwd + "/meshinfomation.txt", "w")
 f.write(str(meshinfo))
 f.close()
