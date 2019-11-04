@@ -513,7 +513,7 @@ def Cal_FS2nowake(POSI, sur, U, Sn, ref):
     return F
 
 
-def Cal_FS3wake1(POSI, sur, U, Sn, ref):
+def Cal_FS2wake1(POSI, sur, U, Sn, ref):
     # from Loland model(1991) the Sn should be 0,13-0.35
     # Reynolds number in range from 1400 to 1800
     num_node = len(POSI)
