@@ -31,9 +31,11 @@ with open('cagedict', 'r') as f:
 
 D = cageinfo['cageDiameter']
 H = cageinfo['cageHeight']
-NT = cageinfo['elementOverCir']  # it can use int(pi*D/L)   # Number of the nodes in circumference
+NT = cageinfo['elementOverCir']
+#  Number of the nodes in circumference
 NN = cageinfo[
-    'elementOverDepth']  # it can use int(H/L)      # number of section in the height, thus, the nodes should be NN+1
+    'elementOverDepth']
+# number of section in the height, thus, the nodes should be NN+1
 p = []
 
 # generate the point coordinates matrix for the net
