@@ -20,16 +20,20 @@ Any questions about this code, please email: hui.cheng@uis.no
 
 """
 import os
-
-# define the fish cage shape
 import numpy as np
 from numpy import pi
 
-print("\nThis script can generate a cylindrical fish cage without a bottom")
-D = float(input("\nInput your cage diameter [m] \n"))
-H = float(input("\nInput your cage height [m] \n"))
-NT = 10  # it can use int(pi*D/L)   # Number of the nodes in circumference
-NN = 6  # it can use int(H/L)      # number of section in the height, thus, the nodes should be NN+1
+cwd = os.getcwd()
+
+with open('cagedict', 'r') as f:
+    content = f.read()
+    cageinfo = eval(content)
+
+D = cageinfo['cageDiameter']
+H = cageinfo['cageHeight']
+NT = cageinfo['elementOverCir']  # it can use int(pi*D/L)   # Number of the nodes in circumference
+NN = cageinfo[
+    'elementOverDepth']  # it can use int(H/L)      # number of section in the height, thus, the nodes should be NN+1
 p = []
 
 # generate the point coordinates matrix for the net
@@ -77,10 +81,22 @@ for i in range(1, NT + 1):
                 con.append([i + j * NT - 1, 1 + i + j * NT - 1])  # add the horizontal line into con
                 sur.append([i + j * NT - 1, 1 + i + j * NT - 1, i + (j + 1) * NT - 1, 1 + i + (j + 1) * NT - 1])
                 # add the horizontal surface into sur
-cwd = os.getcwd()
-np.savetxt(cwd + '/lines.txt', con)
-np.savetxt(cwd + '/surfaces.txt', sur)
-np.savetxt(cwd + '/elementlength.txt', [float(pi * D / NT), float(H / NN)])
+
+meshinfo = {
+    "horizontalElementLength": float(pi * D / NT),
+    "verticalElementLength": float(H / NN),
+    "numberOfNodes": len(p),
+    "numberOfLines": len(con),
+    "numberOfSurfaces": len(sur),
+    "netLines": con,
+    "netSurfaces": sur,
+    "netNodes": p,
+    "NN": NN,
+    "NT": NT,
+}
+f = open(cwd + "/meshinfomation.txt", "w")
+f.write(str(meshinfo))
+f.close()
 
 isDone = Mesh_1.Compute()
 # naming  the group
