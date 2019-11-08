@@ -1,34 +1,25 @@
 # Apps for aquaculture and fishing usage
 
-This folder contains different applications that can make the simulation easier. 
-The app's name indicates it functionality. An example of running the app is shown as below:
+This folder contains different applications that can make simulations easier. 
+The app's name indicates it functionality. 
+An alternative way to use this function is to create a link in your working folder, 
+then using python to execute it. An example of running the app is shown as below:
 ```
 python3 creatmesh.py
 ```
-List of application:
 
-- creatmesh
-
-- allrun
-
-- allclean
-
-
-
-
-The code and generate three files, one is mesh file end with .med; 
-One is line connection file witch can be used to calculate the hydrodynamic forces based on Morison models;
-The last on is the surface connection file, which can be used to calculate the hydrodynamic forces according to Screen models.
+Through creatmesh.py, the code can generate two files, one is mesh file end with .med, the other is meshinformation.txt 
+which contains the information for further simulations. 
 
 Any questions about this code, please email: hui.cheng@uis.no
 
 The available numerical models are:
 
-- Cylindrical fish cage with bottom
+- Cylindrical fish cage with bottom net
 
     The fish cage is a cylindrical shape. And it has a bottom which can be either flat or cone shape(according to the "cagebottomcenter" )
  
- - Cylindrical fish cage without bottom
+ - Cylindrical fish cage without bottom net
 
     The fish cage is a cylindrical shape. And it do not take the bottom into numerical simulation to 
     generate some corresponding results with experiments.
