@@ -8,7 +8,7 @@ with open('cagedict', 'r') as f:
     content = f.read()
     cageinfo = eval(content)
 
-inputBank = "/home/hui/GitCode/aqua/scr/inputfilecreator/"
+inputBank = "/home/hui/GitCode/aqua/scr/inputfilecreator/"  # todo autochange the parth in install.py
 cwd = os.getcwd()
 if not os.path.exists("asterinput"):
     os.mkdir("asterinput")

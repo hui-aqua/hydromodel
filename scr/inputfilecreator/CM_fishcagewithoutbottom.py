@@ -9,8 +9,8 @@ import numpy as np
 from numpy import pi
 
 cwd = os.getcwd()
-hydroBank = "/home/hui/GitCode/aqua/scr/forcemodel"
-with open('meshinfomation.txt', 'r') as f:
+hydroBank = "/home/hui/GitCode/aqua/scr/forcemodel"  # todo autochange the parth in install.py
+with open('./asterinput/meshinfomation.txt', 'r') as f:
     content = f.read()
     meshinfo = eval(content)
 with open('netdict', 'r') as f:
