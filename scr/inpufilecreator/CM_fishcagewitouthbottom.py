@@ -10,7 +10,7 @@ import os
 with open('meshinfomation.txt', 'r') as f:
     content = f.read()
     meshinfo = eval(content)
-with open('netinformation.txt', 'r') as f:
+with open('netdict', 'r') as f:
     content = f.read()
     netinfo = eval(content)
 
@@ -40,19 +40,19 @@ mesh = LIRE_MAILLAGE(UNITE=20)
 model = AFFE_MODELE(AFFE=(_F(GROUP_MA=('twines'), 
                              MODELISATION=('CABLE'), 
                              PHENOMENE='MECANIQUE'), 
-                          _F(GROUP_MA=('bottomring'), 
-                             MODELISATION=('POU_D_E'), 
-                             PHENOMENE='MECANIQUE')
+                          # _F(GROUP_MA=('bottomring'), 
+                          #    MODELISATION=('POU_D_E'), 
+                          #    PHENOMENE='MECANIQUE')
                           ), 
                     MAILLAGE=mesh)
 elemprop = AFFE_CARA_ELEM(CABLE=_F(GROUP_MA=('twines'),
                                    N_INIT=10.0,
                                    SECTION=''' + str(dws) + '''),
-                          POUTRE=_F(GROUP_MA=('bottomring', ), 
-                                    SECTION='CERCLE', 
-                                    CARA=('R', 'EP'), 
-                                    VALE=(''' + str(netinfo["bottomringR"]) + ''', ''' + str(netinfo["bottomringR"]) + ''')),
-                          
+                          # POUTRE=_F(GROUP_MA=('bottomring', ), 
+                          #           SECTION='CERCLE', 
+                          #           CARA=('R', 'EP'), 
+                          #           VALE=(''' + str(netinfo["bottomringR"]) + ''', ''' + str(netinfo["bottomringR"]) + ''')),
+                          # 
                           MODELE=model)
 net = DEFI_MATERIAU(CABLE=_F(EC_SUR_E=0.0001),
                           ELAS=_F(E=''' + str(netinfo["netYoungmodule"]) + ''', NU=0.2,RHO=''' + str(
@@ -61,13 +61,13 @@ net = DEFI_MATERIAU(CABLE=_F(EC_SUR_E=0.0001),
                           # ELAS=_F(E=82000000,NU=0.2,RHO=1015.0))  #from H.moe, a. fredheim, 2010
                           # ELAS=_F(E=119366207.319,NU=0.2,RHO=1015.0))#from chun woo lee
                           # ELAS=_F(E=182000000,NU=0.2,RHO=1015.0)) 
-fe = DEFI_MATERIAU(ELAS=_F(E=''' + str(netinfo["bottomringYoungmodule"]) + ''', 
-                           NU=0.3,
-                           RHO=''' + str(netinfo["bottomringRho"]) + '''))  
+# fe = DEFI_MATERIAU(ELAS=_F(E=''' + str(netinfo["bottomringYoungmodule"]) + ''', 
+#                            NU=0.3,
+#                            RHO=''' + str(netinfo["bottomringRho"]) + '''))  
 fieldmat = AFFE_MATERIAU(AFFE=(_F(GROUP_MA=('twines'),
                                  MATER=(net)),
-                               _F(GROUP_MA=('bottomring'),
-                                 MATER=(fe)),
+                               # _F(GROUP_MA=('bottomring'),
+                               #   MATER=(fe)),
                                ),
                          MODELE=model)
 
@@ -79,7 +79,8 @@ selfwigh = AFFE_CHAR_MECA(PESANTEUR=_F(DIRECTION=(0.0, 0.0, -1.0),
                                        GRAVITE=9.81,
                                        GROUP_MA=('twines')),
                       MODELE=model)
-sinkF = AFFE_CHAR_MECA(FORCE_NODALE=_F(GROUP_NO=('bottomtip'),
+                      
+sinkF = AFFE_CHAR_MECA(FORCE_NODALE=_F(GROUP_NO=('bottomtip'),  
                                       FZ=-''' + str(netinfo["centerWeight"]) + ''',
                                       FX=0,
                                       FY=0,
