@@ -3,13 +3,12 @@ writer hui cheng
 email hui.cheng@uis.no
 """
 import os
-
+import time
 with open('cagedict', 'r') as f:
     content = f.read()
     cageinfo = eval(content)
 
-import time
-
+inputBank = "/home/hui/GitCode/aqua/scr/inputfilecreator/"
 cwd = os.getcwd()
 if not os.path.exists("asterinput"):
     os.mkdir("asterinput")
@@ -21,13 +20,13 @@ for i in files:
         meshfile = str(i)
 os.system("mv *.txt ./asterinput/")
 os.system("mv *.med ./asterinput/")
-modelBank = "/home/hui/GitCode/aqua/scr/inputfilecreator/"
-os.system("python3" + modelBank + "CM_" + cageinfo['cageType'] + ".py")
+
+os.system("python3 " + inputBank + "CM_" + cageinfo['cageType'] + ".py")
 
 print("\n"
       "\n"
       "Currently, this code is not ready for release\n"
       "Any questions about this code, please email: hui.cheng@uis.no")
-time.sleep(3.5)
+time.sleep(4.5)
 os.system("source /opt/aster144/etc/codeaster/profile.sh")
 os.system("as_run ./asterinput/ASTERRUN.export")

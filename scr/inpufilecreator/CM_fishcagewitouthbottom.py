@@ -2,57 +2,60 @@
 # Groupname:
 # GROUP_NO: allnodes, topnodes, bottomnodes, (bottomtip), node[i]
 # GROUP_MA: twines, topring, bottomring
-import random as rd
-from numpy import pi
-import numpy as np
 import os
+import random as rd
 
+import numpy as np
+from numpy import pi
+
+cwd = os.getcwd()
+hydroBank = "/home/hui/GitCode/aqua/scr/forcemodel"
 with open('meshinfomation.txt', 'r') as f:
     content = f.read()
     meshinfo = eval(content)
 with open('netdict', 'r') as f:
     content = f.read()
     netinfo = eval(content)
+with open('cagedict', 'r') as f:
+    content = f.read()
+    cageinfo = eval(content)
+with open('envdict', 'r') as f:
+    content = f.read()
+    envinfo = eval(content)
 
 Fbuoy = meshinfo['horizontalElementLength'] * meshinfo['verticalElementLength'] * netinfo['Sn'] / netinfo[
-    'twineDiameter'] * 0.25 * pi * pow(netinfo['twineDiameter'], 2) * 9.81 * 1025
+    'twineDiameter'] * 0.25 * pi * pow(netinfo['twineDiameter'], 2) * 9.81 * float(envinfo['fluidDensity'])
+# Buoyancy force to assign on each nodes
 dwh = meshinfo['horizontalElementLength'] * meshinfo['verticalElementLength'] * netinfo['Sn'] / (
         meshinfo['horizontalElementLength'] + meshinfo['verticalElementLength'])
+# hydrodynamic diameter to calculate the hydrodynamic coefficient.
 lam1 = meshinfo['horizontalElementLength'] / netinfo['meshLength']
 lam2 = meshinfo['verticalElementLength'] / netinfo['meshLength']
 dws = np.sqrt(2 * lam1 * lam2 / (lam1 + lam2)) * netinfo['twineDiameter']
+twineSection = 0.25 * pi * pow(dws, 2)
+dt = 0.1
 
 
-def CR_comm(cwd):
+def CR_comm():
     output_file = open('./asterinput/ASTER1.comm', 'w')
     output_file.write(
         '''
 import sys
 import numpy as np
-sys.path.append("/home/hui/GitCode/aqua/scr/forcemodel")
+sys.path.append("''' + hydroBank + '''")
 import hydro4c1 as hy
 cwd="''' + cwd + '''/"
-U=[1.0,0,0]              # current velocity[0.12 0.26 0.39 0.50 0.65 0.76 0.93]
-
 DEBUT(PAR_LOT='NON',
 IGNORE_ALARM=("SUPERVIS_25","DISCRETE_26") )
 mesh = LIRE_MAILLAGE(UNITE=20)
 model = AFFE_MODELE(AFFE=(_F(GROUP_MA=('twines'), 
                              MODELISATION=('CABLE'), 
                              PHENOMENE='MECANIQUE'), 
-                          # _F(GROUP_MA=('bottomring'), 
-                          #    MODELISATION=('POU_D_E'), 
-                          #    PHENOMENE='MECANIQUE')
                           ), 
                     MAILLAGE=mesh)
 elemprop = AFFE_CARA_ELEM(CABLE=_F(GROUP_MA=('twines'),
                                    N_INIT=10.0,
-                                   SECTION=''' + str(dws) + '''),
-                          # POUTRE=_F(GROUP_MA=('bottomring', ), 
-                          #           SECTION='CERCLE', 
-                          #           CARA=('R', 'EP'), 
-                          #           VALE=(''' + str(netinfo["bottomringR"]) + ''', ''' + str(netinfo["bottomringR"]) + ''')),
-                          # 
+                                   SECTION=''' + str(twineSection) + '''),
                           MODELE=model)
 net = DEFI_MATERIAU(CABLE=_F(EC_SUR_E=0.0001),
                           ELAS=_F(E=''' + str(netinfo["netYoungmodule"]) + ''', NU=0.2,RHO=''' + str(
@@ -61,9 +64,6 @@ net = DEFI_MATERIAU(CABLE=_F(EC_SUR_E=0.0001),
                           # ELAS=_F(E=82000000,NU=0.2,RHO=1015.0))  #from H.moe, a. fredheim, 2010
                           # ELAS=_F(E=119366207.319,NU=0.2,RHO=1015.0))#from chun woo lee
                           # ELAS=_F(E=182000000,NU=0.2,RHO=1015.0)) 
-# fe = DEFI_MATERIAU(ELAS=_F(E=''' + str(netinfo["bottomringYoungmodule"]) + ''', 
-#                            NU=0.3,
-#                            RHO=''' + str(netinfo["bottomringRho"]) + '''))  
 fieldmat = AFFE_MATERIAU(AFFE=(_F(GROUP_MA=('twines'),
                                  MATER=(net)),
                                # _F(GROUP_MA=('bottomring'),
@@ -80,8 +80,8 @@ selfwigh = AFFE_CHAR_MECA(PESANTEUR=_F(DIRECTION=(0.0, 0.0, -1.0),
                                        GROUP_MA=('twines')),
                       MODELE=model)
                       
-sinkF = AFFE_CHAR_MECA(FORCE_NODALE=_F(GROUP_NO=('bottomtip'),  
-                                      FZ=-''' + str(netinfo["centerWeight"]) + ''',
+sinkF = AFFE_CHAR_MECA(FORCE_NODALE=_F(GROUP_NO=('sinkers'),  
+                                      FZ=-''' + str(cageinfo["sinkerWeight"]) + ''',
                                       FX=0,
                                       FY=0,
                                       ), 
@@ -89,8 +89,9 @@ sinkF = AFFE_CHAR_MECA(FORCE_NODALE=_F(GROUP_NO=('bottomtip'),
 buoyF= AFFE_CHAR_MECA(FORCE_NODALE=_F(GROUP_NO=('allnodes'),
                                       FZ=''' + str(Fbuoy) + '''), 
                       MODELE=model)
-itimes=110    
-dt=0.1       # Physically it simulates 110s
+
+dt=''' + str(dt) + '''      # frequency to update the hydrodynamic forces
+itimes=''' + str(int(10.0 / dt * len(envinfo['current']))) + '''   
 tend=itimes*dt
 
 listr = DEFI_LIST_REEL(DEBUT=0.0,
@@ -161,9 +162,6 @@ if k == 0:
                     COMPORTEMENT=(_F(DEFORMATION='GROT_GDEP',
                                     GROUP_MA=('twines', ),
                                     RELATION='CABLE'),
-                                  _F(DEFORMATION='GROT_GDEP',
-                                    GROUP_MA=('bottomring', ),
-                                    RELATION='ELAS')
                                   ),
                     CONVERGENCE=_F(ITER_GLOB_MAXI=1000,
                                    RESI_GLOB_RELA=2e-05),
@@ -182,15 +180,12 @@ if k == 0:
                     MODELE=model)
 else:
     resn = DYNA_NON_LINE(CARA_ELEM=elemprop,
-    				            CHAM_MATER=fieldmat,
-    				            reuse=resn,
+    				CHAM_MATER=fieldmat,
+    				reuse=resn,
                     ETAT_INIT=_F(EVOL_NOLI=resn),
                     COMPORTEMENT=(_F(DEFORMATION='GROT_GDEP',
                                     GROUP_MA=('twines', ),
                                     RELATION='CABLE'),
-                                  _F(DEFORMATION='GROT_GDEP',
-                                    GROUP_MA=('bottomring', ),
-                                    RELATION='ELAS')
                                   ),
                    CONVERGENCE=_F(ITER_GLOB_MAXI=1000,
                                   RESI_GLOB_RELA=2e-05),
@@ -227,10 +222,13 @@ if k==0:
     con=''' + str(meshinfo['netLines']) + ''' 
     sur=''' + str(meshinfo['netSurfaces']) + '''
     np.savetxt(cwd+'/asteroutput/initialpositions.txt', posi)
-    hymo=hy.HydroMorison(posi,con,U,''' + str(netinfo['Sn']) + ''',''' + str(dwh) + ''',''' + str(
+    Uinput=''' + str(envinfo['current']) + ''' 
+    hymo=hy.HydroMorison(posi,con,Uinput[0],''' + str(netinfo['Sn']) + ''',''' + str(dwh) + ''',''' + str(
         netinfo['twineDiameter']) + ''')
-# U=np.array([np.fix(k*dt/10.0)/10.0+0.1,0.0,0.0])
 
+
+# U=np.array([np.fix(k*dt/10.0)/10.0+0.1,0.0,0.0])
+U=Uinput[int(k*dt/10.0)]
 Fnh=hymo.M1(posi,U)
 # np.savetxt(cwd+'Fh1'+str((1+k)*dt)+'.txt', Fnh)    
 DETRUIRE(CONCEPT=_F( NOM=(tblp)))
@@ -243,7 +241,7 @@ if k < itimes-1:
     output_file.close()
 
 
-def CR_export(cwd, mesh):
+def CR_export(mesh):
     suffix = rd.randint(1, 10000)
     output_file = open('./asterinput/ASTERRUN.export', 'w')
     # for the enviromentsetting
@@ -302,6 +300,6 @@ F mess ''' + cwd + '''/asteroutput/mess.log R 6\n''')
 # P memory_limit 5102.0
 # P time_limit 90000.0
 
-cwd = os.getcwd()
-CR_comm(cwd)
-CR_export(cwd, meshinfo['meshName'])
+
+CR_comm()
+CR_export(meshinfo['meshName'])
