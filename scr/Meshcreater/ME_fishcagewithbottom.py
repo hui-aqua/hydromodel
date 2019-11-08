@@ -5,43 +5,44 @@ Z=0 is the free surface
 Z<0 is the water zone
 Z>0 is the air zone
 The fish cage is a cylindrical shape
-The fish cage has no bottom
+The fish cage has a bottom, and the bottom can be flat or cone shape
+ (according to the "cagebottomcenter" at line 37)
 
 Because it is dependent on individual cage.
 This code can be executed by the following command in terminal:
 
-/opt/salome2019/appli_V2019_univ/salome -t ~/GitCode/aqua/hydromodel/Meshcreater/fishcagewithbottom.py
+/opt/salome2019/appli_V2019_univ/salome -t ~/GitCode/aqua/hydromodel/Meshcreater/ME_fishcagewithbottom.py
 
 or:
 
-/opt/salome2019/appli_V2019_univ/salome -t fishcagewithbottom.py
+/opt/salome2019/appli_V2019_univ/salome -t ME_fishcagewithbottom.py
 
 Any questions about this code, please email: hui.cheng@uis.no
 
 """
 import os
+
+# define the fish cage shape
 import numpy as np
 from numpy import pi
 
-cwd = os.getcwd()
+print("\nThis script can generate a cylindrical fish cage with a bottom")
+D = float(input("\nInput your cage diameter [m] \n"))
+H = float(input("\nInput your cage height [m] \n"))
+Dtip = float(input("\nInput your bottom weight depth [m] \n"))
+NT = 20  # it can use int(pi*D/L)   # Number of the nodes in circumference
+NN = 6  # it can use int(H/L)      # number of section in the height, thus, the nodes should be NN+1
+cagebottomcenter = [0, 0, -Dtip]
 
-with open('cagedict', 'r') as f:
-    content = f.read()
-    cageinfo = eval(content)
-
-D = cageinfo['cageDiameter']
-H = cageinfo['cageHeight']
-NT = cageinfo['elementOverCir']
-#  Number of the nodes in circumference
-NN = cageinfo[
-    'elementOverDepth']
-# number of section in the height, thus, the nodes should be NN+1
 p = []
+con = []
+sur = []
 
 # generate the point coordinates matrix for the net
 for j in range(0, NN + 1):
     for i in range(0, NT):
         p.append([D / 2 * np.cos(i * 2 * pi / float(NT)), D / 2 * np.sin(i * 2 * pi / float(NT)), -j * H / float(NN)])
+p.append(cagebottomcenter)
 
 # the below is the commond in the Mesh, Salome.
 # the mesh creater script
@@ -59,32 +60,52 @@ Mesh_1 = smesh.Mesh()
 for i in range(len(p)):
     nodeID = Mesh_1.AddNode(float(p[i][0]), float(p[i][1]), float(p[i][2]))
 
-con = []
-sur = []
 for i in range(1, NT + 1):
     for j in range(0, NN + 1):
         if j == NN:
+            edge = Mesh_1.AddEdge([i + j * NT, len(p)])  # add the vertical line into geometry
+            con.append([i + j * NT - 1, len(p) - 1])  # add the vertical line into geometry
             if i == NT:
                 edge = Mesh_1.AddEdge([i + j * NT, 1 + i + (j - 1) * NT])  # add the horizontal line into geometry
-                con.append([i + j * NT - 1, 1 + i + (j - 1) * NT - 1])  # add the horizontal line into con
+                con.append([i + j * NT - 1, 1 + i + (j - 1) * NT - 1])  # add the horizontal line into geometry
+                sur.append([i + j * NT - 1, 1 + i + (j - 1) * NT - 1, len(p) - 1, len(p) - 1])
+                # add the cone surface into sur
             else:
                 edge = Mesh_1.AddEdge([i + j * NT, 1 + i + j * NT])  # add the horizontal line into geometry
-                con.append([i + j * NT - 1, 1 + i + j * NT - 1])  # add the horizontal line into con
+                con.append([i + j * NT - 1, 1 + i + j * NT - 1])  # add the horizontal line into geometry
+                sur.append([i + j * NT - 1, 1 + i + j * NT - 1, len(p) - 1, len(p) - 1])
+                # add the cone surface into sur
         else:
             edge = Mesh_1.AddEdge([i + j * NT, i + (j + 1) * NT])  # add the vertical line into geometry
-            con.append([i + j * NT - 1, i + (j + 1) * NT - 1])  # add the vertical line into con
+            con.append([i + j * NT - 1, i + (j + 1) * NT - 1])  # add the vertical line into geometry
             if i == NT:
                 edge = Mesh_1.AddEdge([i + j * NT, 1 + i + (j - 1) * NT])  # add the horizontal line into geometry
-                con.append([i + j * NT - 1, 1 + i + (j - 1) * NT - 1])  # add the horizontal line into con
+                con.append([i + j * NT - 1, 1 + i + (j - 1) * NT - 1])  # add the horizontal line into geometry
                 sur.append([i + j * NT - 1, 1 + i + (j - 1) * NT - 1, i + (j + 1) * NT - 1, 1 + i + j * NT - 1])
                 # add the horizontal surface into sur
             else:
                 edge = Mesh_1.AddEdge([i + j * NT, 1 + i + j * NT])  # add the horizontal line into geometry
-                con.append([i + j * NT - 1, 1 + i + j * NT - 1])  # add the horizontal line into con
+                con.append([i + j * NT - 1, 1 + i + j * NT - 1])  # add the horizontal line into geometry
                 sur.append([i + j * NT - 1, 1 + i + j * NT - 1, i + (j + 1) * NT - 1, 1 + i + (j + 1) * NT - 1])
                 # add the horizontal surface into sur
 
-
+cwd = os.getcwd()
+meshinfo = {
+    "horizontalElementLength": float(pi * D / NT),
+    "verticalElementLength": float(H / NN),
+    "coneElementLength": np.sqrt(pow(Dtip - D, 2) + pow(D / 2.0, 2)),
+    "numberOfNodes": len(p),
+    "numberOfLines": len(con),
+    "numberOfSurfaces": len(sur),
+    "netLines": con,
+    "netSurfaces": sur,
+    "netNodes": p,
+    "NN": NN,
+    "NT": NT,
+}
+f = open(cwd + "/meshinfomation.txt", "w")
+f.write(str(meshinfo))
+f.close()
 
 isDone = Mesh_1.Compute()
 # naming  the group
@@ -103,6 +124,11 @@ bottomnodes = Mesh_1.CreateEmptyGroup(SMESH.NODE, 'bottomnodes')
 nbAdd = bottomnodes.Add([i for i in range(NT * NN + 1, NT * (NN + 1) + 1)])
 smesh.SetName(bottomnodes, 'bottomnodes')
 
+# define the node on the bottom tip
+bottomtip = Mesh_1.CreateEmptyGroup(SMESH.NODE, 'bottomtip')
+nbAdd = bottomtip.Add([len(p)])
+smesh.SetName(bottomtip, 'bottomtip')
+
 # generate the name for each node to assign the hycxrodynamic forces.
 for i in range(1, len(p) + 1):
     node1 = Mesh_1.CreateEmptyGroup(SMESH.NODE, 'node%s' % i)
@@ -117,29 +143,12 @@ smesh.SetName(twines, 'twines')
 
 # the top ring to keep ths shape of the fish cage.
 topring = Mesh_1.CreateEmptyGroup(SMESH.EDGE, 'topring')
-nbAdd = topring.Add([i for i in range(2, len(con) + 1, 2 * NN + 1)])
+nbAdd = topring.Add([i for i in range(2, len(con) + 1, 2 * NN + 2)])
 smesh.SetName(topring, 'topring')
 
 # bottom ring will keep the cage and add the sink forces
 bottomring = Mesh_1.CreateEmptyGroup(SMESH.EDGE, 'bottomring')
-nbAdd = bottomring.Add([i for i in range(2 * NN + 1, len(con) + 1, 2 * NN + 1)])
+nbAdd = bottomring.Add([i for i in range(2 * (1 + NN), len(con) + 1, 2 * (NN + 1))])
 smesh.SetName(bottomring, 'bottomring')
-meshname = "CFGNB" + str(D) + "X" + str(H) + ".med"
-Mesh_1.ExportMED(cwd + "/" + meshname)
 
-meshinfo = {
-    "horizontalElementLength": float(pi * D / NT),
-    "verticalElementLength": float(H / NN),
-    "numberOfNodes": len(p),
-    "numberOfLines": len(con),
-    "numberOfSurfaces": len(sur),
-    "netLines": con,
-    "netSurfaces": sur,
-    "netNodes": p,
-    "NN": NN,
-    "NT": NT,
-    "meshName": meshname
-}
-f = open(cwd + "/meshinfomation.txt", "w")
-f.write(str(meshinfo))
-f.close()
+Mesh_1.ExportMED(cwd + "/CFGWB" + str(D) + "X" + str(H) + ".med")
