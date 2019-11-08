@@ -3,6 +3,11 @@ writer hui cheng
 email hui.cheng@uis.no
 """
 import os
+
+with open('cagedict', 'r') as f:
+    content = f.read()
+    cageinfo = eval(content)
+
 import time
 import sys
 sys.path.append(
@@ -20,8 +25,8 @@ for i in files:
         meshfile = str(i)
 os.system("mv *.txt ./asterinput/")
 os.system("mv *.med ./asterinput/")
-cme.CR_comm(cwd)
-cme.CR_export(cwd, meshfile)
+os.system("python3" + "CM_" + cageinfo['cageType'] + ".py")
+
 print("\n"
       "\n"
       "Currently, this code is not ready for release\n"
