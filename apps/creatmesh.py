@@ -1,5 +1,5 @@
 import os
-
+from etc import workPath
 os.system("clear")
 if not os.path.isfile('cagedict'):
     print("\n Please make sure cagedict is located in the working path.\n")
@@ -23,5 +23,4 @@ while not os.path.isfile(apPath):
         apPath = "/opt/salome2018/appli_V2018.0.1_public/salome"
 os.system("clear")
 
-modelBank = "/home/hui/GitCode/aqua/scr/Meshcreater/"  # todo autochange the parth in install.py
-os.system("python3 " + modelBank + "generateMesh.py " + apPath)
+os.system("python3 " + workPath.mesh_path + "generateMesh.py " + apPath)

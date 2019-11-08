@@ -1,7 +1,7 @@
 import os
 import sys
-import dictCheaker as dc
-
+from scr.Meshcreater import dictCheaker as dc
+from etc import workPath
 with open('cagedict', 'r') as f:
     content = f.read()
     cageinfo = eval(content)
@@ -21,11 +21,9 @@ def printmodel():
         print(str(modelList.index(model)) + " " + model)
 
 
-modelBank = "/home/hui/GitCode/aqua/scr/Meshcreater/"  # todo autochange the parth in install.py
-
 if cageinfo['cageType'] in modelList:
     dc.check(cageinfo, cageinfo['cageType'])
-    os.system(str(sys.argv[1]) + " -t " + modelBank + "ME_" + cageinfo['cageType'] + ".py")
+    os.system(str(sys.argv[1]) + " -t " + workPath.mesh_path + "ME_" + cageinfo['cageType'] + ".py")
 else:
     printmodel()
     exit()

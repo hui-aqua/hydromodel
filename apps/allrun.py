@@ -3,12 +3,12 @@ writer hui cheng
 email hui.cheng@uis.no
 """
 import os
+from etc import workPath
 import time
 with open('cagedict', 'r') as f:
     content = f.read()
     cageinfo = eval(content)
 
-inputBank = "/home/hui/GitCode/aqua/scr/inputfilecreator/"  # todo autochange the parth in install.py
 cwd = os.getcwd()
 if not os.path.exists("asterinput"):
     os.mkdir("asterinput")
@@ -21,7 +21,7 @@ for i in files:
 os.system("mv *.txt ./asterinput/")
 os.system("mv *.med ./asterinput/")
 
-os.system("python3 " + inputBank + "CM_" + cageinfo['cageType'] + ".py")
+os.system("python3 " + workPath.inputcreater_path + "CM_" + cageinfo['cageType'] + ".py")
 
 print("\n"
       "\n"

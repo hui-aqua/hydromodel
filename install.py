@@ -13,3 +13,16 @@ alias aclean='python3 $APP/apps/allclean.py'
     \n''')
 output_file.write('\n')
 output_file.close()
+
+output_file = open('./etc/workPath.py', 'w')
+output_file.write('''
+# Description
+#     workingPath for all the code
+# hui.cheng@uis.no
+Program_path = "''' + cwd + '''"
+mesh_path = Program_path+"/scr/Meshcreater/"
+inputcreater_path = Program_path+"/scr/inputfilecreator/"
+forceModel_path = Program_path+"/scr/forcemodel/"
+    \n''')
+output_file.write('\n')
+output_file.close()

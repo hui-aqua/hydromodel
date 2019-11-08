@@ -239,8 +239,6 @@ if k < itimes-1:
     output_file.close()
 
 
-# todo check whether con and sur can work
-
 def CR_export(cwd, mesh):
     suffix = rd.randint(1, 10000)
     output_file = open('./asterinput/ASTERRUN.export', 'w')

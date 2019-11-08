@@ -4,12 +4,10 @@
 # GROUP_MA: twines, topring, bottomring
 import os
 import random as rd
-
+from etc import workPath
 import numpy as np
-from numpy import pi
 
 cwd = os.getcwd()
-hydroBank = "/home/hui/GitCode/aqua/scr/forcemodel"  # todo autochange the parth in install.py
 with open('./asterinput/meshinfomation.txt', 'r') as f:
     content = f.read()
     meshinfo = eval(content)
@@ -24,7 +22,7 @@ with open('envdict', 'r') as f:
     envinfo = eval(content)
 
 Fbuoy = meshinfo['horizontalElementLength'] * meshinfo['verticalElementLength'] * netinfo['Sn'] / netinfo[
-    'twineDiameter'] * 0.25 * pi * pow(netinfo['twineDiameter'], 2) * 9.81 * float(envinfo['fluidDensity'])
+    'twineDiameter'] * 0.25 * np.pi * pow(netinfo['twineDiameter'], 2) * 9.81 * float(envinfo['fluidDensity'])
 # Buoyancy force to assign on each nodes
 dwh = meshinfo['horizontalElementLength'] * meshinfo['verticalElementLength'] * netinfo['Sn'] / (
         meshinfo['horizontalElementLength'] + meshinfo['verticalElementLength'])
@@ -32,7 +30,7 @@ dwh = meshinfo['horizontalElementLength'] * meshinfo['verticalElementLength'] * 
 lam1 = meshinfo['horizontalElementLength'] / netinfo['meshLength']
 lam2 = meshinfo['verticalElementLength'] / netinfo['meshLength']
 dws = np.sqrt(2 * lam1 * lam2 / (lam1 + lam2)) * netinfo['twineDiameter']
-twineSection = 0.25 * pi * pow(dws, 2)
+twineSection = 0.25 * np.pi * pow(dws, 2)
 dt = 0.1
 
 
@@ -42,7 +40,7 @@ def CR_comm():
         '''
 import sys
 import numpy as np
-sys.path.append("''' + hydroBank + '''")
+sys.path.append("''' + workPath.forceModel_path + '''")
 import hydro4c1 as hy
 cwd="''' + cwd + '''/"
 DEBUT(PAR_LOT='NON',
