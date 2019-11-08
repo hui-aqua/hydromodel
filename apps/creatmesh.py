@@ -44,7 +44,7 @@ os.system("clear")
 
 modelBank = "/home/hui/GitCode/aqua/scr/Meshcreater/"
 if cageinfo['cageType'] in modelList:
-    os.system(apPath + " -t " + modelBank + cageinfo['cageType'] + ".py")
+    os.system(apPath + " -t " + modelBank + "ME_" + cageinfo['cageType'] + ".py")
 else:
     printmodel()
     exit()

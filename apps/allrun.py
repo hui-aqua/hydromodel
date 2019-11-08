@@ -9,11 +9,7 @@ with open('cagedict', 'r') as f:
     cageinfo = eval(content)
 
 import time
-import sys
-sys.path.append(
-    '/home/hui/GitCode/aqua/scr/inpufilecreator'
-)
-import creamodule as cme
+
 cwd = os.getcwd()
 if not os.path.exists("asterinput"):
     os.mkdir("asterinput")
@@ -25,12 +21,13 @@ for i in files:
         meshfile = str(i)
 os.system("mv *.txt ./asterinput/")
 os.system("mv *.med ./asterinput/")
-os.system("python3" + "CM_" + cageinfo['cageType'] + ".py")
+modelBank = "/home/hui/GitCode/aqua/scr/inputfilecreator/"
+os.system("python3" + modelBank + "CM_" + cageinfo['cageType'] + ".py")
 
 print("\n"
       "\n"
       "Currently, this code is not ready for release\n"
       "Any questions about this code, please email: hui.cheng@uis.no")
-time.sleep(1.5)
+time.sleep(3.5)
 os.system("source /opt/aster144/etc/codeaster/profile.sh")
 os.system("as_run ./asterinput/ASTERRUN.export")
