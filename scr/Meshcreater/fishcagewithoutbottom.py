@@ -84,21 +84,7 @@ for i in range(1, NT + 1):
                 sur.append([i + j * NT - 1, 1 + i + j * NT - 1, i + (j + 1) * NT - 1, 1 + i + (j + 1) * NT - 1])
                 # add the horizontal surface into sur
 
-meshinfo = {
-    "horizontalElementLength": float(pi * D / NT),
-    "verticalElementLength": float(H / NN),
-    "numberOfNodes": len(p),
-    "numberOfLines": len(con),
-    "numberOfSurfaces": len(sur),
-    "netLines": con,
-    "netSurfaces": sur,
-    "netNodes": p,
-    "NN": NN,
-    "NT": NT,
-}
-f = open(cwd + "/meshinfomation.txt", "w")
-f.write(str(meshinfo))
-f.close()
+
 
 isDone = Mesh_1.Compute()
 # naming  the group
@@ -138,5 +124,22 @@ smesh.SetName(topring, 'topring')
 bottomring = Mesh_1.CreateEmptyGroup(SMESH.EDGE, 'bottomring')
 nbAdd = bottomring.Add([i for i in range(2 * NN + 1, len(con) + 1, 2 * NN + 1)])
 smesh.SetName(bottomring, 'bottomring')
+meshname = "CFGNB" + str(D) + "X" + str(H) + ".med"
+Mesh_1.ExportMED(cwd + "/" + meshname)
 
-Mesh_1.ExportMED(cwd + "/CFGNB" + str(D) + "X" + str(H) + ".med")
+meshinfo = {
+    "horizontalElementLength": float(pi * D / NT),
+    "verticalElementLength": float(H / NN),
+    "numberOfNodes": len(p),
+    "numberOfLines": len(con),
+    "numberOfSurfaces": len(sur),
+    "netLines": con,
+    "netSurfaces": sur,
+    "netNodes": p,
+    "NN": NN,
+    "NT": NT,
+    "meshName": meshname
+}
+f = open(cwd + "/meshinfomation.txt", "w")
+f.write(str(meshinfo))
+f.close()
