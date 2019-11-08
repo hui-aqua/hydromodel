@@ -151,4 +151,22 @@ bottomring = Mesh_1.CreateEmptyGroup(SMESH.EDGE, 'bottomring')
 nbAdd = bottomring.Add([i for i in range(2 * (1 + NN), len(con) + 1, 2 * (NN + 1))])
 smesh.SetName(bottomring, 'bottomring')
 
-Mesh_1.ExportMED(cwd + "/CFGWB" + str(D) + "X" + str(H) + ".med")
+meshname = "CFGWB" + str(D) + "X" + str(H) + ".med"
+Mesh_1.ExportMED(cwd + "/" + meshname)
+
+meshinfo = {
+    "horizontalElementLength": float(pi * D / NT),
+    "verticalElementLength": float(H / NN),
+    "numberOfNodes": len(p),
+    "numberOfLines": len(con),
+    "numberOfSurfaces": len(sur),
+    "netLines": con,
+    "netSurfaces": sur,
+    "netNodes": p,
+    "NN": NN,
+    "NT": NT,
+    "meshName": meshname
+}
+f = open(cwd + "/meshinfomation.txt", "w")
+f.write(str(meshinfo))
+f.close()

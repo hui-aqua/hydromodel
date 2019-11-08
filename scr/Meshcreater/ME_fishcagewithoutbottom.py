@@ -103,7 +103,13 @@ bottomnodes = Mesh_1.CreateEmptyGroup(SMESH.NODE, 'bottomnodes')
 nbAdd = bottomnodes.Add([i for i in range(NT * NN + 1, NT * (NN + 1) + 1)])
 smesh.SetName(bottomnodes, 'bottomnodes')
 
-# generate the name for each node to assign the hycxrodynamic forces.
+# define the nodes for sinkers
+# todo add the sinkers
+bottomtip = Mesh_1.CreateEmptyGroup(SMESH.NODE, 'sinkers')
+nbAdd = bottomtip.Add([len(p)])
+smesh.SetName(bottomtip, 'sinkers')
+
+# generate the name for each node to assign the hydrodynamic forces.
 for i in range(1, len(p) + 1):
     node1 = Mesh_1.CreateEmptyGroup(SMESH.NODE, 'node%s' % i)
     nbAdd = node1.Add([i])
