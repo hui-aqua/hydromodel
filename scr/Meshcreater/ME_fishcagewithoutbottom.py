@@ -22,7 +22,6 @@ Any questions about this code, please email: hui.cheng@uis.no
 import os
 import numpy as np
 from numpy import pi
-
 cwd = os.getcwd()
 
 with open('cagedict', 'r') as f:

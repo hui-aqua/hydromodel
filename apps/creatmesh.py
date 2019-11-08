@@ -5,25 +5,6 @@ if not os.path.isfile('cagedict'):
     print("\n Please make sure cagedict is located in the working path.\n")
     exit()
 
-with open('cagedict', 'r') as f:
-    content = f.read()
-    cageinfo = eval(content)
-
-modelList = [
-    "fishcagewithbottom",
-    "fishcagewithoutbottom",
-    "squarefishcage",
-    "trawlnet",
-    "fishcagewithmooringsystem"]  # add more models if it is ready
-
-
-def printmodel():
-    print("The cage type '" + cageinfo['cageType'] + "' are not included in this code.\n")
-    print("Currently, the available numerical models are:")
-    for model in modelList:
-        print(str(modelList.index(model)) + " " + model)
-
-
 apPath = input(
     "The default path for salome2019 is: \t/opt/salome2019/appli_V2019_univ/salome \n"
     "If your salome is located in this path, you can press '1' and enter \n\n"
@@ -42,9 +23,5 @@ while not os.path.isfile(apPath):
         apPath = "/opt/salome2018/appli_V2018.0.1_public/salome"
 os.system("clear")
 
-modelBank = "/home/hui/GitCode/aqua/scr/Meshcreater/"
-if cageinfo['cageType'] in modelList:
-    os.system(apPath + " -t " + modelBank + "ME_" + cageinfo['cageType'] + ".py")
-else:
-    printmodel()
-    exit()
+modelBank = "/home/hui/GitCode/aqua/scr/Meshcreater/"  # todo autochange the parth in install.py
+os.system("python3 " + modelBank + "generateMesh.py " + apPath)
