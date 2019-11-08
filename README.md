@@ -8,23 +8,31 @@ This is a project within the Ocean Technology Innovation Cluster Stavanger (OTIC
 This program it is not ready for release now.
 If you have any questions about this program, please email: hui.cheng@uis.no
 * Requirements
-    * Salome-Meca (Ver2019, Ver2018)
+    * Salome-Meca (Ver2019, Ver2018)  
     https://www.code-aster.org/V2/spip.php?article303
-    * Code_Aster (stable version)
+    * Code_Aster (stable version)  
     https://www.code-aster.org/V2/spip.php?article272
     * Python3
      
-* How to use this program
+* How to install this program
     1. Clone this repository to your local folder. 
-    2. If you clone the repository in $HOME/aqua, the user should:
+    2. If you cloned folder, the user should:
         ```
         python3 install.py
         ```
-    3. Source the environment:
-        ```
-        source $HOME/aqua/etc/aliases.sh 
-        ```
-    4. The available application are:
-       - amesh : To creat mesh
-       - arun : To auto run simulation
-       - aclean : To clean working folder
+ * How to use this program   
+ 1. Now there are three applications that can be used for simulations:
+    - amesh : To creat mesh
+    - arun : To auto run simulation
+    - aclean : To clean working folder 
+       
+2. To use the applications, the user needs to source the environment:
+   ```
+   source $HOME/aqua/etc/aliases.sh 
+   ```
+ 3. The users has to prepare the three dicts in your working path
+ (You can find the template of these dicts in the examples folder). :
+ - cagedict: information about the cage.
+ - netdict: information about the net.
+ - envdict: information about the environmental condition.
+ 
