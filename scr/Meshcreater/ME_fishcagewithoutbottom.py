@@ -30,10 +30,9 @@ with open('cagedict', 'r') as f:
 
 D = cageinfo['cageDiameter']
 H = cageinfo['cageHeight']
-NT = cageinfo['elementOverCir']
-#  Number of the nodes in circumference
-NN = cageinfo[
-    'elementOverDepth']
+NT = cageinfo['elementOverCir']  # Number of the nodes in circumference
+NN = cageinfo['elementOverDepth']
+NS = cageinfo['NumOfSinker']
 # number of section in the height, thus, the nodes should be NN+1
 p = []
 
@@ -83,8 +82,6 @@ for i in range(1, NT + 1):
                 sur.append([i + j * NT - 1, 1 + i + j * NT - 1, i + (j + 1) * NT - 1, 1 + i + (j + 1) * NT - 1])
                 # add the horizontal surface into sur
 
-
-
 isDone = Mesh_1.Compute()
 # naming  the group
 # GROUP_NO
@@ -103,11 +100,15 @@ nbAdd = bottomnodes.Add([i for i in range(NT * NN + 1, NT * (NN + 1) + 1)])
 smesh.SetName(bottomnodes, 'bottomnodes')
 
 # define the nodes for sinkers
-# todo add the sinkers
-bottomtip = Mesh_1.CreateEmptyGroup(SMESH.NODE, 'sinkers')
-nbAdd = bottomtip.Add([len(p)])
-smesh.SetName(bottomtip, 'sinkers')
-
+if (float(cageinfo['elementOverCir']) / float(cageinfo['NumOfSinker'])).is_integer():
+    print("The sinkers are evenly distributed in the bottom.")
+    sinkers = Mesh_1.CreateEmptyGroup(SMESH.NODE, 'sinkers')
+    nbAdd = sinkers.Add(
+        [i for i in range(len(p) - NT + 1, len(p), int(cageinfo['elementOverCir'] / cageinfo['NumOfSinker']))])
+    smesh.SetName(sinkers, 'sinkers')
+else:
+    print("The sinkers can not be evenly distributed in the bottom.")
+    pass
 # generate the name for each node to assign the hydrodynamic forces.
 for i in range(1, len(p) + 1):
     node1 = Mesh_1.CreateEmptyGroup(SMESH.NODE, 'node%s' % i)
