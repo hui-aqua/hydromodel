@@ -19,18 +19,18 @@ If you have any questions about this program, please email: hui.cheng@uis.no
         python3 install.py
         ```
  * How to use this program   
- 1. Now there are three applications that can be used for simulations:
-    - amesh : To creat mesh
-    - arun : To auto run simulation
-    - aclean : To clean working folder 
+ 1. The users has to prepare the three dicts in your working path
+ (You can find the template of these dicts in the examples folder). :
+ - cagedict: information about the cage.
+ - netdict: information about the net.
+ - envdict: information about the environmental condition.
        
 2. To use the applications, the user needs to source the environment:
    ```
    source $HOME/aqua/etc/aliases.sh 
    ```
- 3. The users has to prepare the three dicts in your working path
- (You can find the template of these dicts in the examples folder). :
- - cagedict: information about the cage.
- - netdict: information about the net.
- - envdict: information about the environmental condition.
- 
+
+  3. Now there are three applications that can be used for simulations:
+    - amesh : To creat mesh
+    - arun : To auto run simulation
+    - aclean : To clean working folder 
