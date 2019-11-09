@@ -2,31 +2,45 @@
 # Groupname:
 # GROUP_NO: allnodes, topnodes, bottomnodes, (bottomtip), node[i]
 # GROUP_MA: twines, topring, bottomring
+import os
 import random as rd
-from numpy import pi
+import workPath
 import numpy as np
 
-with open('meshinfomation.txt', 'r') as f:
+cwd = os.getcwd()
+with open('./asterinput/meshinfomation.txt', 'r') as f:
     content = f.read()
     meshinfo = eval(content)
-with open('netinformation.txt', 'r') as f:
+with open('netdict', 'r') as f:
     content = f.read()
     netinfo = eval(content)
+with open('cagedict', 'r') as f:
+    content = f.read()
+    cageinfo = eval(content)
+with open('envdict', 'r') as f:
+    content = f.read()
+    envinfo = eval(content)
 
 Fbuoy = meshinfo['horizontalElementLength'] * meshinfo['verticalElementLength'] * netinfo['Sn'] / netinfo[
-    'twineDiameter'] * 0.25 * pi * pow(netinfo['twineDiameter'], 2) * 9.81 * 1025
+    'twineDiameter'] * 0.25 * np.pi * pow(netinfo['twineDiameter'], 2) * 9.81 * float(envinfo['fluidDensity'])
+# Buoyancy force to assign on each nodes
 dwh = meshinfo['horizontalElementLength'] * meshinfo['verticalElementLength'] * netinfo['Sn'] / (
-            meshinfo['horizontalElementLength'] + meshinfo['verticalElementLength'])
+        meshinfo['horizontalElementLength'] + meshinfo['verticalElementLength'])
+# hydrodynamic diameter to calculate the hydrodynamic coefficient.
 lam1 = meshinfo['horizontalElementLength'] / netinfo['meshLength']
 lam2 = meshinfo['verticalElementLength'] / netinfo['meshLength']
 dws = np.sqrt(2 * lam1 * lam2 / (lam1 + lam2)) * netinfo['twineDiameter']
+twineSection = 0.25 * np.pi * pow(dws, 2)
+dt = 0.1
+
+
 def CR_comm(cwd):
     output_file = open('./asterinput/ASTER1.comm', 'w')
     output_file.write(
         '''
 import sys
 import numpy as np
-sys.path.append("/home/hui/GitCode/aqua/scr/forcemodel")
+sys.path.append("''' + workPath.forceModel_path + '''")
 import hydro4c1 as hy
 cwd="''' + cwd + '''/"
 U=[1.0,0,0]              # current velocity[0.12 0.26 0.39 0.50 0.65 0.76 0.93]

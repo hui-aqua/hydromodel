@@ -7,7 +7,7 @@ Z>0 is the air zone
 The fish cage is a cylindrical shape
 The fish cage has a bottom, and the bottom can be flat or cone shape
  (according to the "cagebottomcenter" at line 37)
-
+The weight system for the fish cage only have sinker tube and center weight.
 Because it is dependent on individual cage.
 This code can be executed by the following command in terminal:
 
@@ -24,12 +24,16 @@ import os
 import numpy as np
 from numpy import pi
 
-print("\nThis script can generate a cylindrical fish cage with a bottom")
-D = float(input("\nInput your cage diameter [m] \n"))
-H = float(input("\nInput your cage height [m] \n"))
-Dtip = float(input("\nInput your bottom weight depth [m] \n"))
-NT = 20  # it can use int(pi*D/L)   # Number of the nodes in circumference
-NN = 6  # it can use int(H/L)      # number of section in the height, thus, the nodes should be NN+1
+cwd = os.getcwd()
+
+with open('cagedict', 'r') as f:
+    content = f.read()
+    cageinfo = eval(content)
+D = cageinfo['cageDiameter']
+H = cageinfo['cageHeight']
+NT = cageinfo['elementOverCir']  # Number of the nodes in circumference
+NN = cageinfo['elementOverDepth']  # number of section in the height, thus, the nodes should be NN+1
+Dtip = cageinfo['CenterWeightHeight']
 cagebottomcenter = [0, 0, -Dtip]
 
 p = []
@@ -87,23 +91,6 @@ for i in range(1, NT + 1):
                 sur.append([i + j * NT - 1, 1 + i + j * NT - 1, i + (j + 1) * NT - 1, 1 + i + (j + 1) * NT - 1])
                 # add the horizontal surface into sur
 
-cwd = os.getcwd()
-meshinfo = {
-    "horizontalElementLength": float(pi * D / NT),
-    "verticalElementLength": float(H / NN),
-    "coneElementLength": np.sqrt(pow(Dtip - D, 2) + pow(D / 2.0, 2)),
-    "numberOfNodes": len(p),
-    "numberOfLines": len(con),
-    "numberOfSurfaces": len(sur),
-    "netLines": con,
-    "netSurfaces": sur,
-    "netNodes": p,
-    "NN": NN,
-    "NT": NT,
-}
-f = open(cwd + "/meshinfomation.txt", "w")
-f.write(str(meshinfo))
-f.close()
 
 isDone = Mesh_1.Compute()
 # naming  the group

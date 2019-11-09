@@ -5,7 +5,8 @@ Z=0 is the free surface
 Z<0 is the water zone
 Z>0 is the air zone
 The fish cage is a cylindrical shape
-The fish cage has no bottom
+The fish cage has no bottom net
+The weight system for the fish cage only has sinkers
 
 Because it is dependent on individual cage.
 This code can be executed by the following command in terminal:
@@ -31,10 +32,13 @@ with open('cagedict', 'r') as f:
 D = cageinfo['cageDiameter']
 H = cageinfo['cageHeight']
 NT = cageinfo['elementOverCir']  # Number of the nodes in circumference
-NN = cageinfo['elementOverDepth']
+NN = cageinfo['elementOverDepth']  # number of section in the height, thus, the nodes should be NN+1
 NS = cageinfo['NumOfSinker']
-# number of section in the height, thus, the nodes should be NN+1
+
 p = []
+con = []
+sur = []
+
 
 # generate the point coordinates matrix for the net
 for j in range(0, NN + 1):
@@ -57,8 +61,6 @@ Mesh_1 = smesh.Mesh()
 for i in range(len(p)):
     nodeID = Mesh_1.AddNode(float(p[i][0]), float(p[i][1]), float(p[i][2]))
 
-con = []
-sur = []
 for i in range(1, NT + 1):
     for j in range(0, NN + 1):
         if j == NN:
@@ -108,7 +110,7 @@ if (float(cageinfo['elementOverCir']) / float(cageinfo['NumOfSinker'])).is_integ
     smesh.SetName(sinkers, 'sinkers')
 else:
     print("The sinkers can not be evenly distributed in the bottom.")
-    pass
+
 # generate the name for each node to assign the hydrodynamic forces.
 for i in range(1, len(p) + 1):
     node1 = Mesh_1.CreateEmptyGroup(SMESH.NODE, 'node%s' % i)
