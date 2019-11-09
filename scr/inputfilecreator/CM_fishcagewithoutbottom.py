@@ -4,9 +4,8 @@
 # GROUP_MA: twines, topring, bottomring
 import os
 import random as rd
-from etc import workPath
+import workPath
 import numpy as np
-
 cwd = os.getcwd()
 with open('./asterinput/meshinfomation.txt', 'r') as f:
     content = f.read()

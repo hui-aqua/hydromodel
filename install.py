@@ -26,3 +26,6 @@ forceModel_path = Program_path+"/scr/forcemodel/"
     \n''')
 output_file.write('\n')
 output_file.close()
+os.system("ln -sf " + cwd + "/etc/workPath.py ./scr/inputfilecreator/workPath.py")
+os.system("ln -sf " + cwd + "/etc/workPath.py ./scr/Meshcreater/workPath.py")
+os.system("ln -sf " + cwd + "/etc/workPath.py ./apps/workPath.py")

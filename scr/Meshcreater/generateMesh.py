@@ -1,7 +1,8 @@
 import os
 import sys
-from scr.Meshcreater import dictCheaker as dc
-from etc import workPath
+# from scr.Meshcreater import dictCheaker as dc
+import dictCheaker as dc
+import workPath
 with open('cagedict', 'r') as f:
     content = f.read()
     cageinfo = eval(content)

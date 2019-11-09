@@ -3,7 +3,7 @@ writer hui cheng
 email hui.cheng@uis.no
 """
 import os
-from etc import workPath
+import workPath
 import time
 with open('cagedict', 'r') as f:
     content = f.read()

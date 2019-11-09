@@ -1,5 +1,5 @@
 import os
-from etc import workPath
+import workPath
 os.system("clear")
 if not os.path.isfile('cagedict'):
     print("\n Please make sure cagedict is located in the working path.\n")

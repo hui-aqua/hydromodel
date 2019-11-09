@@ -21,8 +21,6 @@ Any questions about this code, please email: hui.cheng@uis.no
 
 """
 import os
-
-# define the fish cage shape
 import numpy as np
 from numpy import pi
 
