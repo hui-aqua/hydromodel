@@ -1,4 +1,3 @@
-
 # Description
 #     workingPath for all the code
 # hui.cheng@uis.no
