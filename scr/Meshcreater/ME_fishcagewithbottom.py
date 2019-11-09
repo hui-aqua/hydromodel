@@ -33,7 +33,7 @@ D = cageinfo['cageDiameter']
 H = cageinfo['cageHeight']
 NT = cageinfo['elementOverCir']  # Number of the nodes in circumference
 NN = cageinfo['elementOverDepth']  # number of section in the height, thus, the nodes should be NN+1
-Dtip = cageinfo['CenterWeightHeight']
+Dtip = cageinfo['centerWeightHeight']
 cagebottomcenter = [0, 0, -Dtip]
 
 p = []

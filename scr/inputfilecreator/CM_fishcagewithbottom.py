@@ -34,7 +34,7 @@ twineSection = 0.25 * np.pi * pow(dws, 2)
 dt = 0.1
 
 
-def CR_comm(cwd):
+def CR_comm():
     output_file = open('./asterinput/ASTER1.comm', 'w')
     output_file.write(
         '''
@@ -58,11 +58,11 @@ model = AFFE_MODELE(AFFE=(_F(GROUP_MA=('twines'),
                     MAILLAGE=mesh)
 elemprop = AFFE_CARA_ELEM(CABLE=_F(GROUP_MA=('twines'),
                                    N_INIT=10.0,
-                                   SECTION=''' + str(dws) + '''),
+                                   SECTION=''' + str(twineSection) + '''),
                           POUTRE=_F(GROUP_MA=('bottomring', ), 
                                     SECTION='CERCLE', 
                                     CARA=('R', 'EP'), 
-                                    VALE=(''' + str(netinfo["bottomringR"]) + ''', ''' + str(netinfo["bottomringR"]) + ''')),
+                                    VALE=(''' + str(cageinfo["bottomringR"]) + ''', ''' + str(cageinfo["bottomringR"]) + ''')),
                           
                           MODELE=model)
 net = DEFI_MATERIAU(CABLE=_F(EC_SUR_E=0.0001),
@@ -72,9 +72,9 @@ net = DEFI_MATERIAU(CABLE=_F(EC_SUR_E=0.0001),
                           # ELAS=_F(E=82000000,NU=0.2,RHO=1015.0))  #from H.moe, a. fredheim, 2010
                           # ELAS=_F(E=119366207.319,NU=0.2,RHO=1015.0))#from chun woo lee
                           # ELAS=_F(E=182000000,NU=0.2,RHO=1015.0)) 
-fe = DEFI_MATERIAU(ELAS=_F(E=''' + str(netinfo["bottomringYoungmodule"]) + ''', 
+fe = DEFI_MATERIAU(ELAS=_F(E=''' + str(cageinfo["bottomringYoungmodule"]) + ''', 
                            NU=0.3,
-                           RHO=''' + str(netinfo["bottomringRho"]) + '''))  
+                           RHO=''' + str(cageinfo["bottomringRho"]) + '''))  
 fieldmat = AFFE_MATERIAU(AFFE=(_F(GROUP_MA=('twines'),
                                  MATER=(net)),
                                _F(GROUP_MA=('bottomring'),
@@ -91,7 +91,7 @@ selfwigh = AFFE_CHAR_MECA(PESANTEUR=_F(DIRECTION=(0.0, 0.0, -1.0),
                                        GROUP_MA=('twines')),
                       MODELE=model)
 sinkF = AFFE_CHAR_MECA(FORCE_NODALE=_F(GROUP_NO=('bottomtip'),
-                                      FZ=-''' + str(netinfo["centerWeight"]) + ''',
+                                      FZ=-''' + str(cageinfo["centerWeight"]) + ''',
                                       FX=0,
                                       FY=0,
                                       ), 
@@ -99,8 +99,8 @@ sinkF = AFFE_CHAR_MECA(FORCE_NODALE=_F(GROUP_NO=('bottomtip'),
 buoyF= AFFE_CHAR_MECA(FORCE_NODALE=_F(GROUP_NO=('allnodes'),
                                       FZ=''' + str(Fbuoy) + '''), 
                       MODELE=model)
-itimes=110    
-dt=0.1       # Physically it simulates 110s
+dt=''' + str(dt) + '''      # frequency to update the hydrodynamic forces
+itimes=''' + str(int(10.0 / dt * len(envinfo['current']))) + '''   
 tend=itimes*dt
 
 listr = DEFI_LIST_REEL(DEBUT=0.0,
@@ -237,10 +237,13 @@ if k==0:
     con=''' + str(meshinfo['netLines']) + ''' 
     sur=''' + str(meshinfo['netSurfaces']) + '''
     np.savetxt(cwd+'/asteroutput/initialpositions.txt', posi)
-    hymo=hy.HydroMorison(posi,con,U,''' + str(netinfo['Sn']) + ''',''' + str(dwh) + ''',''' + str(
+    Uinput=''' + str(envinfo['current']) + ''' 
+    hymo=hy.HydroMorison(posi,con,Uinput[0],''' + str(netinfo['Sn']) + ''',''' + str(dwh) + ''',''' + str(
         netinfo['twineDiameter']) + ''')
+        
+        
 # U=np.array([np.fix(k*dt/10.0)/10.0+0.1,0.0,0.0])
-
+U=Uinput[int(k*dt/10.0)]
 Fnh=hymo.M1(posi,U)
 # np.savetxt(cwd+'Fh1'+str((1+k)*dt)+'.txt', Fnh)    
 DETRUIRE(CONCEPT=_F( NOM=(tblp)))
@@ -253,7 +256,7 @@ if k < itimes-1:
     output_file.close()
 
 
-def CR_export(cwd, mesh):
+def CR_export(mesh):
     suffix = rd.randint(1, 10000)
     output_file = open('./asterinput/ASTERRUN.export', 'w')
     # for the enviromentsetting
@@ -310,3 +313,7 @@ F mess ''' + cwd + '''/asteroutput/mess.log R 6\n''')
 
 # P memory_limit 5102.0
 # P time_limit 90000.0
+
+
+CR_comm()
+CR_export(meshinfo['meshName'])

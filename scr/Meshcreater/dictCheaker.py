@@ -18,7 +18,8 @@ listOfInput2 = ['cageType',
                 'bottomringR',
                 'bottomringRho',
                 'bottomringYoungmodule',
-                'centerWeight'
+                'centerWeight',
+                'centerWeightHeight'
                 ]
 
 
