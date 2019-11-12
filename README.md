@@ -21,9 +21,9 @@ If you have any questions about this program, please email: hui.cheng@uis.no
  * How to use this program   
  1. The users has to prepare the three dicts in your working path
  (You can find the template of these dicts in the examples folder). :
-   - cagedict: information about the cage.
-   - netdict: information about the net.
-   - envdict: information about the environmental condition.
+   -- cagedict: information about the cage.
+   -- netdict: information about the net.
+   -- envdict: information about the environmental condition.
        
 2. To use the applications, the user needs to source the environment:
    ```
