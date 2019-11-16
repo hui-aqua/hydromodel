@@ -261,7 +261,7 @@ def CR_export(mesh):
     output_file = open('./asterinput/ASTERRUN.export', 'w')
     # for the enviromentsetting
     output_file.write('''P actions make_etude
-P aster_root /opt/aster144
+P aster_root ''' + workPath.aster_path[:-25] + '''
 P consbtc oui
 P corefilesize unlimited
 P cpresok RESNOOK

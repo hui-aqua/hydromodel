@@ -28,6 +28,6 @@ print("\n"
       "Currently, this code is not ready for release\n"
       "Any questions about this code, please email: hui.cheng@uis.no")
 time.sleep(4.5)
-
-os.system("source /opt/aster144/etc/codeaster/profile.sh")
+print("source " + workPath.aster_path)
+os.system("source " + workPath.aster_path)
 os.system("as_run ./asterinput/ASTERRUN.export")

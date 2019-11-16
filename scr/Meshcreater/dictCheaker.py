@@ -1,3 +1,6 @@
+"""
+this is to check if the components are intact
+"""
 def errormess(ite):
     print("Error! '" + ite + "' is not in cagedict")
 
