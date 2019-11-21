@@ -90,12 +90,7 @@ selfwigh = AFFE_CHAR_MECA(PESANTEUR=_F(DIRECTION=(0.0, 0.0, -1.0),
                                        GRAVITE=9.81,
                                        GROUP_MA=('twines')),
                       MODELE=model)
-sinkF = AFFE_CHAR_MECA(FORCE_NODALE=_F(GROUP_NO=('bottomtip'),
-                                      FZ=-''' + str(cageinfo["centerWeight"]) + ''',
-                                      FX=0,
-                                      FY=0,
-                                      ), 
-                      MODELE=model)
+
 buoyF= AFFE_CHAR_MECA(FORCE_NODALE=_F(GROUP_NO=('allnodes'),
                                       FZ=''' + str(Fbuoy) + '''), 
                       MODELE=model)
@@ -160,7 +155,6 @@ for i in range (1,len(Fnh)+1):
 loadr=[]
 loadr.append( _F(CHARGE=fix), )
 loadr.append( _F(CHARGE=selfwigh), )
-loadr.append( _F(CHARGE=sinkF), )
 loadr.append( _F(CHARGE=buoyF), )
 for i in range (1,len(Fnh)+1):    
     loadr.append( _F(CHARGE=l[i],),)
@@ -310,6 +304,7 @@ F resu ''' + cwd + '''/asteroutput/reactionforce.txt R 8
 F mess ''' + cwd + '''/asteroutput/mess.log R 6\n''')
     output_file.write('\n')
     output_file.close()
+
 
 # P memory_limit 5102.0
 # P time_limit 90000.0

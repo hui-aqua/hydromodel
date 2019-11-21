@@ -9,14 +9,6 @@ The fish cage has a bottom, and the bottom can be flat or cone shape
  (according to the "cagebottomcenter" at line 37)
 The weight system for the fish cage only have sinker tube and center weight.
 Because it is dependent on individual cage.
-This code can be executed by the following command in terminal:
-
-/opt/salome2019/appli_V2019_univ/salome -t ~/GitCode/aqua/hydromodel/Meshcreater/ME_fishcagewithbottom.py
-
-or:
-
-/opt/salome2019/appli_V2019_univ/salome -t ME_fishcagewithbottom.py
-
 Any questions about this code, please email: hui.cheng@uis.no
 
 """

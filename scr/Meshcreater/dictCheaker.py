@@ -9,6 +9,7 @@ listOfInput1 = ['cageType',
                 'elementOverDepth',
                 'cageDiameter',
                 'cageHeight',
+                'weightType',
                 'NumOfSinker',
                 'sinkerWeight'
                 ]
@@ -18,16 +19,17 @@ listOfInput2 = ['cageType',
                 'elementOverDepth',
                 'cageDiameter',
                 'cageHeight',
+                'centerTipHeight'
+                'weightType',
                 'bottomringR',
                 'bottomringRho',
                 'bottomringYoungmodule',
                 'centerWeight',
-                'centerWeightHeight'
                 ]
 
 
-def check(cage, meshname):
-    if meshname == "fishcagewithoutbottom":
+def check(cage, meshType):
+    if meshType == "fishcagewithoutbottom":
         for i in listOfInput1:
             if i not in list(cage):
                 errormess(i)
@@ -36,7 +38,7 @@ def check(cage, meshname):
             print("\nAlarm! The sinkers cannot be evenly distributed in the bottom.\n"
                   "\nYou have to set the sinkers in the mesh file manually through GUI.\n")
 
-    if meshname == "fishcagewithbottom":
+    if meshType == "fishcagewithbottom":
         for i in listOfInput2:
             if i not in list(cage):
                 errormess(i)

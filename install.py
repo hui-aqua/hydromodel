@@ -1,5 +1,6 @@
 import os
 
+os.system("clear")
 cwd = os.getcwd()
 salomePath = input(
     "The default path for salome2019 is: \t/opt/salome2019/appli_V2019_univ/salome \n"
@@ -17,7 +18,7 @@ while not os.path.isfile(salomePath):
         salomePath = "/opt/salome2019/appli_V2019_univ/salome"
     if salomePath == str(2):
         salomePath = "/opt/salome2018/appli_V2018.0.1_public/salome"
-
+os.system("clear")
 asterPath = input("Please add the path of 'profile.sh' to your code_aster in your computer\n"
                   "The default path for code_aster 14.2 is: \t /opt/aster/etc/codeaster/profile.sh \n"
                   "If you want to use cod_aster 14.2, you can press '1' and enter \n\n"
@@ -58,6 +59,7 @@ output_file.write('''
 # hui.cheng@uis.no
 
 Program_path = "''' + cwd + '''"
+scr_path = Program_path+"/scr/"
 mesh_path = Program_path+"/scr/Meshcreater/"
 inputcreater_path = Program_path+"/scr/inputfilecreator/"
 forceModel_path = Program_path+"/scr/forcemodel/"
