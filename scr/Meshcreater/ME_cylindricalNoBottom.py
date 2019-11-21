@@ -25,16 +25,14 @@ import numpy as np
 from numpy import pi
 cwd = os.getcwd()
 
-with open('cagedict', 'r') as f:
+with open('cageDict', 'r') as f:
     content = f.read()
     cageinfo = eval(content)
 
-D = cageinfo['cageDiameter']
-H = cageinfo['cageHeight']
-NT = cageinfo['elementOverCir']  # Number of the nodes in circumference
-NN = cageinfo['elementOverDepth']  # number of section in the height, thus, the nodes should be NN+1
-NS = cageinfo['NumOfSinker']
-
+D = cageinfo['CageShape']['cageDiameter']
+H = cageinfo['CageShape']['cageHeight']
+NT = cageinfo['CageShape']['elementOverCir']  # Number of the nodes in circumference
+NN = cageinfo['CageShape']['elementOverHeight']  # number of section in the height, thus, the nodes should be NN+1
 p = []
 con = []
 sur = []
@@ -102,15 +100,19 @@ nbAdd = bottomnodes.Add([i for i in range(NT * NN + 1, NT * (NN + 1) + 1)])
 smesh.SetName(bottomnodes, 'bottomnodes')
 
 # define the nodes for sinkers
-if (float(cageinfo['elementOverCir']) / float(cageinfo['NumOfSinker'])).is_integer():
-    print("The sinkers are evenly distributed in the bottom.")
-    sinkers = Mesh_1.CreateEmptyGroup(SMESH.NODE, 'sinkers')
-    nbAdd = sinkers.Add(
-        [i for i in range(len(p) - NT + 1, len(p), int(cageinfo['elementOverCir'] / cageinfo['NumOfSinker']))])
-    smesh.SetName(sinkers, 'sinkers')
+if cageinfo['Weight']['weightType'] == 'sinkers':
+    NS = cageinfo['Weight']['NumOfSinker']
+    if (float(cageinfo['CageShape']['elementOverCir']) / float(cageinfo['CageShape']['NumOfSinker'])).is_integer():
+        print("The sinkers are evenly distributed in the bottom.")
+        sinkers = Mesh_1.CreateEmptyGroup(SMESH.NODE, 'sinkers')
+        nbAdd = sinkers.Add(
+            [i for i in range(len(p) - NT + 1, len(p),
+                              int(cageinfo['CageShape']['elementOverCir'] / cageinfo['CageShape']['NumOfSinker']))])
+        smesh.SetName(sinkers, 'sinkers')
+    else:
+        print("The sinkers can not be evenly distributed in the bottom.")
 else:
-    print("The sinkers can not be evenly distributed in the bottom.")
-
+    print("There is no sinkers on the bottom ring")
 # generate the name for each node to assign the hydrodynamic forces.
 for i in range(1, len(p) + 1):
     node1 = Mesh_1.CreateEmptyGroup(SMESH.NODE, 'node%s' % i)

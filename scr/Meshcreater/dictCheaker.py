@@ -1,45 +1,40 @@
 """
 this is to check if the components are intact
+todo need to update
 """
 def errormess(ite):
-    print("Error! '" + ite + "' is not in cagedict")
+    print("Error! '" + ite + "' is not in CageShape")
 
-listOfInput1 = ['cageType',
+
+cylindricalNoBottom = ['shape',
                 'elementOverCir',
-                'elementOverDepth',
+                       'elementOverHeight',
                 'cageDiameter',
                 'cageHeight',
-                'weightType',
-                'NumOfSinker',
-                'sinkerWeight'
-                ]
-
-listOfInput2 = ['cageType',
+                       ]
+cylindricalWithBottom = ['shape',
                 'elementOverCir',
-                'elementOverDepth',
+                         'elementOverHeight',
                 'cageDiameter',
                 'cageHeight',
-                'centerTipHeight'
-                'weightType',
-                'bottomringR',
-                'bottomringRho',
-                'bottomringYoungmodule',
-                'centerWeight',
-                ]
+                         'cageCenterTip',
+                         ]
+
 
 
 def check(cage, meshType):
-    if meshType == "fishcagewithoutbottom":
-        for i in listOfInput1:
-            if i not in list(cage):
+    if meshType == "cylindricalNoBottom":
+        for i in cylindricalNoBottom:
+            if i not in list(cage['CageShape']):
                 errormess(i)
                 exit()
-        if not float(cage['elementOverCir'] / cage['NumOfSinker']).is_integer():
-            print("\nAlarm! The sinkers cannot be evenly distributed in the bottom.\n"
-                  "\nYou have to set the sinkers in the mesh file manually through GUI.\n")
 
-    if meshType == "fishcagewithbottom":
-        for i in listOfInput2:
-            if i not in list(cage):
+    if meshType == "cylindricalWithBottom":
+        for i in cylindricalWithBottom:
+            if i not in list(cage['CageShape']):
                 errormess(i)
                 exit()
+
+        # if not float(cage['elementOverCir'] / cage['NumOfSinker']).is_integer():
+        #     print("\nAlarm! The sinkers cannot be evenly distributed in the bottom.\n"
+        #           "\nYou have to set the sinkers in the mesh file manually through GUI.\n")

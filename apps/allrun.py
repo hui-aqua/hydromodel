@@ -5,7 +5,8 @@ email hui.cheng@uis.no
 import os
 import workPath
 import time
-with open('cagedict', 'r') as f:
+
+with open('cageDict', 'r') as f:
     content = f.read()
     cageinfo = eval(content)
 
@@ -21,7 +22,7 @@ for i in files:
 os.system("mv *.txt ./asterinput/")
 os.system("mv *.med ./asterinput/")
 
-os.system("python3 " + workPath.inputcreater_path + "CM_" + cageinfo['cageType'] + ".py")
+os.system("python3 " + workPath.inputcreater_path + "CM_" + cageinfo['Weight']['weightType'] + ".py")
 
 print("\n"
       "\n"

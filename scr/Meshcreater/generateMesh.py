@@ -1,7 +1,7 @@
 import os
 import sys
 # from scr.Meshcreater import dictCheaker as dc
-from Meshcreater import dictCheaker as dc
+import dictCheaker as dc
 import workPath
 
 with open('cageDict', 'r') as f:
@@ -24,9 +24,9 @@ cageTypes = [
     "cylindricalWithBottomWithMooring",
     "trawlnet",
 ]  # add more models if it is ready
-if cageinfo['CageShape']['CageType'] in cageTypes:
-    dc.check(cageinfo, cageinfo['CageShape'])
-    os.system(str(sys.argv[1]) + " -t " + workPath.mesh_path + "ME_" + cageinfo['cageType'] + ".py")
+if cageinfo['CageShape']['shape'] in cageTypes:
+    dc.check(cageinfo, cageinfo['CageShape']['shape'])
+    os.system(str(sys.argv[1]) + " -t " + workPath.mesh_path + "ME_" + cageinfo['CageShape']['shape'] + ".py")
 else:
     printmodel()
     exit()

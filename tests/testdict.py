@@ -17,3 +17,4 @@ f.close()
 with open('cageDict', 'r') as f:
     content = f.read()
     reread = eval(content)
+print(reread['Environment']['fluidDensity'])
