@@ -18,14 +18,6 @@ class Net2NetWake:
         self.cagecenter = np.zeros((3, 1))  # set the cage center is [0,0,0]
         self.elem_shie = []
         self.Sn = Sn
-        self.coe25 = np.array(
-            [-2.892133401021243500e-01, 6.267135574694910893e-01, -7.157409449812776603e-02, -8.320909217614042008e-01,
-             7.398392740943907642e-01, -2.683467821216800053e-01, 1.949719351189289560e-02, 8.249793665980104107e-01])
-        self.coe20 = np.array(
-            [-1.474349975132451362e+00, 6.490272947305592233e+00, -1.146253302377779626e+01, 1.016432973554554842e+01,
-             -4.699724398373956724e+00, 1.002973285638476986e+00, -8.328579182908107947e-02,
-             8.608477553083272449e-01, ])
-        self.coe35 = np.array([-4.25657, 18.6974, -32.7564, 28.8642, -13.4061, 3.0472, -0.304585, 0.885381, ])
 
     def getpaneslinwake(self):
         elem_shie = []
@@ -50,17 +42,9 @@ class Net2NetWake:
         return self.elem_shie
 
     def reductionfactorblvin(self, alf):  # alf is the inflow angle
-        refa = 0
         alf = np.abs(alf)
-        if self.Sn < 0.22:
-            coe = self.coe20
-        elif self.Sn < 0.32:
-            coe = self.coe25
-        else:
-            coe = self.coe30
-        for i in range(len(coe) - 1):
-            refa += coe[i] * pow(abs(alf), 7 - i)  # polynomial fitting
-        return refa + 0.825
+        refa = (np.cos(alf) + 0.05 - 0.38 * self.Sn) / (np.cos(alf) + 0.05)
+        return max(0, refa)
 
 
 class HydroMorison:
@@ -71,7 +55,7 @@ class HydroMorison:
     In addition, the solidity and constant flow reduction are also needed.
     """
 
-    def __init__(self, posimatrix, hydroelem, current, solidity, dwh=0.0, dw0=0.0):
+    def __init__(self, posimatrix, hydroelem, current, solidity, Udirection, dwh=0.0, dw0=0.0):
         self.posi = posimatrix  # the position matrix [[x1,y1,z1][x2,y2,z2]]
         self.hydroelem = hydroelem  # the connections of the twines[[p1,p2][p2,p3]]
         self.dwh = dwh  # used for the force calculation (reference area)
@@ -81,7 +65,8 @@ class HydroMorison:
         self.Sn = solidity
         wake = Net2NetWake(self.posi, self.hydroelem, current, self.Sn)
         self.ref = wake.getlinesinwake()
-
+        self.wake = Net2NetWake(self.posi, self.hydroelem, Udirection, self.Sn)
+        self.ref = wake.getlinesinwake()
     def M1(self, realtimeposi, U):
         # ref is a list of which elements in the wake region
         # ref. J.S. Bessonneau and D. Marichal. 1998 # cd=1.2,ct=0.1.
@@ -109,15 +94,12 @@ class HydroMorison:
         num_line = len(self.hydroelem)
         Ct = 0.1
         Cn = 1.3
-        wake = Net2NetWake(self.posi, self.hydroelem, U, self.Sn)
-        ref = wake.getlinesinwake()
-
         F = np.zeros((num_node, 3))  # force on nodes
         for i in range(num_line):
             Ueff = U
             b = Cal_distence(self.posi[int(self.hydroelem[i][0])], self.posi[int(self.hydroelem[i][1])])
             a = Cal_orientation(self.posi[int(self.hydroelem[i][0])], self.posi[int(self.hydroelem[i][1])])
-            if i in ref:
+            if i in self.ref:
                 Ueff = 0.8 * U
             ft = 0.5 * row * self.dwh * (b - self.dwh) * Ct * pow(np.dot(a, Ueff), 2) * a
             fn = 0.5 * row * self.dwh * (b - self.dwh) * Cn * (
@@ -136,15 +118,16 @@ class HydroScreen:
     In addition, the solidity and constant flow reduction are also needed.
     """
 
-    def __init__(self, posimatrix, hydroelems, solidity, dwh=0.0, dw0=0.0):
-        self.posi = posimatrix  # the position matrix [[x1,y1,z1][x2,y2,z2]]
+    def __init__(self, posiMatrix, hydroelems, solidity, Udirection, dwh=0.0, dw0=0.0):
+        self.posi = posiMatrix  # the position matrix [[x1,y1,z1][x2,y2,z2]]
         self.hydroelems = hydroelems.tolist()  # the connections of the twines[[p1,p2][p2,p3]]
         self.dwh = dwh  # used for the force calculation (reference area)
         # can be a consistent number or a list
         self.dw0 = dw0  # used for the hydrodynamic coefficients
         # can be a consistent number or a list
         self.Sn = solidity
-
+        self.wake = Net2NetWake(self.posi, self.hydroelems, Udirection, self.Sn)  # create wake object
+        self.ref = self.wake.getpaneslinwake()  # Calculate the element in the wake
     def Cal_element(self, eachpanel, origvelo):
         # because the mesh construction, the first two node cannot have same index
         a1 = Cal_orientation(self.posi[eachpanel[0]], self.posi[eachpanel[1]])
@@ -165,39 +148,44 @@ class HydroScreen:
     def S1(self, U):
         # from Aarsnes model(1990) the Sn should be less than 0.35
         # Reynolds number in range from 1400 to 1800
-        num_node = len(self.posi)
-        F = np.zeros((num_node, 3))  # force on nodes
-        wake = Net2NetWake(self.posi, self.hydroelems, U, self.Sn)
-        ref = wake.getpaneslinwake()
-        for panel in self.hydroelems:
-            alpha, surN, surL, surA = self.Cal_element(panel, U)
-            set([int(k) for k in set(panel)])
-            if self.hydroelems.index(panel) in ref:
-                Ueff = U * wake.reductionfactorblvin(alpha)
+        num_node = len(self.posi)  # the number of the node
+        F = np.zeros((num_node, 3))  # force on nodes, initial as zeros
+        for panel in self.hydroelems:  # loop based on the hydrodynamic elements
+            alpha, surN, surL, surA = self.Cal_element(panel,
+                                                       U)  # calculate the inflow angel, normal vector, lift force factor, area of the hydrodyanmic element
+            # set([int(k) for k in set(panel)])   # get a set of the node sequence in the element
+            if self.hydroelems.index(panel) in self.ref:  # if the element in the wake region
+                Ueff = U * self.wake.reductionfactorblvin(alpha)  # the effective velocity = U* reduction factor
             else:
-                Ueff = U
-            if len([int(k) for k in set(panel)]) == 3:  # triangle
-                nodes = [k for k in set([int(k) for k in set(panel)])]
+                Ueff = U  # if not in the wake region, the effective velocity is the undistrubed velocity
+
+            if len([int(k) for k in set(panel)]) == 3:  # the hydrodynamic element is a triangle
+                nodes = [k for k in set([int(k) for k in set(panel)])]  # a list of the node sequence
+                # Cd and Cl is calculated according to the formula
                 Cd = 0.04 + (-0.04 + self.Sn - 1.24 * pow(self.Sn, 2) +
                              13.7 * pow(self.Sn, 3)) * np.cos(alpha)
                 Cl = (0.57 * self.Sn - 3.54 * pow(self.Sn, 2) +
                       10.1 * pow(self.Sn, 3)) * np.sin(2 * alpha)
+                # Calculate the drag and lift force
                 fd = 0.5 * row * surA * Cd * np.linalg.norm(Ueff) * Ueff
                 fl = 0.5 * row * surA * Cl * pow(np.linalg.norm(Ueff), 2) * surL
+                # map the force on the corresponding nodes
                 F[nodes[0]] = F[nodes[0]] + (fd + fl) / 3
                 F[nodes[1]] = F[nodes[1]] + (fd + fl) / 3
                 F[nodes[2]] = F[nodes[2]] + (fd + fl) / 3
-            else:
-                for i in range(len(panel)):  # square
-                    nodes = [int(k) for k in panel]
-                    panel = nodes.pop(i)
-                    alpha, surN, surL, surA = self.Cal_element(panel, U)
+            else:  # the hydrodynamic element is a square
+                for i in range(len(panel)):  # loop 4 times to map the force
+                    nodes = [int(k) for k in panel]  # get the list of nodes [p1,p2,p3,p4]
+                    panelInSquare = nodes.pop(i)  # delete the i node to make the square to a triangle
+                    alpha, surN, surL, surA = self.Cal_element(panelInSquare,
+                                                               U)  # calculate the inflow angel, normal vector, lift force factor, area of the hydrodyanmic element
                     Cd = 0.04 + (-0.04 + self.Sn - 1.24 * pow(self.Sn, 2) +
                                  13.7 * pow(self.Sn, 3)) * np.cos(alpha)
                     Cl = (0.57 * self.Sn - 3.54 * pow(self.Sn, 2) +
                           10.1 * pow(self.Sn, 3)) * np.sin(2 * alpha)
                     fd = 0.5 * row * surA * Cd * np.linalg.norm(Ueff) * Ueff
                     fl = 0.5 * row * surA * Cl * pow(np.linalg.norm(Ueff), 2) * surL
+                    # map the force on the corresponding nodes
                     F[nodes[0]] = F[nodes[0]] + (fd + fl) / 6
                     F[nodes[1]] = F[nodes[1]] + (fd + fl) / 6
                     F[nodes[2]] = F[nodes[2]] + (fd + fl) / 6
