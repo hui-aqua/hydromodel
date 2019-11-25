@@ -60,47 +60,61 @@ class HydroMorison:
 
     def Save_ref(self):
         return self.ref
-    def M1(self, realtimeposi, U):
+
+    def M1(self):
+        return 1.2, 0.1
+
+    def M2(self):
+        return 1.3, 0.0
+
+    def M3(self, U):
+        Re = row * self.dw0 * np.linalg.norm(U) / Dynvis
+        if Re < 200:
+            Cn = pow(10, 0.7) * pow(Re, -0.3)
+        else:
+            Cn = 1.2
+        return Cn, 0.1
+
+    def M4(self, U):
+        Re = row * self.dw0 * np.linalg.norm(U) / Dynvis
+        Ct = np.pi * Dynvis * (0.55 * np.sqrt(Re) + 0.084 * pow(Re, 2.0 / 3.0))
+        s = -0.07721565 + np.log(8.0 / Re)
+        if Re < 1:
+            Cn = 8 * np.pi * (1 - 0.87 * pow(s, -2)) / (s * Re)
+        elif Re < 30:
+            Cn = 1.45 + 8.55 * pow(Re, -0.9)
+
+        else:
+            Cn = 1.1 + 4 * pow(Re, -0.5)
+        return Cn, Ct
+
+    def M5(self, U):
+        Re = row * self.dw0 * np.linalg.norm(U) / Dynvis
+        Cn = -3.2891e-5 * pow(Re * self.Sn * self.Sn, 2) + 0.00068 * Re * pow(self.Sn, 2) + 1.4253
+        return Cn, 0
+
+    def TwineForce(self, realtimeposi, U):
         # ref is a list of which elements in the wake region
         # ref. J.S. Bessonneau and D. Marichal. 1998 # cd=1.2,ct=0.1.
         num_node = len(self.posi)
         num_line = len(self.hydroelem)
-        Ct = 0.1
-        Cn = 1.2
         F = np.zeros((num_node, 3))  # force on nodes
         for i in range(num_line):
-            Ueff = U
             b = Cal_distence(realtimeposi[int(self.hydroelem[i][0])], realtimeposi[int(self.hydroelem[i][1])])
             a = Cal_orientation(realtimeposi[int(self.hydroelem[i][0])], realtimeposi[int(self.hydroelem[i][1])])
             if i in self.ref:
-                Ueff = 0.8 * U
-            ft = 0.5 * row * self.dwh * (b - self.dwh) * Ct * pow(np.dot(a, Ueff), 2) * a
-            fn = 0.5 * row * self.dwh * (b - self.dwh) * Cn * (
-                    Ueff - np.dot(a, Ueff) * a) * np.linalg.norm(
+                Ueff = 0.8 * np.array(U)
+            else:
+                Ueff = np.array(U)
+            Cn, Ct = self.M1()
+            # Cn, Ct = self.M5(Ueff) if M5 is applied
+            ft = 0.5 * row * self.dwh * (b - self.dwh) * Ct * np.dot(a, Ueff) * a * np.linalg.norm(np.dot(a, Ueff))
+            fn = 0.5 * row * self.dwh * (b - self.dwh) * Cn * (Ueff - np.dot(a, Ueff) * a) * np.linalg.norm(
                 (Ueff - np.dot(a, Ueff) * a))
             F[int(self.hydroelem[i][0])] = F[int(self.hydroelem[i][0])] + 0.5 * (fn + ft)
             F[int(self.hydroelem[i][1])] = F[int(self.hydroelem[i][1])] + 0.5 * (fn + ft)
         return F
 
-    def M2(self, U):  # constant drag coefficient value 1.3
-        num_node = len(self.posi)
-        num_line = len(self.hydroelem)
-        Ct = 0.1
-        Cn = 1.3
-        F = np.zeros((num_node, 3))  # force on nodes
-        for i in range(num_line):
-            Ueff = np.array(U)
-            b = Cal_distence(self.posi[int(self.hydroelem[i][0])], self.posi[int(self.hydroelem[i][1])])
-            a = Cal_orientation(self.posi[int(self.hydroelem[i][0])], self.posi[int(self.hydroelem[i][1])])
-            if i in self.ref:
-                Ueff = 0.8 * np.array(U)
-            ft = 0.5 * row * self.dwh * (b - self.dwh) * Ct * pow(np.dot(a, Ueff), 2) * a
-            fn = 0.5 * row * self.dwh * (b - self.dwh) * Cn * (
-                    Ueff - np.dot(a, Ueff) * a) * np.linalg.norm(
-                (Ueff - np.dot(a, Ueff) * a))
-            F[int(self.hydroelem[i][0])] = F[int(self.hydroelem[i][0])] + 0.5 * (fn + ft)
-            F[int(self.hydroelem[i][1])] = F[int(self.hydroelem[i][1])] + 0.5 * (fn + ft)
-        return F
 
 
 class HydroScreen:
@@ -123,29 +137,88 @@ class HydroScreen:
         self.ref = self.wake.geteleminwake()  # Calculate the element in the wake
 
     def Save_ref(self):
+        # return the index of the elements in the wake region
         return self.ref
 
-    def S1(self, realtimeposi, U):
+    def S1(self, inflowAngle):
+        Cd = 0.04 + (-0.04 + self.Sn - 1.24 * pow(self.Sn, 2) + 13.7 * pow(self.Sn, 3)) * np.cos(inflowAngle)
+        Cl = (0.57 * self.Sn - 3.54 * pow(self.Sn, 2) + 10.1 * pow(self.Sn, 3)) * np.sin(2 * inflowAngle)
+        return Cd, Cl
+
+    def S2(self, inflowAngle):
+        Cd = 0.04 + (-0.04 + 0.33 * self.Sn + 6.54 * pow(self.Sn, 2) - 4.88 * pow(self.Sn, 3)) * np.cos(inflowAngle)
+        Cl = (-0.05 * self.Sn - 2.3 * pow(self.Sn, 2) - 1.76 * pow(self.Sn, 3)) * np.sin(2 * inflowAngle)
+        return Cd, Cl
+
+    def S3(self, inflowAngle, a1, a3, b2, b4, U):
+        Re = row * self.dw0 * np.linalg.norm(U) / Dynvis / (1 - self.Sn)  # Re
+        cdcyl = -78.46675 + 254.73873 * np.log10(Re) - 327.8864 * pow(np.log10(Re), 2) + 223.64577 * pow(np.log10(Re),
+                                                                                                         3) - 87.92234 * pow(
+            np.log10(Re), 4) + 20.00769 * pow(np.log10(Re), 5) - 2.44894 * pow(np.log10(Re), 6) + 0.12479 * pow(
+            np.log10(Re), 7)
+        Cd0 = cdcyl * (self.Sn * (2 - self.Sn)) / (2.0 * pow((1 - self.Sn), 2))
+        Cl0 = np.pi * cdcyl * self.Sn / pow(1 - self.Sn, 2) / (8 + cdcyl * self.Sn / pow(1 - self.Sn, 2))
+        Cd = Cd0 * (a1 * np.cos(inflowAngle) + a3 * np.cos(3 * inflowAngle))
+        Cl = Cl0 * (b2 * np.sin(2 * inflowAngle) + b4 * np.sin(4 * inflowAngle))
+        return Cd, Cl
+
+    def S4(self, inflowAngle, U):
+        Re = np.linalg.norm(U) * self.dw0 * row / Dynvis
+        Rey = Re / (2 * self.Sn)
+        Ct = 0.1 * pow(Re, 0.14) * self.Sn
+        Cn = 3 * pow(Rey, -0.07) * self.Sn
+        Cd = Cn * np.cos(inflowAngle) * pow(np.cos(inflowAngle), 2) + Ct * np.sin(inflowAngle) * pow(
+            np.sin(inflowAngle), 2)
+        Cl = Cn * np.sin(inflowAngle) * pow(np.cos(inflowAngle), 2) + Ct * np.cos(inflowAngle) * pow(
+            np.sin(inflowAngle), 2)
+        return Cd, Cl
+
+    def S5(self, inflowAngle):
+        # polynomial fitting
+        Cd = 0.556 * pow(inflowAngle, 7) - 1.435 * pow(inflowAngle, 6) - 2.403 * pow(
+            inflowAngle, 5) + 11.75 * pow(inflowAngle, 4) - 13.48 * pow(inflowAngle, 3) + 5.079 * pow(
+            inflowAngle, 2) - 0.9431 * pow(inflowAngle, 1) + 1.155
+        Cl = -10.22 * pow(inflowAngle, 9) + 69.22 * pow(inflowAngle, 8) - 187.9 * pow(
+            inflowAngle, 7) + 257.3 * pow(inflowAngle, 6) - 181.6 * pow(inflowAngle, 5) + 59.14 * pow(
+            inflowAngle, 4) - 7.97 * pow(inflowAngle, 3) + 2.103 * pow(
+            inflowAngle, 2) + 0.2325 * pow(inflowAngle, 1) + 0.01294
+        return Cd, Cl
+
+    def S6(self, inflowAngle, U, knot, ):
+        Re_cyl = row * self.dw0 * np.linalg.norm(U) / Dynvis / (1 - self.Sn) + 0.000001
+        cdcyl = 1 + 10.0 / (pow(Re_cyl, 2.0 / 3.0))
+        Cd = cdcyl * (0.12 - 0.74 * self.Sn + 8.03 * pow(self.Sn, 2)) * pow(inflowAngle, 3)
+        if knot == 'knotless':
+            return Cd, 0
+        elif knot == 'knotted':
+            meshsize = 10 * self.dw0  # assume Sn=0.2
+            D = 2 * self.dw0  # assume the knot is twice of the diameter of the twine
+            Re_sp = row * D * np.linalg.norm(U) / Dynvis / (1 - self.Sn) + 0.000001
+            cdsp = 24.0 / Re_sp + 6.0 / (1 + np.sqrt(Re_sp)) + 0.4
+            Cd = (cdcyl * 8 * pow(D, 2) + cdsp * np.pi * meshsize * self.dw0) / np.pi * meshsize * self.dw0 * (
+                        0.12 - 0.74 * self.Sn + 8.03 * pow(self.Sn, 2)) * pow(inflowAngle, 3)
+            return Cd, 0
+        else:
+            pass
+
+    def ScreenForce(self, realtimeposi, U):
         # from Aarsnes model(1990) the Sn should be less than 0.35
         # Reynolds number in range from 1400 to 1800
         num_node = len(self.posi)  # the number of the node
         F = np.zeros((num_node, 3))  # force on nodes, initial as zeros
         for panel in self.hydroelems:  # loop based on the hydrodynamic elements
-            alpha, surN, surL, surA = Cal_element(panel, realtimeposi,
-                                                  U)  # calculate the inflow angel, normal vector, lift force factor, area of the hydrodyanmic element
+            alpha, surN, surL, surA = Cal_element(panel, realtimeposi, U)
+            # calculate the inflow angel, normal vector, lift force factor, area of the hydrodynamic element
             # set([int(k) for k in set(panel)])   # get a set of the node sequence in the element
             if self.hydroelems.index(panel) in self.ref:  # if the element in the wake region
                 Ueff = U * self.wake.reductionfactorblvin(alpha)  # the effective velocity = U* reduction factor
             else:
-                Ueff = U  # if not in the wake region, the effective velocity is the undistrubed velocity
+                Ueff = U  # if not in the wake region, the effective velocity is the undisturbed velocity
 
             if len([int(k) for k in set(panel)]) == 3:  # the hydrodynamic element is a triangle
                 nodes = [k for k in set([int(k) for k in set(panel)])]  # a list of the node sequence
                 # Cd and Cl is calculated according to the formula
-                Cd = 0.04 + (-0.04 + self.Sn - 1.24 * pow(self.Sn, 2) +
-                             13.7 * pow(self.Sn, 3)) * np.cos(alpha)
-                Cl = (0.57 * self.Sn - 3.54 * pow(self.Sn, 2) +
-                      10.1 * pow(self.Sn, 3)) * np.sin(2 * alpha)
+                Cd, Cl = self.S1(alpha)
                 # Calculate the drag and lift force
                 fd = 0.5 * row * surA * Cd * np.linalg.norm(Ueff) * Ueff
                 fl = 0.5 * row * surA * Cl * pow(np.linalg.norm(Ueff), 2) * surL
@@ -158,12 +231,9 @@ class HydroScreen:
                     nodes = [int(k) for k in panel]  # get the list of nodes [p1,p2,p3,p4]
                     nodes.pop(i)  # delete the i node to make the square to a triangle
                     panelInSquare = nodes  # delete the i node to make the square to a triangle
-                    alpha, surN, surL, surA = Cal_element(panelInSquare, realtimeposi,
-                                                               U)  # calculate the inflow angel, normal vector, lift force factor, area of the hydrodyanmic element
-                    Cd = 0.04 + (-0.04 + self.Sn - 1.24 * pow(self.Sn, 2) +
-                                 13.7 * pow(self.Sn, 3)) * np.cos(alpha)
-                    Cl = (0.57 * self.Sn - 3.54 * pow(self.Sn, 2) +
-                          10.1 * pow(self.Sn, 3)) * np.sin(2 * alpha)
+                    alpha, surN, surL, surA = Cal_element(panelInSquare, realtimeposi, U)
+                    # calculate the inflow angel, normal vector, lift force factor, area of the hydrodynamic element
+                    Cd, Cl = self.S1(alpha)
                     fd = 0.5 * row * surA * Cd * np.linalg.norm(Ueff) * Ueff
                     fl = 0.5 * row * surA * Cl * pow(np.linalg.norm(Ueff), 2) * surL
                     # map the force on the corresponding nodes
