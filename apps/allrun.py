@@ -28,7 +28,7 @@ print("\n"
       "\n"
       "Currently, this code is not ready for release\n"
       "Any questions about this code, please email: hui.cheng@uis.no")
-time.sleep(4.5)
+time.sleep(1.5)
 print("source " + workPath.aster_path)
 os.system("source " + workPath.aster_path)
 os.system("as_run ./asterinput/ASTERRUN.export")

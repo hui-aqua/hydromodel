@@ -4,7 +4,6 @@
 # GROUP_MA: twines, topring, bottomring
 import os
 import random as rd
-
 import numpy as np
 import workPath
 
@@ -228,15 +227,17 @@ if k%10==0:
 if k==0:
     con=''' + str(meshinfo['netLines']) + ''' 
     sur=''' + str(meshinfo['netSurfaces']) + '''
-    np.savetxt(cwd+'/asteroutput/initialpositions.txt', posi)
     Uinput=''' + str(cageinfo['Environment']['current']) + ''' 
-    hymo=hy.HydroMorison(posi,con,Uinput[0],''' + str(cageinfo['Net']['Sn']) + ''',''' + str(dwh) + ''',''' + str(
+    hymo=hy.HydroScreen(posi,sur,''' + str(cageinfo['Net']['Sn']) + ''',np.array(Uinput[0]),''' + str(
+        dwh) + ''',''' + str(
         cageinfo['Net']['twineDiameter']) + ''')
-        
+    elementinwake=hymo.Save_ref()
+    np.savetxt(cwd+'/asteroutput/elementinwake.txt', elementinwake)
         
 # U=np.array([np.fix(k*dt/10.0)/10.0+0.1,0.0,0.0])
-U=Uinput[int(k*dt/10.0)]
-Fnh=hymo.M1(posi,U)
+U=np.array(Uinput[int(k*dt/10.0)])
+
+Fnh=hymo.S1(posi,U)
 # np.savetxt(cwd+'Fh1'+str((1+k)*dt)+'.txt', Fnh)    
 DETRUIRE(CONCEPT=_F( NOM=(tblp)))
 if k < itimes-1:

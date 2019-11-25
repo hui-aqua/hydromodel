@@ -6,29 +6,26 @@ import os
 import random as rd
 import workPath
 import numpy as np
+
 cwd = os.getcwd()
 with open('./asterinput/meshinfomation.txt', 'r') as f:
     content = f.read()
     meshinfo = eval(content)
-with open('netdict', 'r') as f:
-    content = f.read()
-    netinfo = eval(content)
-with open('cagedict', 'r') as f:
+
+with open('cageDict', 'r') as f:
     content = f.read()
     cageinfo = eval(content)
-with open('envdict', 'r') as f:
-    content = f.read()
-    envinfo = eval(content)
 
-Fbuoy = meshinfo['horizontalElementLength'] * meshinfo['verticalElementLength'] * netinfo['Sn'] / netinfo[
-    'twineDiameter'] * 0.25 * np.pi * pow(netinfo['twineDiameter'], 2) * 9.81 * float(envinfo['fluidDensity'])
+Fbuoy = meshinfo['horizontalElementLength'] * meshinfo['verticalElementLength'] * cageinfo['Net']['Sn'] / \
+        cageinfo['Net']['twineDiameter'] * 0.25 * np.pi * pow(cageinfo['Net']['twineDiameter'], 2) * 9.81 * float(
+    cageinfo['Environment']['fluidDensity'])
 # Buoyancy force to assign on each nodes
-dwh = meshinfo['horizontalElementLength'] * meshinfo['verticalElementLength'] * netinfo['Sn'] / (
+dwh = meshinfo['horizontalElementLength'] * meshinfo['verticalElementLength'] * cageinfo['Net']['Sn'] / (
         meshinfo['horizontalElementLength'] + meshinfo['verticalElementLength'])
 # hydrodynamic diameter to calculate the hydrodynamic coefficient.
-lam1 = meshinfo['horizontalElementLength'] / netinfo['meshLength']
-lam2 = meshinfo['verticalElementLength'] / netinfo['meshLength']
-dws = np.sqrt(2 * lam1 * lam2 / (lam1 + lam2)) * netinfo['twineDiameter']
+lam1 = meshinfo['horizontalElementLength'] / cageinfo['Net']['meshLength']
+lam2 = meshinfo['verticalElementLength'] / cageinfo['Net']['meshLength']
+dws = np.sqrt(2 * lam1 * lam2 / (lam1 + lam2)) * cageinfo['Net']['twineDiameter']
 twineSection = 0.25 * np.pi * pow(dws, 2)
 dt = 0.1
 
@@ -55,8 +52,8 @@ elemprop = AFFE_CARA_ELEM(CABLE=_F(GROUP_MA=('twines'),
                                    SECTION=''' + str(twineSection) + '''),
                           MODELE=model)
 net = DEFI_MATERIAU(CABLE=_F(EC_SUR_E=0.0001),
-                          ELAS=_F(E=''' + str(netinfo["netYoungmodule"]) + ''', NU=0.2,RHO=''' + str(
-            netinfo["netRho"]) + '''))  #from H.moe 2016
+                          ELAS=_F(E=''' + str(cageinfo['Net']["netYoungmodule"]) + ''', NU=0.2,RHO=''' + str(
+            cageinfo['Net']["netRho"]) + '''))  #from H.moe 2016s
                           # ELAS=_F(E=62500000,NU=0.2,RHO=1140.0))  #from odd m. faltinsen, 2017
                           # ELAS=_F(E=82000000,NU=0.2,RHO=1015.0))  #from H.moe, a. fredheim, 2010
                           # ELAS=_F(E=119366207.319,NU=0.2,RHO=1015.0))#from chun woo lee
@@ -78,7 +75,7 @@ selfwigh = AFFE_CHAR_MECA(PESANTEUR=_F(DIRECTION=(0.0, 0.0, -1.0),
                       MODELE=model)
                       
 sinkF = AFFE_CHAR_MECA(FORCE_NODALE=_F(GROUP_NO=('sinkers'),  
-                                      FZ=-''' + str(cageinfo["sinkerWeight"]) + ''',
+                                      FZ=-''' + str(cageinfo['Weight']["sinkerWeight"]) + ''',
                                       FX=0,
                                       FY=0,
                                       ), 
@@ -88,7 +85,7 @@ buoyF= AFFE_CHAR_MECA(FORCE_NODALE=_F(GROUP_NO=('allnodes'),
                       MODELE=model)
 
 dt=''' + str(dt) + '''      # frequency to update the hydrodynamic forces
-itimes=''' + str(int(10.0 / dt * len(envinfo['current']))) + '''   
+itimes=''' + str(int(10.0 / dt * len(cageinfo['Environment']['current']))) + '''   
 tend=itimes*dt
 
 listr = DEFI_LIST_REEL(DEBUT=0.0,
@@ -218,15 +215,17 @@ if k%10==0:
 if k==0:
     con=''' + str(meshinfo['netLines']) + ''' 
     sur=''' + str(meshinfo['netSurfaces']) + '''
-    np.savetxt(cwd+'/asteroutput/initialpositions.txt', posi)
-    Uinput=''' + str(envinfo['current']) + ''' 
-    hymo=hy.HydroMorison(posi,con,Uinput[0],''' + str(netinfo['Sn']) + ''',''' + str(dwh) + ''',''' + str(
-        netinfo['twineDiameter']) + ''')
-
-
+    Uinput=''' + str(cageinfo['Environment']['current']) + ''' 
+    hymo=hy.HydroScreen(posi,sur,''' + str(cageinfo['Net']['Sn']) + ''',np.array(Uinput[0]),''' + str(
+        dwh) + ''',''' + str(
+        cageinfo['Net']['twineDiameter']) + ''')
+    elementinwake=hymo.Save_ref()
+    np.savetxt(cwd+'/asteroutput/elementinwake.txt', elementinwake)
+        
 # U=np.array([np.fix(k*dt/10.0)/10.0+0.1,0.0,0.0])
-U=Uinput[int(k*dt/10.0)]
-Fnh=hymo.M1(posi,U)
+U=np.array(Uinput[int(k*dt/10.0)])
+
+Fnh=hymo.S1(posi,U)
 # np.savetxt(cwd+'Fh1'+str((1+k)*dt)+'.txt', Fnh)    
 DETRUIRE(CONCEPT=_F( NOM=(tblp)))
 if k < itimes-1:

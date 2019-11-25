@@ -9,7 +9,7 @@ netinfo = {
     'netYoungmodule': 40000000,
     'netRho': 1140.0,
 }
-f = open("meshinfomation.txt", "w")
+f = open("meshinfomation1.txt", "w")
 f.write(str(meshinfo))
 f.write(str(netinfo))
 f.close()
@@ -18,3 +18,6 @@ with open('cageDict', 'r') as f:
     content = f.read()
     reread = eval(content)
 print(reread['Environment']['fluidDensity'])
+with open('meshinfomation.txt', 'r') as f:
+    content = f.read()
+    mesh = eval(content)

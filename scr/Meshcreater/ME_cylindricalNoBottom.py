@@ -101,13 +101,13 @@ smesh.SetName(bottomnodes, 'bottomnodes')
 
 # define the nodes for sinkers
 if cageinfo['Weight']['weightType'] == 'sinkers':
-    NS = cageinfo['Weight']['NumOfSinker']
-    if (float(cageinfo['CageShape']['elementOverCir']) / float(cageinfo['CageShape']['NumOfSinker'])).is_integer():
+    NS = float(cageinfo['Weight']['numOfSinkers'])
+    if (float(cageinfo['CageShape']['elementOverCir']) / NS).is_integer():
         print("The sinkers are evenly distributed in the bottom.")
         sinkers = Mesh_1.CreateEmptyGroup(SMESH.NODE, 'sinkers')
         nbAdd = sinkers.Add(
             [i for i in range(len(p) - NT + 1, len(p),
-                              int(cageinfo['CageShape']['elementOverCir'] / cageinfo['CageShape']['NumOfSinker']))])
+                              int(cageinfo['CageShape']['elementOverCir'] / NS))])
         smesh.SetName(sinkers, 'sinkers')
     else:
         print("The sinkers can not be evenly distributed in the bottom.")
