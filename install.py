@@ -46,6 +46,8 @@ export APP=''' + cwd + '''
 alias amesh='python3 $APP/apps/creatmesh.py'
 alias arun='python3 $APP/apps/allrun.py'
 alias aclean='python3 $APP/apps/allclean.py'
+alias mesh2cfd='python3 $APP/apps/mesh2CFD.py'
+    
     \n''')
 output_file.write('\n')
 output_file.close()
