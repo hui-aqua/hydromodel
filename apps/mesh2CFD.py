@@ -10,7 +10,7 @@ with open('meshinfomation.txt', 'r') as f:
 
 def CR_posi():
     # step 1 the head
-    output_file = open(cwd + 'posi', 'w')
+    output_file = open(cwd + '/posi', 'w')
     output_file.write('''
 // Input for the nets in openfoam. 
 // Author: Hui Cheng
@@ -29,12 +29,12 @@ numOfPoint   ''' + str(meshinfo['numberOfNodes']) + ''' ;''')
     # step 2 the nodes
     output_file.write('\n')
     output_file.close()
-    with open(cwd + 'posi', 'a') as the_file:
+    with open(cwd + '/posi', 'a') as the_file:
         for i in range(meshinfo['numberOfNodes']):
             the_file.write('p' + str(i) + ' ( ' + str(meshinfo['netNodes'][i][0]) + '\t' + str(
                 meshinfo['netNodes'][i][1]) + '\t' + str(meshinfo['netNodes'][i][2]) + ' );\n')
     # step the tail
-    output_file = open(cwd + 'posi', 'a')
+    output_file = open(cwd + '/posi', 'a')
     output_file.write('''
 }
 // ************************************************************************* //
@@ -45,7 +45,7 @@ numOfPoint   ''' + str(meshinfo['numberOfNodes']) + ''' ;''')
 
 def CR_surc():
     # step 1 the head
-    output_file = open(cwd + 'surc', 'w')
+    output_file = open(cwd + '/surc', 'w')
     output_file.write('''
 // Input for the nets in openfoam. 
 // Author: Hui Cheng
@@ -65,7 +65,7 @@ numOfSurc   ''' + str(meshinfo['numberOfSurfaces'] * 2) + ''' ;''')
     # step 2 the surface
     output_file.write('\n')
     output_file.close()
-    with open(cwd + 'surc', 'a') as the_file:
+    with open(cwd + '/surc', 'a') as the_file:
         for i in range(meshinfo['numberOfSurfaces']):
             the_file.write('e' + str(i) + ' ( ' + str(meshinfo['netSurfaces'][i][0]) + '\t' + str(
                 meshinfo['netSurfaces'][i][1]) + '\t' + str(meshinfo['netSurfaces'][i][2]) + ' );\n')
@@ -74,7 +74,7 @@ numOfSurc   ''' + str(meshinfo['numberOfSurfaces'] * 2) + ''' ;''')
                     meshinfo['netSurfaces'][i][3]) + '\t' + str(meshinfo['netSurfaces'][i][2]) + ' );\n')
 
     # step the tail
-    output_file = open(cwd + 'surc', 'a')
+    output_file = open(cwd + '/surc', 'a')
     output_file.write('''
 }
 // ************************************************************************* //
