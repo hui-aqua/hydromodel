@@ -132,9 +132,9 @@ class HydroScreen:
         # can be a consistent number or a list
         self.dw0 = dw0  # used for the hydrodynamic coefficients
         # can be a consistent number or a list
-        self.Sn = solidity
+        self.Sn = solidity  # solidity of th net
         self.wake = Net2NetWake(self.posi, self.hydroelems, Udirection, self.Sn)  # create wake object
-        self.ref = self.wake.geteleminwake()  # Calculate the element in the wake
+        self.ref = self.wake.geteleminwake()  # get the elements in the wake
 
     def Save_ref(self):
         # return the index of the elements in the wake region
