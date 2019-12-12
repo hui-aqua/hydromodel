@@ -242,6 +242,40 @@ class HydroScreen:
                     F[nodes[2]] = F[nodes[2]] + (fd + fl) / 6
         return F
 
+    def screenFsi(self, realtimeposi, U):
+        Fh = []  # force on netpanel, initial as zeros
+        elementlist = []
+        for panel in self.hydroelems:  # loop based on the hydrodynamic elements
+            alpha, surN, surL, surA = Cal_element(panel, realtimeposi, U)
+            # calculate the inflow angel, normal vector, lift force factor, area of the hydrodynamic element
+            # set([int(k) for k in set(panel)])   # get a set of the node sequence in the element
+            # todo make the U as input from Opnefoam, Now is a simple way
+            if self.hydroelems.index(panel) in self.ref:  # if the element in the wake region
+                Ueff = U * self.wake.reductionfactorblvin(alpha)  # the effective velocity = U* reduction factor
+            else:
+                Ueff = U  # if not in the wake region, the effective velocity is the undisturbed velocity
+
+            if len([int(k) for k in set(panel)]) == 3:  # the hydrodynamic element is a triangle
+                nodes = [k for k in set([int(k) for k in set(panel)])]  # a list of the node sequence
+                Cd, Cl = self.S1(alpha)
+                # Calculate the drag and lift force
+                fd = 0.5 * row * surA * Cd * np.linalg.norm(Ueff) * Ueff
+                fl = 0.5 * row * surA * Cl * pow(np.linalg.norm(Ueff), 2) * surL
+                elementlist.append(nodes)
+                Fh.append((fd + fl) / 1.0)
+            else:  # the hydrodynamic element is a square
+                for i in range(len(panel)):  # loop 4 times to map the force
+                    nodes = [int(k) for k in panel]  # get the list of nodes [p1,p2,p3,p4]
+                    nodes.pop(i)  # delete the i node to make the square to a triangle
+                    panelInSquare = nodes  # delete the i node to make the square to a triangle
+                    alpha, surN, surL, surA = Cal_element(panelInSquare, realtimeposi, U)
+                    # calculate the inflow angel, normal vector, lift force factor, area of the hydrodynamic element
+                    Cd, Cl = self.S1(alpha)
+                    fd = 0.5 * row * surA * Cd * np.linalg.norm(Ueff) * Ueff
+                    fl = 0.5 * row * surA * Cl * pow(np.linalg.norm(Ueff), 2) * surL
+                    elementlist.append(panelInSquare)
+                    Fh.append((fd + fl) / 2.0)
+        return Fh, elementlist
 
 # four functions used in the current file
 
