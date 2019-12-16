@@ -11,11 +11,11 @@ The weight system for the fish cage only has sinkers
 Because it is dependent on individual cage.
 This code can be executed by the following command in terminal:
 
-/opt/salome2019/appli_V2019_univ/salome -t ~/GitCode/aqua/hydromodel/Meshcreater/ME_fishcagewithbottom.py
+/opt/salome2019/appli_V2019_univ/salome -t ~/GitCode/aqua/hydromodel/Meshcreater/ME_cylindricalWithBottom.py
 
 or:
 
-/opt/salome2019/appli_V2019_univ/salome -t ME_fishcagewithbottom.py
+/opt/salome2019/appli_V2019_univ/salome -t ME_cylindricalWithBottom.py
 
 Any questions about this code, please email: hui.cheng@uis.no
 

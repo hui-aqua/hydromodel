@@ -60,19 +60,24 @@ FoamFile
 }
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 {
-numOfSurc   ''' + str(meshinfo['numberOfSurfaces'] * 2) + ''' ;''')
+numOfSurc   ''' + str(meshinfo['numberOfSurfaces'] * 4) + ''' ;''')
 
     # step 2 the surface
+    newHydroE = []
     output_file.write('\n')
     output_file.close()
     with open(cwd + '/surc', 'a') as the_file:
-        for i in range(meshinfo['numberOfSurfaces']):
-            the_file.write('e' + str(i) + ' ( ' + str(meshinfo['netSurfaces'][i][0]) + '\t' + str(
-                meshinfo['netSurfaces'][i][1]) + '\t' + str(meshinfo['netSurfaces'][i][2]) + ' );\n')
-            the_file.write(
-                'e' + str(meshinfo['numberOfSurfaces'] + i) + ' ( ' + str(meshinfo['netSurfaces'][i][1]) + '\t' + str(
-                    meshinfo['netSurfaces'][i][3]) + '\t' + str(meshinfo['netSurfaces'][i][2]) + ' );\n')
-
+        for panel in meshinfo['netSurfaces']:
+            if len([int(k) for k in set(panel)]) == 3:  # the hydrodynamic element is a triangle
+                newHydroE.append([k for k in set([int(k) for k in set(panel)])])  # a list of the node sequence
+            else:
+                for i in range(len(panel)):  # loop 4 times to map the force
+                    nodes = [int(k) for k in set(panel)]  # get the list of nodes [p1,p2,p3,p4]
+                    nodes.pop(i)  # delete the i node to make the square to a triangle
+                    newHydroE.append(nodes)  # delete the i node to make the square to a triangle
+        for ele in newHydroE:
+            the_file.write('e' + str(newHydroE.index(ele)) + ' ( ' + str(ele[0]) + '\t' + str(ele[1]) + '\t' + str(
+                ele[2]) + ' );\n')
     # step the tail
     output_file = open(cwd + '/surc', 'a')
     output_file.write('''

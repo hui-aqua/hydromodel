@@ -18,14 +18,15 @@ from numpy import pi
 
 cwd = os.getcwd()
 
-with open('cagedict', 'r') as f:
+with open('cageDict', 'r') as f:
     content = f.read()
     cageinfo = eval(content)
-D = cageinfo['cageDiameter']
-H = cageinfo['cageHeight']
-NT = cageinfo['elementOverCir']  # Number of the nodes in circumference
-NN = cageinfo['elementOverDepth']  # number of section in the height, thus, the nodes should be NN+1
-Dtip = cageinfo['centerWeightHeight']
+
+D = cageinfo['CageShape']['cageDiameter']
+H = cageinfo['CageShape']['cageHeight']
+NT = cageinfo['CageShape']['elementOverCir']  # Number of the nodes in circumference
+NN = cageinfo['CageShape']['elementOverHeight']  # number of section in the height, thus, the nodes should be NN+1
+Dtip = cageinfo['CageShape']['cageCenterTip']
 cagebottomcenter = [0, 0, -Dtip]
 
 p = []
@@ -61,13 +62,15 @@ for i in range(1, NT + 1):
             con.append([i + j * NT - 1, len(p) - 1])  # add the vertical line into geometry
             if i == NT:
                 edge = Mesh_1.AddEdge([i + j * NT, 1 + i + (j - 1) * NT])  # add the horizontal line into geometry
-                con.append([i + j * NT - 1, 1 + i + (j - 1) * NT - 1])  # add the horizontal line into geometry
-                sur.append([i + j * NT - 1, 1 + i + (j - 1) * NT - 1, len(p) - 1, len(p) - 1])
+                con.append([(j + 1) * NT - 1, j * NT])  # add the horizontal line into geometry
+                sur.append([(j + 1) * NT - 1, j * NT, (j + 1) * NT - 2, len(p) - 1])
                 # add the cone surface into sur
             else:
                 edge = Mesh_1.AddEdge([i + j * NT, 1 + i + j * NT])  # add the horizontal line into geometry
-                con.append([i + j * NT - 1, 1 + i + j * NT - 1])  # add the horizontal line into geometry
-                sur.append([i + j * NT - 1, 1 + i + j * NT - 1, len(p) - 1, len(p) - 1])
+                con.append([i + j * NT - 1,
+                            i + j * NT])  # add the horizontal line into geometry
+                if i * 2 + j * NT < len(p) - 1:
+                    sur.append([i * 2 + j * NT - 2, i * 2 + j * NT - 1, i * 2 + j * NT, len(p) - 1])
                 # add the cone surface into sur
         else:
             edge = Mesh_1.AddEdge([i + j * NT, i + (j + 1) * NT])  # add the vertical line into geometry
