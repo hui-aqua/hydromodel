@@ -220,11 +220,11 @@ class HydroScreen:
         else:
             pass
 
-    def ScreenForce(self, realtimeposi, U):
+    def ScreenForce(self, realTimePositions, U):
         num_node = len(self.posi)  # the number of the node
-        hydroForces = np.zeros((num_node, 3))  # force on nodes, initial as zeros
+        hydroForces_nodes = np.zeros((num_node, 3))  # force on nodes, initial as zeros
         for panel in self.hydroelems:  # loop based on the hydrodynamic elements
-            alpha, surN, surL, surA = Cal_element(panel, realtimeposi, U)
+            alpha, surN, surL, surA = Cal_element(panel, realTimePositions, U)
             # calculate the inflow angel, normal vector, lift force factor, area of the hydrodynamic element
             # set([int(k) for k in set(panel)])   # get a set of the node sequence in the element
             if self.hydroelems.index(panel) in self.ref:  # if the element in the wake region
@@ -235,20 +235,21 @@ class HydroScreen:
             fd = 0.5 * row * surA * Cd * np.linalg.norm(Ueff) * Ueff
             fl = 0.5 * row * surA * Cl * pow(np.linalg.norm(Ueff), 2) * surL
             # map the force on the corresponding nodes
-            hydroForces[panel[0]] = hydroForces[panel[0]] + (fd + fl) / 6
-            hydroForces[panel[1]] = hydroForces[panel[1]] + (fd + fl) / 6
-            hydroForces[panel[2]] = hydroForces[panel[2]] + (fd + fl) / 6
-        return hydroForces
+            hydroForces_nodes[panel[0]] = hydroForces_nodes[panel[0]] + (fd + fl) / 6
+            hydroForces_nodes[panel[1]] = hydroForces_nodes[panel[1]] + (fd + fl) / 6
+            hydroForces_nodes[panel[2]] = hydroForces_nodes[panel[2]] + (fd + fl) / 6
+        return hydroForces_nodes
 
-    def screenFsi(self, realtimeposi, U):
-        Felement = []  # force on netpanel, initial as zeros
+    def screenFsi(self, realTimePositions, U):
+        hydroForce_elements = []  # force on netpanel, initial as zeros
         for panel in self.hydroelems:  # loop based on the hydrodynamic elements
-            alpha, surN, surL, surA = Cal_element(panel, realtimeposi, U.index(panel))
+            alpha, surN, surL, surA = Cal_element(panel, realTimePositions, U[self.hydroelems.index(panel)])
             Cd, Cl = self.S1(alpha)
-            fd = 0.5 * row * surA * Cd * np.linalg.norm(U.index(panel)) * U.index(panel)
-            fl = 0.5 * row * surA * Cl * pow(np.linalg.norm(U.index(panel)), 2) * surL
-            Felement.append((fd + fl) / 2.0)
-        return Felement
+            fd = 0.5 * row * surA * Cd * np.linalg.norm(U[self.hydroelems.index(panel)]) * U[
+                self.hydroelems.index(panel)]
+            fl = 0.5 * row * surA * Cl * pow(np.linalg.norm(U[self.hydroelems.index(panel)]), 2) * surL
+            hydroForce_elements.append((fd + fl) / 2.0)
+        return hydroForce_elements
 
 
 # four functions used in the current file
@@ -292,12 +293,12 @@ def Get_velo(tabreu):  # to get the velocity
     return np.transpose(VITE)
 
 
-def Cal_element(eachpanel, realtimeposi, origvelo):
+def Cal_element(eachpanel, realTimePositions, origvelo):
     # because the mesh construction, the first two node cannot have same index
-    a1 = Cal_orientation(realtimeposi[eachpanel[0]], realtimeposi[eachpanel[1]])
-    a2 = Cal_orientation(realtimeposi[eachpanel[0]], realtimeposi[eachpanel[2]])
-    ba1 = Cal_distence(realtimeposi[eachpanel[0]], realtimeposi[eachpanel[1]])
-    ba2 = Cal_distence(realtimeposi[eachpanel[0]], realtimeposi[eachpanel[2]])
+    a1 = Cal_orientation(realTimePositions[eachpanel[0]], realTimePositions[eachpanel[1]])
+    a2 = Cal_orientation(realTimePositions[eachpanel[0]], realTimePositions[eachpanel[2]])
+    ba1 = Cal_distence(realTimePositions[eachpanel[0]], realTimePositions[eachpanel[1]])
+    ba2 = Cal_distence(realTimePositions[eachpanel[0]], realTimePositions[eachpanel[2]])
     surN = np.cross(a1, a2) / np.linalg.norm(np.cross(a1, a2))
     surA = 0.5 * np.linalg.norm(np.cross(a1 * ba1, a2 * ba2))
     if np.dot(surN, origvelo) < 0:
@@ -308,36 +309,3 @@ def Cal_element(eachpanel, realtimeposi, origvelo):
     cosalpha = abs(np.dot(surN, origvelo) / np.linalg.norm(origvelo))
     alpha = np.arccos(cosalpha)
     return alpha, surN, surL, surA
-# Might mot use
-#     # if set(elementIndex) == 3:  # only three point for the screen.
-#     #     newEIndex = [k for k in set(elementIndex)]  # the new set of element index
-#     #     newEIndex.sort()
-#     a1 = Cal_orientation(self.posi[newEIndex[0]], self.posi[newEIndex[1]])
-#     a2 = Cal_orientation(self.posi[newEIndex[0]], self.posi[newEIndex[1]])
-#     ba1 = Cal_distence(self.posi[newEIndex[0]], self.posi[newEIndex[1]])
-#     ba2 = Cal_distence(self.posi[newEIndex[0]], self.posi[newEIndex[1]])
-#     surN = np.cross(a1, a2) / np.linalg.norm(np.cross(a1, a2))
-#     if np.dot(surN, Ueff) < 0:
-#         surN = -surN
-#     # the normal vector of the net plane in positive with current direction
-#     surL = np.cross(np.cross(Ueff, surN), Ueff) / \
-#            np.linalg.norm(np.cross(np.cross(Ueff, surN), Ueff) + 0.000000001)
-#
-#     surA = 0.5 * np.linalg.norm(np.cross(a1 * ba1, a2 * ba2))
-#     cosalpha = abs(np.dot(surN, Ueff) / np.linalg.norm(Ueff))
-#     sinalpha = np.linalg.norm(np.cross(surN, Ueff)) / np.linalg.norm(Ueff)
-#     Cd = 0.04 + (-0.04 + self.Sn - 1.24 * pow(self.Sn, 2) +
-#                  13.7 * pow(self.Sn, 3)) * cosalpha
-#     Cl = (0.57 * self.Sn - 3.54 * pow(self.Sn, 2) +
-#           10.1 * pow(self.Sn, 3)) * 2 * sinalpha * cosalpha
-#     wake = Net2NetWake(self.posi, self.hydroelem, U, self.Sn)
-#     ref = wake.getpaneslinwake()
-#     if i in ref:
-#         Ueff = U * wake.reductionfactorblvin(np.arccos(cosalpha))
-#     fd = 0.5 * row * surA * Cd * np.linalg.norm(Ueff) * Ueff
-#     fl = 0.5 * row * surA * Cl * pow(np.linalg.norm(Ueff), 2) * surL
-#     F[newEIndex[0]] = F[newEIndex[0]] + (fd + fl) / 3
-#     F[newEIndex[1]] = F[newEIndex[1]] + (fd + fl) / 3
-#     F[newEIndex[2]] = F[newEIndex[2]] + (fd + fl) / 3
-#
-# else:
