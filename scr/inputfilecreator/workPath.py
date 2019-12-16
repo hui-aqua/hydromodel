@@ -1,1 +1,1 @@
-/home/hui/GitCode/aqua/etc/workPath.py
+/home/hui/GitCode/Code_Aster/etc/workPath.py
