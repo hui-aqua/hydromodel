@@ -47,6 +47,8 @@ alias amesh='python3 $APP/apps/creatmesh.py'
 alias arun='python3 $APP/apps/allrun.py'
 alias aclean='python3 $APP/apps/allclean.py'
 alias mesh2cfd='python3 $APP/apps/mesh2CFD.py'
+alias fsirun='python3 $APP/apps/fsiRun.py'
+alias fe2cfd='python3 $APP/apps/conFhandposi.py'
 alias run='cd $HOME/aster/Run'
     
     \n''')
@@ -66,6 +68,7 @@ scr_path = Program_path+"/scr/"
 mesh_path = Program_path+"/scr/Meshcreater/"
 inputcreater_path = Program_path+"/scr/inputfilecreator/"
 forceModel_path = Program_path+"/scr/forcemodel/"
+app_path= Program_path+"/apps/"
 salome_path = "''' + salomePath + '''"
 aster_path = "''' + asterPath + '''"
     \n''')

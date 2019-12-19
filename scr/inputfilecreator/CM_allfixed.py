@@ -65,7 +65,7 @@ fieldmat = AFFE_MATERIAU(AFFE=(_F(GROUP_MA=('twines'),
                                ),
                          MODELE=model)
 
-fix = AFFE_CHAR_MECA(DDL_IMPO=_F(GROUP_MA=('topring'),
+fix = AFFE_CHAR_MECA(DDL_IMPO=_F(GROUP_NO=('allnodes'),
                                  LIAISON='ENCASTRE'),
                      MODELE=model)
 
@@ -73,13 +73,7 @@ selfwigh = AFFE_CHAR_MECA(PESANTEUR=_F(DIRECTION=(0.0, 0.0, -1.0),
                                        GRAVITE=9.81,
                                        GROUP_MA=('twines')),
                       MODELE=model)
-                      
-sinkF = AFFE_CHAR_MECA(FORCE_NODALE=_F(GROUP_NO=('sinkers'),  
-                                      FZ=-''' + str(cageinfo['Weight']["sinkerWeight"]) + ''',
-                                      FX=0,
-                                      FY=0,
-                                      ), 
-                      MODELE=model)
+
 buoyF= AFFE_CHAR_MECA(FORCE_NODALE=_F(GROUP_NO=('allnodes'),
                                       FZ=''' + str(Fbuoy) + '''), 
                       MODELE=model)
@@ -93,7 +87,7 @@ listr = DEFI_LIST_REEL(DEBUT=0.0,
 
 times = DEFI_LIST_INST(DEFI_LIST=_F(LIST_INST=listr,PAS_MINI=1e-8),
                        METHODE='AUTO')
-                       
+
 NODEnumber=''' + str(meshinfo["numberOfNodes"]) + '''
 Fnh= np.zeros((NODEnumber,3)) # initial hydrodynamic forces=0
 l=['None']*((len(Fnh)+1))
@@ -145,11 +139,10 @@ for i in range (1,len(Fnh)+1):
 loadr=[]
 loadr.append( _F(CHARGE=fix), )
 loadr.append( _F(CHARGE=selfwigh), )
-loadr.append( _F(CHARGE=sinkF), )
 loadr.append( _F(CHARGE=buoyF), )
 for i in range (1,len(Fnh)+1):    
     loadr.append( _F(CHARGE=l[i],),)
-    
+
 if k == 0:
     resn = DYNA_NON_LINE(CARA_ELEM=elemprop,
                     CHAM_MATER=fieldmat,
@@ -221,7 +214,7 @@ if k==0:
         cageinfo['Net']['twineDiameter']) + ''')
     elementinwake=hymo.Save_ref()
     np.savetxt(cwd+'/asteroutput/elementinwake.txt', elementinwake)
-        
+
 # U=np.array([np.fix(k*dt/10.0)/10.0+0.1,0.0,0.0])
 U=np.array(Uinput[int(k*dt/10.0)])
 

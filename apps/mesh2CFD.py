@@ -45,7 +45,7 @@ numOfPoint   ''' + str(meshinfo['numberOfNodes']) + ''' ;''')
 
 def CR_surc():
     # step 1 the head
-    output_file = open(cwd + '/surc', 'w')
+    output_file = open(cwd + '/surf', 'w')
     output_file.write('''
 // Input for the nets in openfoam. 
 // Author: Hui Cheng
@@ -60,13 +60,13 @@ FoamFile
 }
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 {
-numOfSurc   ''' + str(meshinfo['numberOfSurfaces'] * 4) + ''' ;''')
+numOfSurf   ''' + str(meshinfo['numberOfSurfaces'] * 4) + ''' ;''')
 
     # step 2 the surface
     newHydroE = []
     output_file.write('\n')
     output_file.close()
-    with open(cwd + '/surc', 'a') as the_file:
+    with open(cwd + '/surf', 'a') as the_file:
         for panel in meshinfo['netSurfaces']:
             if len([int(k) for k in set(panel)]) == 3:  # the hydrodynamic element is a triangle
                 newHydroE.append([k for k in set([int(k) for k in set(panel)])])  # a list of the node sequence
@@ -79,7 +79,7 @@ numOfSurc   ''' + str(meshinfo['numberOfSurfaces'] * 4) + ''' ;''')
             the_file.write('e' + str(newHydroE.index(ele)) + ' ( ' + str(ele[0]) + '\t' + str(ele[1]) + '\t' + str(
                 ele[2]) + ' );\n')
     # step the tail
-    output_file = open(cwd + '/surc', 'a')
+    output_file = open(cwd + '/surf', 'a')
     output_file.write('''
 }
 // ************************************************************************* //
