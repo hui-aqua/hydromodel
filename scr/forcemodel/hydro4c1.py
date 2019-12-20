@@ -3,6 +3,7 @@ A module can be used to calculate the hydrodynamic forces on nets in Code_Aster.
 To use this module, one should be import this into the input file for calculations.
 Any questions about this code, please email: hui.cheng@uis.no
 """
+import time
 import numpy as np
 
 row = 1025  # kg/m3   sea water density
@@ -253,6 +254,7 @@ class HydroScreen:
                 self.hydroelems.index(panel)]
             fl = 0.5 * row * surA * Cl * pow(np.linalg.norm(U[self.hydroelems.index(panel)]), 2) * surL
             hydroForce_elements.append((fd + fl) / 2.0)
+        time.sleep(5)  # reduce the speed of FEM to meet the CFD simulation.
         return hydroForce_elements
 
 
