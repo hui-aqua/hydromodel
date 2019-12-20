@@ -7,10 +7,10 @@ def errormess(ite):
 
 
 cylindricalNoBottom = ['shape',
-                'elementOverCir',
+                       'elementOverCir',
                        'elementOverHeight',
-                'cageDiameter',
-                'cageHeight',
+                       'cageDiameter',
+                       'cageHeight',
                        ]
 cylindricalWithBottom = ['shape',
                 'elementOverCir',

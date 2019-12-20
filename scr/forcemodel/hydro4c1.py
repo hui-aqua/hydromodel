@@ -229,9 +229,12 @@ class HydroScreen:
             # calculate the inflow angel, normal vector, lift force factor, area of the hydrodynamic element
             # set([int(k) for k in set(panel)])   # get a set of the node sequence in the element
             if self.hydroelems.index(panel) in self.ref:  # if the element in the wake region
-                Ueff = U * self.wake.reductionfactor2(alpha)  # the effective velocity = U* reduction factor
+                Ueff = U * self.wake.reductionfactor2(alpha) * 0.8 ** int(
+                    (self.hydroelems.index(panel) + 1) / 672)  # the effective velocity = U* reduction factor
             else:
-                Ueff = U  # if not in the wake region, the effective velocity is the undisturbed velocity
+                Ueff = U * 0.8 ** int((self.hydroelems.index(
+                    panel) + 1) / 672)  # if not in the wake region, the effective velocity is the undisturbed velocity
+
             Cd, Cl = self.S1(alpha)
             fd = 0.5 * row * surA * Cd * np.linalg.norm(Ueff) * Ueff
             fl = 0.5 * row * surA * Cl * pow(np.linalg.norm(Ueff), 2) * surL
@@ -254,7 +257,7 @@ class HydroScreen:
                 self.hydroelems.index(panel)]
             fl = 0.5 * row * surA * Cl * pow(np.linalg.norm(U[self.hydroelems.index(panel)]), 2) * surL
             hydroForce_elements.append((fd + fl) / 2.0)
-        time.sleep(5)  # reduce the speed of FEM to meet the CFD simulation.
+        time.sleep(180.1)  # reduce the speed of FEM to meet the CFD simulation.
         return hydroForce_elements
 
 

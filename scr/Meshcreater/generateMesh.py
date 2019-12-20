@@ -23,6 +23,7 @@ cageTypes = [
     "squaredWithBottom",
     "cylindricalWithBottomWithMooring",
     "trawlnet",
+    'threecages'
 ]  # add more models if it is ready
 if cageinfo['CageShape']['shape'] in cageTypes:
     dc.check(cageinfo, cageinfo['CageShape']['shape'])

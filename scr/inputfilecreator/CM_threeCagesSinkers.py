@@ -27,7 +27,7 @@ lam1 = meshinfo['horizontalElementLength'] / cageinfo['Net']['meshLength']
 lam2 = meshinfo['verticalElementLength'] / cageinfo['Net']['meshLength']
 dws = np.sqrt(2 * lam1 * lam2 / (lam1 + lam2)) * cageinfo['Net']['twineDiameter']
 twineSection = 0.25 * np.pi * pow(dws, 2)
-dt = 0.01
+dt = 0.1
 
 
 def CR_comm():
@@ -65,7 +65,7 @@ fieldmat = AFFE_MATERIAU(AFFE=(_F(GROUP_MA=('twines'),
                                ),
                          MODELE=model)
 
-fix = AFFE_CHAR_MECA(DDL_IMPO=_F(GROUP_MA=('topring'),
+fix = AFFE_CHAR_MECA(DDL_IMPO=_F(GROUP_NO=('topnodes'),
                                  LIAISON='ENCASTRE'),
                      MODELE=model)
 
@@ -85,7 +85,7 @@ buoyF= AFFE_CHAR_MECA(FORCE_NODALE=_F(GROUP_NO=('allnodes'),
                       MODELE=model)
 
 dt=''' + str(dt) + '''      # frequency to update the hydrodynamic forces
-itimes=''' + str(int(1.0 / dt * len(cageinfo['Environment']['current']))) + '''   
+itimes=''' + str(int(10.0 / dt * len(cageinfo['Environment']['current']))) + '''   
 tend=itimes*dt
 
 listr = DEFI_LIST_REEL(DEBUT=0.0,
@@ -192,7 +192,7 @@ else:
                                     OBSE_ETAT_INIT='NON'),
                     SCHEMA_TEMPS=_F(FORMULATION='DEPLACEMENT',
                                    SCHEMA='HHT',
-                                    ALPHA=-21.5,
+                                    ALPHA=-14.5,
                                    ),
                                    #add damping stablize the oscilations Need to study in the future                        
                     INCREMENT=_F(LIST_INST=times,INST_FIN=(1+k)*dt),
@@ -250,9 +250,9 @@ if k==0:
 U=np.array(Uinput[int(k*dt/10.0)])
 
 Fnh=hymo.ScreenForce(posi,U)
-fh2cfd=hymo.screenFsi(posi, U)
+# fh2cfd=hymo.screenFsi(posi, U)
 np.save(cwd+'posi.npy', posi)
-np.save(cwd+'Fh.npy', fh2cfd)
+# np.save(cwd+'Fh.npy', fh2cfd)
 np.savetxt(cwd+'asteroutput/posi'+str((k)*dt)+'.txt', posi)
 # np.savetxt(cwd+'Fh1'+str((1+k)*dt)+'.txt', Fnh)    
 DETRUIRE(CONCEPT=_F( NOM=(tblp)))
