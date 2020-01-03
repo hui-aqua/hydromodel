@@ -244,7 +244,8 @@ class HydroScreen:
         self.hydroForces_Element = hydroForce_elements
 
     def screenFsi(self, realTimePositions, Ufluid):
-        if int(np.size(Ufluid) / 3) < 2:
+        print(Ufluid)
+        if len(Ufluid) < len(self.hydroelems):
             U = Ufluid * np.ones((len(self.hydroelems), 3))
         else:
             U = Ufluid
@@ -252,8 +253,9 @@ class HydroScreen:
         for panel in self.hydroelems:  # loop based on the hydrodynamic elements
             alpha, surN, surL, surA = Cal_element(panel, realTimePositions, U[self.hydroelems.index(panel)])
             Cd, Cl = self.S1(alpha)
-            fd = 0.5 * row * surA * Cd * np.linalg.norm(U[self.hydroelems.index(panel)]) * U[
-                self.hydroelems.index(panel)]
+            fd = 0.5 * row * surA * Cd * np.linalg.norm(np.array(U[self.hydroelems.index(panel)])) * np.array(U[
+                                                                                                                  self.hydroelems.index(
+                                                                                                                      panel)])
             fl = 0.5 * row * surA * Cl * pow(np.linalg.norm(U[self.hydroelems.index(panel)]), 2) * surL
             hydroForce_elements.append((fd + fl) / 2.0)
         time.sleep(0.1)  # reduce the speed of FEM to meet the CFD simulation.
