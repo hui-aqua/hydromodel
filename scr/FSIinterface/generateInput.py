@@ -1,6 +1,5 @@
 # generate input file for openfoam
 import os
-import random as rd
 import workPath
 import numpy as np
 

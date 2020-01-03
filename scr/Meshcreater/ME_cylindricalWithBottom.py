@@ -12,13 +12,15 @@ Because it is dependent on individual cage.
 Any questions about this code, please email: hui.cheng@uis.no
 
 """
+import sys
 import os
 import numpy as np
 from numpy import pi
 
 cwd = os.getcwd()
+Dictname = str(sys.argv[1])
 
-with open('cageDict', 'r') as f:
+with open(Dictname, 'r') as f:
     content = f.read()
     cageinfo = eval(content)
 

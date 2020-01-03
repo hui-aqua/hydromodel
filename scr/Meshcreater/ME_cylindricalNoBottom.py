@@ -20,12 +20,15 @@ or:
 Any questions about this code, please email: hui.cheng@uis.no
 
 """
+import sys
 import os
 import numpy as np
 from numpy import pi
-cwd = os.getcwd()
 
-with open('cageDict', 'r') as f:
+cwd = os.getcwd()
+Dictname = str(sys.argv[1])
+
+with open(Dictname, 'r') as f:
     content = f.read()
     cageinfo = eval(content)
 
@@ -100,7 +103,7 @@ nbAdd = bottomnodes.Add([i for i in range(NT * NN + 1, NT * (NN + 1) + 1)])
 smesh.SetName(bottomnodes, 'bottomnodes')
 
 # define the nodes for sinkers
-if cageinfo['Weight']['weightType'] == 'sinkers':
+if cageinfo['Weight']['weightType'] in ['sinkers', 'FSIsinkers']:
     NS = float(cageinfo['Weight']['numOfSinkers'])
     if (float(cageinfo['CageShape']['elementOverCir']) / NS).is_integer():
         print("The sinkers are evenly distributed in the bottom.")

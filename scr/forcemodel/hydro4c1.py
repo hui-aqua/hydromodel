@@ -4,6 +4,7 @@ To use this module, one should be import this into the input file for calculatio
 Any questions about this code, please email: hui.cheng@uis.no
 """
 import time
+
 import numpy as np
 
 row = 1025  # kg/m3   sea water density
@@ -139,6 +140,7 @@ class HydroScreen:
         self.Sn = solidity  # solidity of th net
         self.wake = Net2NetWake(self.posi, self.hydroelems, Udirection, self.Sn)  # create wake object
         self.ref = self.wake.geteleminwake()  # get the elements in the wake
+        self.hydroForces_Element = np.zeros((len(hydroelems), 3))
 
     def Save_ref(self):
         # return the index of the elements in the wake region
@@ -221,9 +223,9 @@ class HydroScreen:
         else:
             pass
 
-    def ScreenForce(self, realTimePositions, U):
+    def screenForce(self, realTimePositions, U):
         num_node = len(self.posi)  # the number of the node
-        hydroForces_nodes = np.zeros((num_node, 3))  # force on nodes, initial as zeros
+        hydroForce_elements = []  # force on netpanel, initial as zeros
         for panel in self.hydroelems:  # loop based on the hydrodynamic elements
             alpha, surN, surL, surA = Cal_element(panel, realTimePositions, U)
             # calculate the inflow angel, normal vector, lift force factor, area of the hydrodynamic element
@@ -238,11 +240,8 @@ class HydroScreen:
             Cd, Cl = self.S1(alpha)
             fd = 0.5 * row * surA * Cd * np.linalg.norm(Ueff) * Ueff
             fl = 0.5 * row * surA * Cl * pow(np.linalg.norm(Ueff), 2) * surL
-            # map the force on the corresponding nodes
-            hydroForces_nodes[panel[0]] = hydroForces_nodes[panel[0]] + (fd + fl) / 6
-            hydroForces_nodes[panel[1]] = hydroForces_nodes[panel[1]] + (fd + fl) / 6
-            hydroForces_nodes[panel[2]] = hydroForces_nodes[panel[2]] + (fd + fl) / 6
-        return hydroForces_nodes
+            hydroForce_elements.append((fd + fl) / 2.0)
+        self.hydroForces_Element = hydroForce_elements
 
     def screenFsi(self, realTimePositions, Ufluid):
         if int(np.size(Ufluid) / 3) < 2:
@@ -257,8 +256,22 @@ class HydroScreen:
                 self.hydroelems.index(panel)]
             fl = 0.5 * row * surA * Cl * pow(np.linalg.norm(U[self.hydroelems.index(panel)]), 2) * surL
             hydroForce_elements.append((fd + fl) / 2.0)
-        time.sleep(180.1)  # reduce the speed of FEM to meet the CFD simulation.
-        return hydroForce_elements
+        time.sleep(0.1)  # reduce the speed of FEM to meet the CFD simulation.
+        self.hydroForces_Element = hydroForce_elements
+
+    def distributeForce(self):
+        '''
+        Transfer the dorce on element to its corresponding nodes
+        '''
+        hydroForces_nodes = np.zeros((len(self.posi), 3))  # force on nodes, initial as zeros
+        for panel in self.hydroelems:
+            hydroForces_nodes[panel[0]] = hydroForces_nodes[panel[0]] + (
+            self.hydroForces_Element[self.hydroelems.index(panel)][0]) / 3
+            hydroForces_nodes[panel[1]] = hydroForces_nodes[panel[1]] + (
+            self.hydroForces_Element[self.hydroelems.index(panel)][1]) / 3
+            hydroForces_nodes[panel[2]] = hydroForces_nodes[panel[2]] + (
+            self.hydroForces_Element[self.hydroelems.index(panel)][2]) / 3
+        return hydroForces_nodes
 
 
 ## - five functions used in the current file
