@@ -258,7 +258,7 @@ if k > int(re['Numoflist']):
     time.sleep(2.5)
 else:
     U=re['velocityinsurfaceAt'+str(re['Numoflist'])]
-print(U)
+
 Fh_elem=hymo.screenFsi(posi,U)
 fnh=hymo.distributeForce()
 np.save(cwd+'posi.npy', posi)

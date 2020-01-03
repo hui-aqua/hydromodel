@@ -265,6 +265,7 @@ class HydroScreen:
         '''
         Transfer the dorce on element to its corresponding nodes
         '''
+        print("before transfer the force" + self.hydroForces_Element)
         hydroForces_nodes = np.zeros((len(self.posi), 3))  # force on nodes, initial as zeros
         for panel in self.hydroelems:
             hydroForces_nodes[panel[0]] = hydroForces_nodes[panel[0]] + (
