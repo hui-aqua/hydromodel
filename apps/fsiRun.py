@@ -29,7 +29,7 @@ print("\n"
       "Currently, this code is not ready for release\n"
       "Any questions about this code, please email: hui.cheng@uis.no")
 time.sleep(0.5)
-os.system("python3 " + workPath.app_path + "conFhandposi.py")
+os.system("python3 " + workPath.app_path + "fsi_mapCoorAndFh.py")
 
 print("source " + workPath.aster_path)
 # os.system("source " + workPath.aster_path)

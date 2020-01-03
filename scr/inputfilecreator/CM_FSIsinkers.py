@@ -37,6 +37,8 @@ def CR_comm():
         '''
 import sys
 import numpy as np
+import pickle
+import time
 sys.path.append("''' + workPath.forceModel_path + '''")
 import hydro4c1 as hy
 cwd="''' + cwd + '''/"
@@ -249,7 +251,14 @@ if k==0:
         
 # U=np.array([np.fix(k*dt/10.0)/10.0+0.1,0.0,0.0])
 U=np.array(Uinput[int(k*dt/10.0)])
-U=np.load(cwd+'realTimeU.npy')
+pkfile = open('velocityfile.pkl', 'rb')
+re = pickle.load(pkfile)
+pkfile.close()
+if k > int(re['Numoflist']):
+    time.sleep(2.5)
+else:
+    U=re['velocityinsurfaceAt'+str(re['Numoflist'])]
+
 
 Fh_elem=hymo.screenFsi(posi,U)
 fnh==hymo.distributeForce()
