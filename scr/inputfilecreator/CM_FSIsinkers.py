@@ -28,7 +28,9 @@ lam1 = meshinfo['horizontalElementLength'] / cageinfo['Net']['meshLength']
 lam2 = meshinfo['verticalElementLength'] / cageinfo['Net']['meshLength']
 dws = np.sqrt(2 * lam1 * lam2 / (lam1 + lam2)) * cageinfo['Net']['twineDiameter']
 twineSection = 0.25 * np.pi * pow(dws, 2)
-dt = 0.01
+Tend = 50
+dt = 0.1
+items = Tend / dt
 
 
 def CR_comm():
@@ -37,8 +39,6 @@ def CR_comm():
         '''
 import sys
 import numpy as np
-import pickle
-import time
 sys.path.append("''' + workPath.forceModel_path + '''")
 import hydro4c1 as hy
 cwd="''' + cwd + '''/"
@@ -88,7 +88,7 @@ buoyF= AFFE_CHAR_MECA(FORCE_NODALE=_F(GROUP_NO=('allnodes'),
                       MODELE=model)
 
 dt=''' + str(dt) + '''      # frequency to update the hydrodynamic forces
-itimes=''' + str(int(1.0 / dt * len(cageinfo['Environment']['current']))) + '''   
+itimes=''' + str(int(items)) + '''   
 tend=itimes*dt
 
 listr = DEFI_LIST_REEL(DEBUT=0.0,
@@ -236,6 +236,8 @@ tblp = POST_RELEVE_T(ACTION=(_F(OPERATION='EXTRACTION',   # For Extraction of va
                           INST=(1+k)*dt,                     # STAT_NON_LINE calculates for 10 INST. I want only last INST
                            ),),
                   );
+                  
+# >>>>>>>>>>>>>>>Import>>>>>>>>>>>>>                
 if k < itimes-1:
     del Fnh
 posi=hy.Get_posi(tblp)
@@ -251,25 +253,22 @@ if k==0:
         
 # U=np.array([np.fix(k*dt/10.0)/10.0+0.1,0.0,0.0])
 U=np.array(Uinput[int(k*dt/10.0)])
-pkfile = open('velocityfile.pkl', 'rb')
-re = pickle.load(pkfile)
-pkfile.close()
-if k > int(re['Numoflist']):
-    time.sleep(2.5)
-else:
-    U=re['velocityinsurfaceAt'+str(re['Numoflist'])]
 
+re=cwd+'velo.pkl'
+timeFE=dt*k
+U=hy.FSI_mapvelocity(re,timeFE)
 Fh_elem=hymo.screenFsi(posi,U)
-fnh=hymo.distributeForce()
+Fnh=hymo.distributeForce()
 np.save(cwd+'posi.npy', posi)
 np.save(cwd+'Fh.npy', Fh_elem)
 np.savetxt(cwd+'asteroutput/posi'+str((k)*dt)+'.txt', posi)
+    
 # np.savetxt(cwd+'Fh1'+str((1+k)*dt)+'.txt', Fnh)    
 DETRUIRE(CONCEPT=_F( NOM=(tblp)))
 if k < itimes-1:
     for i in range (1,len(Fnh)+1):
         DETRUIRE(CONCEPT=_F( NOM=(l[i])))
-
+# <<<<<<<<<<<<<<<<< Import>>>>>>>>>>>>>>>
     \n''')
     output_file.write('\n')
     output_file.close()

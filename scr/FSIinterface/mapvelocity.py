@@ -4,13 +4,18 @@ import workPath
 import numpy as np
 import pickle
 
-cwd = os.getcwd()
-with open('./asterinput/meshinfomation.txt', 'r') as f:
-    content = f.read()
-    meshinfo = eval(content)
+# cwd = os.getcwd()
+if os.path.exists('meshinfomation.txt'):
+    with open('meshinfomation.txt', 'r') as f:
+        content = f.read()
+        meshinfo = eval(content)
+else:
+    with open('./asterinput/meshinfomation.txt', 'r') as f:
+        content = f.read()
+        meshinfo = eval(content)
 
 numOfSurface = meshinfo['numberOfSurfaces'] * 4
-f = open("../velocityOnNodes.dat", "r")
+f = open("../velocityOnNetpanels.dat", "r")
 lines = f.readlines()
 velocitydict = {}
 velocitydict['Numoflist'] = 0
@@ -31,6 +36,16 @@ output = open('velocityfile.pkl', 'wb')
 pickle.dump(velocitydict, output)
 output.close()
 
-# pkfile = open('velocityfile.pkl', 'rb')
-# re = pickle.load(pkfile)
-# pkfile.close()
+pkfile = open('velocityfile.pkl', 'rb')
+re = pickle.load(pkfile)
+pkfile.close()
+
+Velo = re['velocityinsurfaceAt' + str(re['Numoflist'])]
+T = re['Numoflist'] * 0.1
+
+data = {'Time': T,
+        'velo': Velo}
+
+output = open('velo.pkl', 'wb')
+pickle.dump(data, output)
+output.close()

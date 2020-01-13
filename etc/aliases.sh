@@ -9,6 +9,7 @@ alias aclean='python3 $APP/apps/allclean.py'
 alias mesh2cfd='python3 $APP/apps/mesh2CFD.py'
 alias fsirun='python3 $APP/apps/fsiRun.py'
 alias fe2cfd='python3 $APP/apps/fsi_mapCoorAndFh.py'
+alias mapVelo='python3 $APP/apps/fsi_mapvelocity.py'
 alias run='cd $HOME/aster/Run'
     
     

@@ -4,7 +4,7 @@ To use this module, one should be import this into the input file for calculatio
 Any questions about this code, please email: hui.cheng@uis.no
 """
 import time
-
+import pickle
 import numpy as np
 
 row = 1025  # kg/m3   sea water density
@@ -244,7 +244,7 @@ class HydroScreen:
         self.hydroForces_Element = hydroForce_elements
 
     def screenFsi(self, realTimePositions, Ufluid):
-        print(Ufluid)
+        print("The length of U vector is " + str(len(Ufluid)))
         if len(Ufluid) < len(self.hydroelems):
             U = Ufluid * np.ones((len(self.hydroelems), 3))
         else:
@@ -259,21 +259,21 @@ class HydroScreen:
             fl = 0.5 * row * surA * Cl * pow(np.linalg.norm(U[self.hydroelems.index(panel)]), 2) * surL
             hydroForce_elements.append((fd + fl) / 2.0)
         time.sleep(0.1)  # reduce the speed of FEM to meet the CFD simulation.
-        self.hydroForces_Element = hydroForce_elements
+        # print("In hy, the fh_elem is " + str(hydroForce_elements))
+        self.hydroForces_Element = np.array(hydroForce_elements)
+        return np.array(hydroForce_elements)
 
     def distributeForce(self):
         '''
         Transfer the dorce on element to its corresponding nodes
         '''
-        print("before transfer the force" + self.hydroForces_Element)
+
         hydroForces_nodes = np.zeros((len(self.posi), 3))  # force on nodes, initial as zeros
         for panel in self.hydroelems:
-            hydroForces_nodes[panel[0]] = hydroForces_nodes[panel[0]] + (
-            self.hydroForces_Element[self.hydroelems.index(panel)][0]) / 3
-            hydroForces_nodes[panel[1]] = hydroForces_nodes[panel[1]] + (
-            self.hydroForces_Element[self.hydroelems.index(panel)][1]) / 3
-            hydroForces_nodes[panel[2]] = hydroForces_nodes[panel[2]] + (
-            self.hydroForces_Element[self.hydroelems.index(panel)][2]) / 3
+            hydroForces_nodes[panel[0]] += (self.hydroForces_Element[self.hydroelems.index(panel)][0]) / 3
+            hydroForces_nodes[panel[1]] += (self.hydroForces_Element[self.hydroelems.index(panel)][1]) / 3
+            hydroForces_nodes[panel[2]] += (self.hydroForces_Element[self.hydroelems.index(panel)][2]) / 3
+        # print("The force on nodes are" + str(hydroForces_nodes))
         return hydroForces_nodes
 
 
@@ -305,7 +305,7 @@ def Get_posi(tabreu):
     DX2 = CxT.values()['DY']
     DX3 = CxT.values()['DZ']
     POSI = np.array([COOR1, COOR2, COOR3]) + np.array([DX1, DX2, DX3])
-    # print('posi is'+str(np.transpose(POSI)))
+    # print('In hy, the posi is'+str(np.transpose(POSI)))
     return np.transpose(POSI)
 
 
@@ -334,6 +334,24 @@ def Cal_element(eachpanel, realtimeposi, origvelo):
     cosalpha = abs(np.dot(surN, origvelo) / np.linalg.norm(origvelo))
     alpha = np.arccos(cosalpha)
     return alpha, surN, surL, surA
+
+
+def FSI_mapvelocity(velocityDict, timeInFE):
+    pkfile = open(velocityDict, 'rb')
+    re = pickle.load(pkfile)
+    pkfile.close()
+    print("time in FE solver is " + str(timeInFE))
+    print("time in FV solver is " + str(re['Time']))
+    while float(timeInFE) > float(re['Time']):
+        time.sleep(10)
+        pkfile = open(velocityDict, 'rb')
+        re = pickle.load(pkfile)
+        pkfile.close()
+
+    else:
+        print("Now, the time in FV solver is " + str(re['Time']))
+        return re['velo']
+
 # Might mot use
 #     # if set(elementIndex) == 3:  # only three point for the screen.
 #     #     newEIndex = [k for k in set(elementIndex)]  # the new set of element index
