@@ -69,6 +69,7 @@ scr_path = Program_path+"/scr/"
 mesh_path = Program_path+"/scr/Meshcreater/"
 inputcreater_path = Program_path+"/scr/inputfilecreator/"
 forceModel_path = Program_path+"/scr/forcemodel/"
+seawave_path = Program_path+"/scr/enviroments/"
 FSI_path= Program_path+"/scr/FSIinterface/"
 app_path= Program_path+"/apps/"
 salome_path = "''' + salomePath + '''"
@@ -78,5 +79,7 @@ output_file.write('\n')
 output_file.close()
 os.system("ln -sf " + cwd + "/etc/workPath.py ./scr/inputfilecreator/workPath.py")
 os.system("ln -sf " + cwd + "/etc/workPath.py ./scr/Meshcreater/workPath.py")
+os.system("ln -sf " + cwd + "/etc/workPath.py ./scr/forcemodel/workPath.py")
 os.system("ln -sf " + cwd + "/etc/workPath.py ./scr/FSIinterface/workPath.py")
 os.system("ln -sf " + cwd + "/etc/workPath.py ./apps/workPath.py")
+

@@ -1,11 +1,11 @@
 """
+
 /--------------------------------\
 |    University of Stavanger     |
 |           Hui Cheng            |
 \--------------------------------/
 Any questions about this code, please email: hui.cheng@uis.no
-A module can be used to calculate the hydrodynamic forces on nets in Code_Aster.
-To use this module, one should be import this into the input file for calculations.
+
 """
 import time
 import pickle
@@ -67,6 +67,7 @@ class HydroMorison:
         self.Sn = solidity
         wake = Net2NetWake(self.posi, self.hydroelem, Udirection, self.Sn)
         self.ref = wake.geteleminwake()
+        self.hydroForces_Element = np.zeros((len(hydroelem), 3))
 
     def Save_ref(self):
         return self.ref
@@ -103,7 +104,7 @@ class HydroMorison:
         Cn = -3.2891e-5 * pow(Re * self.Sn * self.Sn, 2) + 0.00068 * Re * pow(self.Sn, 2) + 1.4253
         return Cn, 0
 
-    def TwineForce(self, realtimeposi, U):
+    def TwineForce(self, realtimeposi, Ucurrent, Uwave):
         # ref is a list of which elements in the wake region
         # ref. J.S. Bessonneau and D. Marichal. 1998 # cd=1.2,ct=0.1.
         num_node = len(self.posi)
@@ -113,9 +114,9 @@ class HydroMorison:
             b = Cal_distence(realtimeposi[int(self.hydroelem[i][0])], realtimeposi[int(self.hydroelem[i][1])])
             a = Cal_orientation(realtimeposi[int(self.hydroelem[i][0])], realtimeposi[int(self.hydroelem[i][1])])
             if i in self.ref:
-                Ueff = 0.8 * np.array(U)
+                Ueff = 0.8 * np.array(Ucurrent) + Uwave  # assume the wake not change wave velocity
             else:
-                Ueff = np.array(U)
+                Ueff = np.array(Ucurrent) + Uwave
             Cn, Ct = self.M1()
             # Cn, Ct = self.M5(Ueff) if M5 is applied
             ft = 0.5 * row * self.dwh * (b - self.dwh) * Ct * np.dot(a, Ueff) * a * np.linalg.norm(np.dot(a, Ueff))
@@ -123,7 +124,18 @@ class HydroMorison:
                 (Ueff - np.dot(a, Ueff) * a))
             F[int(self.hydroelem[i][0])] = F[int(self.hydroelem[i][0])] + 0.5 * (fn + ft)
             F[int(self.hydroelem[i][1])] = F[int(self.hydroelem[i][1])] + 0.5 * (fn + ft)
-        return F
+        self.hydroForces_Element = F
+
+    def distributeForce(self):
+        '''
+        Transfer the dorce on element to its corresponding nodes
+        '''
+        hydroForces_nodes = np.zeros((len(self.posi), 3))  # force on nodes, initial as zeros
+        for twine in self.hydroelem:
+            hydroForces_nodes[twine[0]] += (self.hydroForces_Element[self.hydroelem.index(twine)][0]) / 3
+            hydroForces_nodes[twine[1]] += (self.hydroForces_Element[self.hydroelem.index(twine)][1]) / 3
+        # print("The force on nodes are" + str(hydroForces_nodes))
+        return hydroForces_nodes
 
 
 class HydroScreen:
@@ -227,19 +239,18 @@ class HydroScreen:
         else:
             pass
 
-    def screenForce(self, realTimePositions, U):
+    def screenForce(self, realTimePositions, Ucurrent, Uwave):
         num_node = len(self.posi)  # the number of the node
         hydroForce_elements = []  # force on netpanel, initial as zeros
         for panel in self.hydroelems:  # loop based on the hydrodynamic elements
-            alpha, surN, surL, surA = Cal_element(panel, realTimePositions, U)
+            alpha, surN, surL, surA = Cal_element(panel, realTimePositions, Ucurrent)
             # calculate the inflow angel, normal vector, lift force factor, area of the hydrodynamic element
             # set([int(k) for k in set(panel)])   # get a set of the node sequence in the element
             if self.hydroelems.index(panel) in self.ref:  # if the element in the wake region
-                Ueff = U * self.wake.reductionfactor2(alpha) * 0.8 ** int(
-                    (self.hydroelems.index(panel) + 1) / 672)  # the effective velocity = U* reduction factor
+                Ueff = Ucurrent * self.wake.reductionfactor2(
+                    alpha) + Uwave  # the effective velocity = U* reduction factor
             else:
-                Ueff = U * 0.8 ** int((self.hydroelems.index(
-                    panel) + 1) / 672)  # if not in the wake region, the effective velocity is the undisturbed velocity
+                Ueff = Ucurrent + Uwave  # if not in the wake region, the effective velocity is the undisturbed velocity
 
             Cd, Cl = self.S1(alpha)
             fd = 0.5 * row * surA * Cd * np.linalg.norm(Ueff) * Ueff
@@ -354,37 +365,3 @@ def FSI_mapvelocity(velocityDict, timeInFE):
     else:
         print("Now, the time in FV solver is " + str(re['Time']))
         return re['velo']
-
-# Might mot use
-#     # if set(elementIndex) == 3:  # only three point for the screen.
-#     #     newEIndex = [k for k in set(elementIndex)]  # the new set of element index
-#     #     newEIndex.sort()
-#     a1 = Cal_orientation(self.posi[newEIndex[0]], self.posi[newEIndex[1]])
-#     a2 = Cal_orientation(self.posi[newEIndex[0]], self.posi[newEIndex[1]])
-#     ba1 = Cal_distence(self.posi[newEIndex[0]], self.posi[newEIndex[1]])
-#     ba2 = Cal_distence(self.posi[newEIndex[0]], self.posi[newEIndex[1]])
-#     surN = np.cross(a1, a2) / np.linalg.norm(np.cross(a1, a2))
-#     if np.dot(surN, Ueff) < 0:
-#         surN = -surN
-#     # the normal vector of the net plane in positive with current direction
-#     surL = np.cross(np.cross(Ueff, surN), Ueff) / \
-#            np.linalg.norm(np.cross(np.cross(Ueff, surN), Ueff) + 0.000000001)
-#
-#     surA = 0.5 * np.linalg.norm(np.cross(a1 * ba1, a2 * ba2))
-#     cosalpha = abs(np.dot(surN, Ueff) / np.linalg.norm(Ueff))
-#     sinalpha = np.linalg.norm(np.cross(surN, Ueff)) / np.linalg.norm(Ueff)
-#     Cd = 0.04 + (-0.04 + self.Sn - 1.24 * pow(self.Sn, 2) +
-#                  13.7 * pow(self.Sn, 3)) * cosalpha
-#     Cl = (0.57 * self.Sn - 3.54 * pow(self.Sn, 2) +
-#           10.1 * pow(self.Sn, 3)) * 2 * sinalpha * cosalpha
-#     wake = Net2NetWake(self.posi, self.hydroelem, U, self.Sn)
-#     ref = wake.getpaneslinwake()
-#     if i in ref:
-#         Ueff = U * wake.reductionfactorblvin(np.arccos(cosalpha))
-#     fd = 0.5 * row * surA * Cd * np.linalg.norm(Ueff) * Ueff
-#     fl = 0.5 * row * surA * Cl * pow(np.linalg.norm(Ueff), 2) * surL
-#     F[newEIndex[0]] = F[newEIndex[0]] + (fd + fl) / 3
-#     F[newEIndex[1]] = F[newEIndex[1]] + (fd + fl) / 3
-#     F[newEIndex[2]] = F[newEIndex[2]] + (fd + fl) / 3
-#
-# else:

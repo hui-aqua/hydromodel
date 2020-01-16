@@ -1,9 +1,0 @@
-{
-'cageType':'fishcagewithoutbottom',
-'elementOverCir': 32,
-'elementOverDepth': 9, 
-'cageDiameter':1.75,
-'cageHeight':1.50,
-'NumOfSinker':16,
-'sinkerWeight':4.48
-}

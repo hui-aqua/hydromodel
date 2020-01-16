@@ -1,8 +1,16 @@
-# writer: hui.cheng@uis.no
-# please contact the writer if there is any questions
-# in this library, I assume the wave is coming from -X, and long X-axis,
-# Z is the gravity direction,Z=0 is the water level, and the water is below z=0
-# reference
+"""
+/--------------------------------\
+|    University of Stavanger     |
+|           Hui Cheng            |
+\--------------------------------/
+Any questions about this code, please email: hui.cheng@uis.no
+A module can be used to calculate the hydrodynamic forces on nets in Code_Aster.
+To use this module, one should be import this into the input file for calculations.
+
+In this library, I assume the wave is coming from -X, and long X-axis,
+Z is the gravity direction,Z=0 is the water level, and the water is below z=0
+reference:2000linearwavetheory_NTNU.pdf
+"""
 import numpy as np
 from numpy import pi
 
@@ -84,6 +92,33 @@ class Airywave:
         zeta = self.wavek * posi[0] - 2 * pi / self.wavePeriod * time
         yita = self.waveHeight / 2 * np.cos(zeta)
         return yita
+
+    def Get_posiVelos(self, listofpoint, Golbaltime):
+        '''
+        Get a list of velocity at a list of point
+        '''
+        listOfVelo = []
+        for point in listofpoint:
+            velocityAtPoint = self.Get_Velo(point, Golbaltime)
+            listOfVelo.append(velocityAtPoint)
+        return listOfVelo
+
+    def Get_elemVelos(self, listofpoint, listofelement, Golbaltime):
+        '''
+        Get a list of velocity at a list of element
+        '''
+        listOfveloatElem = []
+        for element in listofelement:
+            lenngthofelement = len(element)
+            xs, ys, zs = 0, 0, 0
+            for point in element:
+                xs += listofpoint[point][0]
+                ys += listofpoint[point][1]
+                zs += listofpoint[point][2]
+            centerP = [xs / lenngthofelement, ys / lenngthofelement, zs / lenngthofelement, ]
+            velocityAtPoint = self.Get_Velo(centerP, Golbaltime)
+            listOfveloatElem.append(velocityAtPoint)
+        return listOfveloatElem
 
 
 class Stocks2wave(Airywave):
