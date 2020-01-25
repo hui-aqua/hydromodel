@@ -48,7 +48,7 @@ alias arun='python3 $APP/apps/arun.py'
 alias brun='python3 $APP/apps/brun.py'
 alias crun='python3 $APP/apps/crun.py'
 alias aclean='python3 $APP/apps/allclean.py'
-alias run='cd $HOME/aster/Run'
+alias aqua-version='python3 $APP/apps/aqua-version.py'
     
     \n''')
 output_file.write('\n')

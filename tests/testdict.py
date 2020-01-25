@@ -14,7 +14,7 @@ f.write(str(meshinfo))
 f.write(str(netinfo))
 f.close()
 
-with open('cageDict', 'r') as f:
+with open('../benchMarkTests/moe2016/cageDict', 'r') as f:
     content = f.read()
     reread = eval(content)
 print(reread['Environment']['fluidDensity'])

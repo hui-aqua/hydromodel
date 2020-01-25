@@ -19,15 +19,25 @@ If you have any questions about this program, please email: hui.cheng@uis.no
         python3 install.py
         ```
  * How to use this program   
- 1. The users has to prepare the the 'cageDict' in your working path. 
+1. The users has to prepare the the 'cageDict' in your working path. 
  You can find a template and introduction of this input file in the examples folder.
         
 2. To use the applications, the user needs to source the environment:
    ```
    source $HOME/aqua/etc/aliases.sh 
    ```
+3. User configuration
+In order to use the installed aquaSimulator, complete the following:
+    1. Open the $HOME/.bashrc file in the user's home directory in an editor, e.g., by typing in a terminal (note the dot)
+    ```
+   vi ~/.bashrc 
+   ```
+   2. Add the following line at the bottom of that file and save the file
+   ```
+    alias aqua='source [source folder]/hydromodel/etc/aliases.sh'
+   ```
 
-  3. Now there are three applications that can be used for simulations:
+4. Now there are three applications that can be used for simulations:
     - amesh : To creat mesh
     - arun : To auto run simulation
     - aclean : To clean working folder 

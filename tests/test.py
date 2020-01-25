@@ -1,6 +1,6 @@
 import numpy as np
 
-with open('cageDict', 'r') as f:
+with open('../benchMarkTests/moe2016/cageDict', 'r') as f:
     content = f.read()
     reread = eval(content)
 print(reread['Environment']['fluidDensity'])
