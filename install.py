@@ -44,7 +44,9 @@ output_file.write('''
 # hui.cheng@uis.no
 export APP=''' + cwd + '''
 alias amesh='python3 $APP/apps/creatmesh.py'
-alias arun='python3 $APP/apps/allrun.py'
+alias arun='python3 $APP/apps/arun.py'
+alias brun='python3 $APP/apps/brun.py'
+alias crun='python3 $APP/apps/crun.py'
 alias aclean='python3 $APP/apps/allclean.py'
 alias run='cd $HOME/aster/Run'
     
