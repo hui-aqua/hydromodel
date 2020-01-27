@@ -12,7 +12,8 @@ print(
 "|    University of Stavanger     | \n"
 "|           Hui Cheng            | \n"
 "\--------------------------------/ \n"
-"Aquasimulator. Ver.0.1 \n"
+"Simulator for Aquaculture.  \n"
+"Ver.: 0.1 \n"
 "Any questions about this code \n"
 "Please email: hui.cheng@uis.no \n"
       )
