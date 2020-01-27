@@ -228,7 +228,11 @@ class HydroScreen:
             pass
 
     def screenForce(self, realTimePositions, U):
-        num_node = len(self.posi)  # the number of the node
+        '''
+        :param realTimePositions: a list of positions of all nodes
+        :param U: [ux,uy,uz], Unit [m/s]
+        :return:  update the self.hydroForces_Element
+        '''
         hydroForce_elements = []  # force on netpanel, initial as zeros
         for panel in self.hydroelems:  # loop based on the hydrodynamic elements
             alpha, surN, surL, surA = Cal_element(panel, realTimePositions, U)
@@ -248,6 +252,12 @@ class HydroScreen:
         self.hydroForces_Element = hydroForce_elements
 
     def screenFsi(self, realTimePositions, Ufluid):
+        '''
+
+        :param realTimePositions: a list of positions of all nodes
+        :param Ufluid: a list of velocity on the centers of all net panels
+        :return: update the self.hydroForces_Element and output the forces on all the net panels.
+        '''
         print("The length of U vector is " + str(len(Ufluid)))
         if len(Ufluid) < len(self.hydroelems):
             U = Ufluid * np.ones((len(self.hydroelems), 3))
@@ -269,7 +279,8 @@ class HydroScreen:
 
     def distributeForce(self):
         '''
-        Transfer the dorce on element to its corresponding nodes
+        Transfer the forces on net panels to their corresponding nodes
+        :return: hydroForces_nodes
         '''
         hydroForces_nodes = np.zeros((len(self.posi), 3))  # force on nodes, initial as zeros
         for panel in self.hydroelems:
