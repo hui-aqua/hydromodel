@@ -17,7 +17,9 @@ import os
 import numpy as np
 from numpy import pi
 
-p = con = sur = []
+point= []
+con = []
+sur = []
 cwd = os.getcwd()
 
 with open(str(sys.argv[1]), 'r') as f:
@@ -36,12 +38,12 @@ if shape in ['cylindrical']:
     # generate the point coordinates matrix for cylindrical cage
     for j in range(0, NN + 1):
         for i in range(0, NT):
-            p.append(
+            point.append(
                 [D / 2 * np.cos(i * 2 * pi / float(NT)), D / 2 * np.sin(i * 2 * pi / float(NT)), -j * H / float(NN)])
     if 'Tube' in cageInfo['Weight']['weightType']:
         tubeDepth=float(cageInfo['Weight']['bottomRingDepth'])
         for i in range(0, NT):
-            p.append([D / 2 * np.cos(i * 2 * pi / float(NT)), D / 2 * np.sin(i * 2 * pi / float(NT)), -tubeDepth])
+            point.append([D / 2 * np.cos(i * 2 * pi / float(NT)), D / 2 * np.sin(i * 2 * pi / float(NT)), -tubeDepth])
 
 elif shape in ['squared']:
     # generate the point coordinates matrix for squared cage
@@ -50,13 +52,13 @@ elif shape in ['squared']:
     if NT / 4.0 is int:
         for j in range(0, NN + 1):
             for i in range(0, NT / 4):
-                p.append([D / 2, -D / 2 + D * i / (NT / 4), -j * H / float(NN)])
+                point.append([D / 2, -D / 2 + D * i / (NT / 4), -j * H / float(NN)])
             for i in range(0, NT / 4):
-                p.append([D / 2 - D * i / (NT / 4), D / 2, -j * H / float(NN)])
+                point.append([D / 2 - D * i / (NT / 4), D / 2, -j * H / float(NN)])
             for i in range(0, NT / 4):
-                p.append([-D / 2, D / 2 - D * i / (NT / 4), -j * H / float(NN)])
+                point.append([-D / 2, D / 2 - D * i / (NT / 4), -j * H / float(NN)])
             for i in range(0, NT / 4):
-                p.append([-D / 2 + D * i / (NT / 4), -D / 2, -j * H / float(NN)])
+                point.append([-D / 2 + D * i / (NT / 4), -D / 2, -j * H / float(NN)])
         if 'Tube' in cageInfo['Weight']['weightType']:
             print("Squared cage with bottom ring is not prepared yet. Please wait for a update.")
             exit()
@@ -66,8 +68,7 @@ elif shape in ['squared']:
 
 if bottomSwitcher in ['WithBottom']:
     tipDepth = cageInfo['CageShape']['cageCenterTipDepth']
-    p.append([0, 0, -tipDepth])
-
+    point.append([0, 0, -tipDepth])
 # the below is the commond in the Mesh, Salome.
 # the mesh creater script
 import salome
@@ -81,8 +82,8 @@ smesh = smeshBuilder.New(theStudy)
 Mesh_1 = smesh.Mesh()
 
 # add the pints into geometry
-for i in range(len(p)):
-    nodeID = Mesh_1.AddNode(float(p[i][0]), float(p[i][1]), float(p[i][2]))
+for i in range(len(point)):
+    nodeID = Mesh_1.AddNode(float(point[i][0]), float(point[i][1]), float(point[i][2]))
 
 for i in range(1, NT + 1):
     for j in range(0, NN + 1):
@@ -125,21 +126,22 @@ nbAdd = bottomnodes.Add([i for i in range(NT * NN + 1, NT * (NN + 1) + 1)])
 smesh.SetName(bottomnodes, 'bottomnodes')
 
 # define the nodes for sinkers
-if cageInfo['Weight']['weightType'] in ['sinkers', 'FSIsinkers']:
+if cageInfo['Weight']['weightType'] in ['sinkers']:
     NS = float(cageInfo['Weight']['numOfSinkers'])
     if (float(cageInfo['CageShape']['elementOverCir']) / NS).is_integer():
-        print("The sinkers are evenly distributed in the bottom.")
+        print("\nThe sinkers are evenly distributed in the bottom.")
         sinkers = Mesh_1.CreateEmptyGroup(SMESH.NODE, 'sinkers')
         nbAdd = sinkers.Add(
-            [i for i in range(len(p) - NT + 1, len(p),
+            [i for i in range(len(point) - NT + 1, len(point),
                               int(cageInfo['CageShape']['elementOverCir'] / NS))])
         smesh.SetName(sinkers, 'sinkers')
     else:
-        print("The sinkers can not be evenly distributed in the bottom.")
+        print("\nThe sinkers can not be evenly distributed in the bottom."
+              "\nYou need to add the sinker manually.")
 else:
-    print("There is no sinkers on the bottom ring")
+    print("\nThere is no sinkers on the bottom ring")
 # generate the name for each node to assign the hydrodynamic forces.
-for i in range(1, len(p) + 1):
+for i in range(1, len(point) + 1):
     node1 = Mesh_1.CreateEmptyGroup(SMESH.NODE, 'node%s' % i)
     nbAdd = node1.Add([i])
     smesh.SetName(node1, 'node%s' % i)
@@ -165,12 +167,12 @@ Mesh_1.ExportMED(cwd + "/" + meshname)
 meshinfo = {
     "horizontalElementLength": float(pi * D / NT),
     "verticalElementLength": float(H / NN),
-    "numberOfNodes": len(p),
+    "numberOfNodes": len(point),
     "numberOfLines": len(con),
     "numberOfSurfaces": len(sur),
     "netLines": con,
     "netSurfaces": sur,
-    "netNodes": p,
+    "netNodes": point,
     "NN": NN,
     "NT": NT,
     "meshName": meshname

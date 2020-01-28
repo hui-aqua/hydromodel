@@ -193,7 +193,7 @@ if cageInfo['Mooring']['mooringType'] in ['None']:
     if cageInfo['Weight']['weightType'] in ['allfixed']:
         output_file = open(cwd + '/ASTER1.comm', 'a')
         output_file.write('''
-        fix = AFFE_CHAR_MECA(DDL_IMPO=_F(GROUP_MA=('allnodes'),
+fix = AFFE_CHAR_MECA(DDL_IMPO=_F(GROUP_MA=('allnodes'),
                                          LIAISON='ENCASTRE'),
                              MODELE=model)
         ''')
@@ -201,7 +201,7 @@ if cageInfo['Mooring']['mooringType'] in ['None']:
     else:
         output_file = open(cwd + '/ASTER1.comm', 'a')
         output_file.write('''
-            fix = AFFE_CHAR_MECA(DDL_IMPO=_F(GROUP_MA=('topring'),
+fix = AFFE_CHAR_MECA(DDL_IMPO=_F(GROUP_MA=('topring'),
                                              LIAISON='ENCASTRE'),
                                  MODELE=model)
             ''')
