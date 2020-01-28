@@ -1,19 +1,19 @@
 {
 'Environment':
   {
-  'current':[[0.069,0,0],[0.122,0,0], [0.178,0,0],[0.242,0,0]], # A list of currents
+  'current':[[0.12,0,0],[0.26,0,0], [0.50,0,0],[0.76,0,0],[0.93,0,0]], # A list of currents
   'waterDepth':2.2,      # [m] the water depth
   'waves':'False',       # wave type : will be add in next version
   'fluidDensity':1000.0, # [kg/m3] fluid density
   },
 'CageShape':
   {
-  'shape':'cylindricalNoBottom', # "cylindricalWithBottom", "squaredNoBottom",  "squaredWithBottom", 'conical'
+  'shape':'cylindrical-NoBottom', # "cylindricalWithBottom", "squaredNoBottom",  "squaredWithBottom", 'conical'
   'elementOverCir': 32,
   'elementOverHeight': 8,
   'cageDiameter':1.75, # [m] diameter of the fish cage
   'cageHeight':1.5,  # [m] height of the fish cage
-  # 'cageCenterTip':1.7, # [m]  the height of the cage center in metter
+  # 'cageCenterTipDepth':1.7, # [m]  the height of the cage center in metter
   },
 'Net':
   {
@@ -34,21 +34,32 @@
     },
 'Weight':
     {
-    'weightType':'sinkers', # 'sinkerTube', 'sinkerTube+centerweight'
+    'weightType':'sinkers', # 'allfixed','sinkerTube', 'sinkerTube+centerweight'
     #'bottomRingRadius':0.64e-3,  # [m] the pipe diameter of the sinker tube
+    #'bottomRingDepth': 2.0,   #[m]
     #'SDR':9,       # SDR is the ratio of pipe diameter to wall thickness
     #'bottomRingRho':7.87e3,
     #'bottomRingYoungModule':9e11,
     'numOfSinkers':16,
     'sinkerWeight':4.48, #[N]
-    # 'tipWeight':10,
+    # 'tipWeight':10,  #[N]
     },
   'Mooring':
   {
-  'mooringType':'hashtag',  # mooring like a hastag. other option: 'Xshape'
+  'mooringType':'None',  # mooring like a hastag. other option: 'Xshape'
   'frameLength':10, # [m] length of the fame line, distance between two buoies
   'bouncyForce':10, # [N] the Maximum bouncy force that the buoy can provide
   'bouncyLine':10,  # [m] the length of the buoy line, distance between the buoy and plate
+  'mooringLine':20, # [m] the length of the mooring line, distance between the mooring point and plate
+  },
+  'Solver':
+  {
+  'Method':'HHT',  # [m] the length of the buoy line, distance between the buoy and plate
+  'alpth':24.3,
+  'timeStep':0.01,          # [s] time step for simulations
+  'timeLength':10,          # [s] length of time for each current velocity
+  'MaximumIteration':1000,
+  'Residuals':2e-5, # [N] the Maximum bouncy force that the buoy can provide
   'mooringLine':20, # [m] the length of the mooring line, distance between the mooring point and plate
   },
 }

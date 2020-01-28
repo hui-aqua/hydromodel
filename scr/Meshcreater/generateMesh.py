@@ -12,18 +12,16 @@ Z>0 is the air zone
 
 Run with a arguement [casename]
 """
+
 import sys
 import os
 import workPath
-import numpy as np
-from numpy import pi
 
 cwd = os.getcwd()
 Dictname = str(sys.argv[1])
 with open(Dictname, 'r') as f:
     content = f.read()
     cageinfo = eval(content)
-
 
 def printmodel():
     print("The cage type '" + cageinfo['CageShape']['CageType'] + "' are not included in this version.\n")
@@ -33,17 +31,17 @@ def printmodel():
 
 
 cageTypes = [
-    "cylindricalNoBottom",
-    "cylindricalWithBottom",
-    "squaredNoBottom",
-    "squaredWithBottom",
-    "cylindricalWithBottomWithMooring",
-    "trawlnet",
-    'threecages'
+    "cylindrical-NoBottom",
+    "cylindrical-WithBottom",
+    "squared-NoBottom",
+    "squared-WithBottom",
 ]  # add more models if it is ready
 if cageinfo['CageShape']['shape'] in cageTypes:
-    os.system(str(workPath.salome_path) + " -t " + workPath.mesh_path + "ME_" + cageinfo['CageShape'][
-        'shape'] + ".py " + "args:" + Dictname)
+    if cageinfo['Mooring']['mooringType'] in ['None']:
+        os.system(str(workPath.salome_path) + " -t " + workPath.mesh_path + "ME_singleCage.py " + "args:" + Dictname)
+    else:
+        print("cage with mooring system is not finished yet, please wait for a update.")
+        exit()
 else:
     printmodel()
     exit()

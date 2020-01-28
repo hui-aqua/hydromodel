@@ -1,23 +1,14 @@
 """
+/--------------------------------\
+|    University of Stavanger     |
+|           Hui Cheng            |
+\--------------------------------/
+Any questions about this code, please email: hui.cheng@uis.no
 The center of the floating collar is (0,0,0)
 Fish cage is along the Z- direction
 Z=0 is the free surface
 Z<0 is the water zone
 Z>0 is the air zone
-The fish cage is a cylindrical shape
-The fish cage has no bottom net
-The weight system for the fish cage only has sinkers
-
-Because it is dependent on individual cage.
-This code can be executed by the following command in terminal:
-
-/opt/salome2019/appli_V2019_univ/salome -t ~/GitCode/aqua/hydromodel/Meshcreater/ME_cylindricalWithBottom.py
-
-or:
-
-/opt/salome2019/appli_V2019_univ/salome -t ME_cylindricalWithBottom.py
-
-Any questions about this code, please email: hui.cheng@uis.no
 
 """
 
@@ -26,26 +17,56 @@ import os
 import numpy as np
 from numpy import pi
 
+p = con = sur = []
 cwd = os.getcwd()
-Dictname = str(sys.argv[1])
 
-with open(Dictname, 'r') as f:
+with open(str(sys.argv[1]), 'r') as f:
     content = f.read()
-    cageinfo = eval(content)
+    cageInfo = eval(content)
 
-D = cageinfo['CageShape']['cageDiameter']
-H = cageinfo['CageShape']['cageHeight']
-NT = cageinfo['CageShape']['elementOverCir']  # Number of the nodes in circumference
-NN = cageinfo['CageShape']['elementOverHeight']  # number of section in the height, thus, the nodes should be NN+1
-p = []
-con = []
-sur = []
+NT = cageInfo['CageShape']['elementOverCir']  # Number of the nodes in circumference
+NN = cageInfo['CageShape']['elementOverHeight']  # number of section in the height, thus, the nodes should be NN+1
+shapeKey = str(cageInfo['CageShape']['shape'])
+shape = shapeKey.split('-')[0]
+bottomSwitcher = shapeKey.split('-')[1]
 
+if shape in ['cylindrical']:
+    D = cageInfo['CageShape']['cageDiameter']
+    H = cageInfo['CageShape']['cageHeight']
+    # generate the point coordinates matrix for cylindrical cage
+    for j in range(0, NN + 1):
+        for i in range(0, NT):
+            p.append(
+                [D / 2 * np.cos(i * 2 * pi / float(NT)), D / 2 * np.sin(i * 2 * pi / float(NT)), -j * H / float(NN)])
+    if 'Tube' in cageInfo['Weight']['weightType']:
+        tubeDepth=float(cageInfo['Weight']['bottomRingDepth'])
+        for i in range(0, NT):
+            p.append([D / 2 * np.cos(i * 2 * pi / float(NT)), D / 2 * np.sin(i * 2 * pi / float(NT)), -tubeDepth])
 
-# generate the point coordinates matrix for the net
-for j in range(0, NN + 1):
-    for i in range(0, NT):
-        p.append([D / 2 * np.cos(i * 2 * pi / float(NT)), D / 2 * np.sin(i * 2 * pi / float(NT)), -j * H / float(NN)])
+elif shape in ['squared']:
+    # generate the point coordinates matrix for squared cage
+    D = cageInfo['CageShape']['cageLength']
+    H = cageInfo['CageShape']['cageHeight']
+    if NT / 4.0 is int:
+        for j in range(0, NN + 1):
+            for i in range(0, NT / 4):
+                p.append([D / 2, -D / 2 + D * i / (NT / 4), -j * H / float(NN)])
+            for i in range(0, NT / 4):
+                p.append([D / 2 - D * i / (NT / 4), D / 2, -j * H / float(NN)])
+            for i in range(0, NT / 4):
+                p.append([-D / 2, D / 2 - D * i / (NT / 4), -j * H / float(NN)])
+            for i in range(0, NT / 4):
+                p.append([-D / 2 + D * i / (NT / 4), -D / 2, -j * H / float(NN)])
+        if 'Tube' in cageInfo['Weight']['weightType']:
+            print("Squared cage with bottom ring is not prepared yet. Please wait for a update.")
+            exit()
+    else:
+        print("NT must be 4 times interger.")
+        exit()
+
+if bottomSwitcher in ['WithBottom']:
+    tipDepth = cageInfo['CageShape']['cageCenterTipDepth']
+    p.append([0, 0, -tipDepth])
 
 # the below is the commond in the Mesh, Salome.
 # the mesh creater script
@@ -104,14 +125,14 @@ nbAdd = bottomnodes.Add([i for i in range(NT * NN + 1, NT * (NN + 1) + 1)])
 smesh.SetName(bottomnodes, 'bottomnodes')
 
 # define the nodes for sinkers
-if cageinfo['Weight']['weightType'] in ['sinkers', 'FSIsinkers']:
-    NS = float(cageinfo['Weight']['numOfSinkers'])
-    if (float(cageinfo['CageShape']['elementOverCir']) / NS).is_integer():
+if cageInfo['Weight']['weightType'] in ['sinkers', 'FSIsinkers']:
+    NS = float(cageInfo['Weight']['numOfSinkers'])
+    if (float(cageInfo['CageShape']['elementOverCir']) / NS).is_integer():
         print("The sinkers are evenly distributed in the bottom.")
         sinkers = Mesh_1.CreateEmptyGroup(SMESH.NODE, 'sinkers')
         nbAdd = sinkers.Add(
             [i for i in range(len(p) - NT + 1, len(p),
-                              int(cageinfo['CageShape']['elementOverCir'] / NS))])
+                              int(cageInfo['CageShape']['elementOverCir'] / NS))])
         smesh.SetName(sinkers, 'sinkers')
     else:
         print("The sinkers can not be evenly distributed in the bottom.")

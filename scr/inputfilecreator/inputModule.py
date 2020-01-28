@@ -12,7 +12,10 @@ import random as rd
 import workPath
 import numpy as np
 
-switcher = str(sys.argv[1])
+cwd = os.getcwd()
+argument = sys.argv
+
+switcher = argument[1].split("-")[1]
 if switcher not in ["FE", "FSI", "simiFSI"]:
     print("The argument are not recognized by the program, Please use one of the following argements: \n"
           "Available arguments:\n"
@@ -20,28 +23,28 @@ if switcher not in ["FE", "FSI", "simiFSI"]:
           "2. FSI\n"
           "3. simiFSI\n")
     exit()
-cwd = os.getcwd()
+
+Dictname = argument[1].split("-")[0]
+with open(cwd + '/' + Dictname, 'r') as f:
+    content = f.read()
+    cageInfo = eval(content)
+
 with open(cwd + '/meshinfomation.txt', 'r') as f:
     content = f.read()
-    meshinfo = eval(content)
+    meshInfo = eval(content)
 
-with open(cwd + '/cageDict', 'r') as f:
-    content = f.read()
-    cageinfo = eval(content)
-
-Fbuoy = meshinfo['horizontalElementLength'] * meshinfo['verticalElementLength'] * cageinfo['Net']['Sn'] / \
-        cageinfo['Net']['twineDiameter'] * 0.25 * np.pi * pow(cageinfo['Net']['twineDiameter'], 2) * 9.81 * float(
-    cageinfo['Environment']['fluidDensity'])
+Fbuoy = meshInfo['horizontalElementLength'] * meshInfo['verticalElementLength'] * cageInfo['Net']['Sn'] / \
+        cageInfo['Net']['twineDiameter'] * 0.25 * np.pi * pow(cageInfo['Net']['twineDiameter'], 2) * 9.81 * float(
+    cageInfo['Environment']['fluidDensity'])
 # Buoyancy force to assign on each nodes
-dwh = meshinfo['horizontalElementLength'] * meshinfo['verticalElementLength'] * cageinfo['Net']['Sn'] / (
-        meshinfo['horizontalElementLength'] + meshinfo['verticalElementLength'])
+dwh = meshInfo['horizontalElementLength'] * meshInfo['verticalElementLength'] * cageInfo['Net']['Sn'] / (
+        meshInfo['horizontalElementLength'] + meshInfo['verticalElementLength'])
 # hydrodynamic diameter to calculate the hydrodynamic coefficient.
-lam1 = meshinfo['horizontalElementLength'] / cageinfo['Net']['meshLength']
-lam2 = meshinfo['verticalElementLength'] / cageinfo['Net']['meshLength']
-dws = np.sqrt(2 * lam1 * lam2 / (lam1 + lam2)) * cageinfo['Net']['twineDiameter']
+lam1 = meshInfo['horizontalElementLength'] / cageInfo['Net']['meshLength']
+lam2 = meshInfo['verticalElementLength'] / cageInfo['Net']['meshLength']
+dws = np.sqrt(2 * lam1 * lam2 / (lam1 + lam2)) * cageInfo['Net']['twineDiameter']
 twineSection = 0.25 * np.pi * pow(dws, 2)
-dt = 0.01  # time step
-
+dt = cageInfo['Solver']['timeStep']  # time step
 
 # >>>>>>>>>>>>>>>>> Sequence run >>>>>>>>>>>>>>>>>>>>>>
 # >>>>>>>>>>>>>>> Start to write input file>>>>>>>>>>>>
@@ -59,7 +62,7 @@ output_file.write('\n')
 output_file.close()
 
 # >>>>>>>>>>>>>>>    AFFE_MODELE       >>>>>>>>>>>>
-if cageinfo['Weight']['weightType'] in ['sinkers']:
+if cageInfo['Weight']['weightType'] in ['sinkers']:
     output_file = open(cwd + '/ASTER1.comm', 'a')
     output_file.write('''
 model = AFFE_MODELE(AFFE=(_F(GROUP_MA=('twines'),
@@ -69,7 +72,7 @@ model = AFFE_MODELE(AFFE=(_F(GROUP_MA=('twines'),
                     MAILLAGE=mesh)
 ''')
     output_file.close()
-elif cageinfo['Weight']['weightType'] in ['sinkerTube', 'sinkerTube+centerweight']:
+elif cageInfo['Weight']['weightType'] in ['sinkerTube', 'sinkerTube+centerweight']:
     output_file = open(cwd + '/ASTER1.comm', 'a')
     output_file.write('''
 model = AFFE_MODELE(AFFE=(_F(GROUP_MA=('twines'), 
@@ -85,12 +88,11 @@ model = AFFE_MODELE(AFFE=(_F(GROUP_MA=('twines'),
 ''')
     output_file.close()
 else:
-    print("The present weight type '" + cageinfo['Weight']['weightType'] + "' is not included in the present program, "
+    print("The present weight type '" + cageInfo['Weight']['weightType'] + "' is not included in the present program, "
                                                                            "Please check the guide for input file.")
 
-
 # >>>>>>>>>>>>>>>    AFFE_CARA_ELEM       >>>>>>>>>>>>
-if cageinfo['Weight']['weightType'] in ['sinkers']:
+if cageInfo['Weight']['weightType'] in ['sinkers']:
     output_file = open(cwd + '/ASTER1.comm', 'a')
     output_file.write('''
 elemprop = AFFE_CARA_ELEM(CABLE=_F(GROUP_MA=('twines'),
@@ -99,7 +101,7 @@ elemprop = AFFE_CARA_ELEM(CABLE=_F(GROUP_MA=('twines'),
                           MODELE=model)
 ''')
     output_file.close()
-elif cageinfo['Weight']['weightType'] in ['sinkerTube', 'sinkerTube+centerweight']:
+elif cageInfo['Weight']['weightType'] in ['sinkerTube', 'sinkerTube+centerweight']:
     output_file = open(cwd + '/ASTER1.comm', 'a')
     output_file.write('''
 elemprop = AFFE_CARA_ELEM(CABLE=_F(GROUP_MA=('twines'),
@@ -108,50 +110,49 @@ elemprop = AFFE_CARA_ELEM(CABLE=_F(GROUP_MA=('twines'),
                           POUTRE=_F(GROUP_MA=('bottomring', ), 
                                     SECTION='CERCLE', 
                                     CARA=('R', 'EP'), 
-                                    VALE=(''' + str(cageinfo['Weight']["bottomRingRadius"]) + ''', ''' + str(
-            cageinfo['Weight']["bottomRingRadius"]) + ''')),
+                                    VALE=(''' + str(cageInfo['Weight']["bottomRingRadius"]) + ''', ''' + str(
+        cageInfo['Weight']["bottomRingRadius"]) + ''')),
                           MODELE=model)
 ''')
     output_file.close()
 else:
-    print("The present weight type '" + cageinfo['Weight']['weightType'] + "' is not included in the present program, "
+    print("The present weight type '" + cageInfo['Weight']['weightType'] + "' is not included in the present program, "
                                                                            "Please check the guide for input file.")
 
 # >>>>>>>>>>>>>>>    DEFI_MATERIAU       >>>>>>>>>>>>
-if cageinfo['Weight']['weightType'] in ['sinkers']:
+if cageInfo['Weight']['weightType'] in ['sinkers']:
     output_file = open(cwd + '/ASTER1.comm', 'a')
     output_file.write('''
 net = DEFI_MATERIAU(CABLE=_F(EC_SUR_E=0.0001),
-                          ELAS=_F(E=''' + str(cageinfo['Net']["netYoungmodule"]) + ''', NU=0.2,RHO=''' + str(
-            cageinfo['Net']["netRho"]) + '''))  #from H.moe 2016
+                          ELAS=_F(E=''' + str(cageInfo['Net']["netYoungmodule"]) + ''', NU=0.2,RHO=''' + str(
+        cageInfo['Net']["netRho"]) + '''))  #from H.moe 2016
                           # ELAS=_F(E=62500000,NU=0.2,RHO=1140.0))  #from odd m. faltinsen, 2017
                           # ELAS=_F(E=82000000,NU=0.2,RHO=1015.0))  #from H.moe, a. fredheim, 2010
                           # ELAS=_F(E=119366207.319,NU=0.2,RHO=1015.0))#from chun woo lee
                           # ELAS=_F(E=182000000,NU=0.2,RHO=1015.0)) 
 ''')
     output_file.close()
-elif cageinfo['Weight']['weightType'] in ['sinkerTube', 'sinkerTube+centerweight']:
+elif cageInfo['Weight']['weightType'] in ['sinkerTube', 'sinkerTube+centerweight']:
     output_file = open(cwd + '/ASTER1.comm', 'a')
     output_file.write('''
 net = DEFI_MATERIAU(CABLE=_F(EC_SUR_E=0.0001),
-                          ELAS=_F(E=''' + str(cageinfo['Net']["netYoungmodule"]) + ''', NU=0.2,RHO=''' + str(
-            cageinfo['Net']["netRho"]) + '''))  #from H.moe 2016
+                          ELAS=_F(E=''' + str(cageInfo['Net']["netYoungmodule"]) + ''', NU=0.2,RHO=''' + str(
+        cageInfo['Net']["netRho"]) + '''))  #from H.moe 2016
                           # ELAS=_F(E=62500000,NU=0.2,RHO=1140.0))  #from odd m. faltinsen, 2017
                           # ELAS=_F(E=82000000,NU=0.2,RHO=1015.0))  #from H.moe, a. fredheim, 2010
                           # ELAS=_F(E=119366207.319,NU=0.2,RHO=1015.0))#from chun woo lee
                           # ELAS=_F(E=182000000,NU=0.2,RHO=1015.0)) 
-fe = DEFI_MATERIAU(ELAS=_F(E=''' + str(cageinfo['Weight']["bottomRingYoungModule"]) + ''', 
+fe = DEFI_MATERIAU(ELAS=_F(E=''' + str(cageInfo['Weight']["bottomRingYoungModule"]) + ''', 
                            NU=0.3,
-                           RHO=''' + str(cageinfo['Weight']["bottomRingRho"]) + '''))  
+                           RHO=''' + str(cageInfo['Weight']["bottomRingRho"]) + '''))  
 ''')
     output_file.close()
 else:
-    print("The present weight type '" + cageinfo['Weight']['weightType'] + "' is not included in the present program, "
+    print("The present weight type '" + cageInfo['Weight']['weightType'] + "' is not included in the present program, "
                                                                            "Please check the guide for input file.")
 
-
 # >>>>>>>>>>>>>>>    AFFE_MATERIAU       >>>>>>>>>>>>
-if cageinfo['Weight']['weightType'] in ['sinkers']:
+if cageInfo['Weight']['weightType'] in ['sinkers']:
     output_file = open(cwd + '/ASTER1.comm', 'a')
     output_file.write('''
 fieldmat = AFFE_MATERIAU(AFFE=(_F(GROUP_MA=('twines'),
@@ -160,7 +161,7 @@ fieldmat = AFFE_MATERIAU(AFFE=(_F(GROUP_MA=('twines'),
                          MODELE=model) 
 ''')
     output_file.close()
-elif cageinfo['Weight']['weightType'] in ['sinkerTube', 'sinkerTube+centerweight']:
+elif cageInfo['Weight']['weightType'] in ['sinkerTube', 'sinkerTube+centerweight']:
     output_file = open(cwd + '/ASTER1.comm', 'a')
     output_file.write('''
 fieldmat = AFFE_MATERIAU(AFFE=(_F(GROUP_MA=('twines'),
@@ -172,17 +173,12 @@ fieldmat = AFFE_MATERIAU(AFFE=(_F(GROUP_MA=('twines'),
 ''')
     output_file.close()
 else:
-    print("The present weight type '" + cageinfo['Weight']['weightType'] + "' is not included in the present program, "
+    print("The present weight type '" + cageInfo['Weight']['weightType'] + "' is not included in the present program, "
                                                                            "Please check the guide for input file.")
-
-
 
 # >>>>>>>>>>>>>>>    AFFE_CHAR_MECA       >>>>>>>>>>>>
 output_file = open(cwd + '/ASTER1.comm', 'a')
 output_file.write('''
-fix = AFFE_CHAR_MECA(DDL_IMPO=_F(GROUP_MA=('topring'),
-                                 LIAISON='ENCASTRE'),
-                     MODELE=model)
 selfwigh = AFFE_CHAR_MECA(PESANTEUR=_F(DIRECTION=(0.0, 0.0, -1.0),
                                        GRAVITE=9.81,
                                        GROUP_MA=('twines')),
@@ -192,22 +188,46 @@ buoyF= AFFE_CHAR_MECA(FORCE_NODALE=_F(GROUP_NO=('allnodes'),
                       MODELE=model)                                         
 ''')
 output_file.close()
-if cageinfo['Weight']['weightType'] in ['sinkers']:
+# >>>>>>>>>>>>>>>    AFFE_CHAR_MECA    fixed >>>>>>>>>>>>
+if cageInfo['Mooring']['mooringType'] in ['None']:
+    if cageInfo['Weight']['weightType'] in ['allfixed']:
+        output_file = open(cwd + '/ASTER1.comm', 'a')
+        output_file.write('''
+        fix = AFFE_CHAR_MECA(DDL_IMPO=_F(GROUP_MA=('allnodes'),
+                                         LIAISON='ENCASTRE'),
+                             MODELE=model)
+        ''')
+        output_file.close()
+    else:
+        output_file = open(cwd + '/ASTER1.comm', 'a')
+        output_file.write('''
+            fix = AFFE_CHAR_MECA(DDL_IMPO=_F(GROUP_MA=('topring'),
+                                             LIAISON='ENCASTRE'),
+                                 MODELE=model)
+            ''')
+        output_file.close()
+
+else:
+    print('need to update the script')
+    exit()
+
+# >>>>>>>>>>>>>>>    AFFE_CHAR_MECA    weight   >>>>>>>>>>>>
+if cageInfo['Weight']['weightType'] in ['sinkers']:
     output_file = open(cwd + '/ASTER1.comm', 'a')
     output_file.write('''
 sinkF = AFFE_CHAR_MECA(FORCE_NODALE=_F(GROUP_NO=('sinkers'),  
-                                      FZ=-''' + str(cageinfo['Weight']["sinkerWeight"]) + ''',
+                                      FZ=-''' + str(cageInfo['Weight']["sinkerWeight"]) + ''',
                                       FX=0,
                                       FY=0,
                                       ), 
                       MODELE=model) 
     ''')
     output_file.close()
-elif cageinfo['Weight']['weightType'] in ['sinkerTube+centerweight']:
+elif cageInfo['Weight']['weightType'] in ['sinkerTube+centerweight']:
     output_file = open(cwd + '/ASTER1.comm', 'a')
     output_file.write('''
 sinkF = AFFE_CHAR_MECA(FORCE_NODALE=_F(GROUP_NO=('bottomtip'),  
-                                      FZ=-''' + str(cageinfo['Weight']["tipWeight"]) + ''',
+                                      FZ=-''' + str(cageInfo['Weight']["tipWeight"]) + ''',
                                       FX=0,
                                       FY=0,
                                       ), 
@@ -220,8 +240,9 @@ else:
 # >>>>>>>>>>>>>>>    DEFI_LIST_INST       >>>>>>>>>>>>
 output_file = open(cwd + '/ASTER1.comm', 'a')
 output_file.write('''
-dt=''' + str(dt) + '''      # frequency to update the hydrodynamic forces
-itimes=''' + str(int(1.0 / dt * len(cageinfo['Environment']['current']))) + '''   
+dt=''' + str(dt) + '''      # time step
+# itimes is the total iterations
+itimes=''' + str(int(cageInfo['Solver']['timeLength'] / dt * len(cageInfo['Environment']['current']))) + '''   
 tend=itimes*dt
 
 listr = DEFI_LIST_REEL(DEBUT=0.0,
@@ -230,7 +251,7 @@ listr = DEFI_LIST_REEL(DEBUT=0.0,
 times = DEFI_LIST_INST(DEFI_LIST=_F(LIST_INST=listr,PAS_MINI=1e-8),
                        METHODE='AUTO')
                        
-NODEnumber=''' + str(meshinfo["numberOfNodes"]) + '''
+NODEnumber=''' + str(meshInfo["numberOfNodes"]) + '''
 Fnh= np.zeros((NODEnumber,3)) # initial hydrodynamic forces=0
 l=['None']*((len(Fnh)+1))
 
@@ -267,7 +288,7 @@ FIN()
 output_file.close()
 
 # >>>>>>>>>>>>>>>    DEFI_LIST_INST       >>>>>>>>>>>>
-output_file = open(cwd+"/ASTER2.comm", 'w')
+output_file = open(cwd + "/ASTER2.comm", 'w')
 output_file.write('''
 for i in range (1,len(Fnh)+1):
     grpno = 'node%01g' %i
@@ -284,7 +305,7 @@ for i in range (1,len(Fnh)+1):
     loadr.append( _F(CHARGE=l[i],), )
 ''')
 output_file.close()
-if cageinfo['Weight']['weightType'] in ['sinkers','sinkerTube+centerweight']:
+if cageInfo['Weight']['weightType'] in ['sinkers', 'sinkerTube+centerweight']:
     output_file = open(cwd + "/ASTER2.comm", 'a')
     output_file.write('''
 loadr.append( _F(CHARGE=sinkF), )
@@ -294,7 +315,7 @@ else:
     pass
 
 # >>>>>>>>>>>>>>>    DYNA_NON_LINE       >>>>>>>>>>>>
-if cageinfo['Weight']['weightType'] in ['sinkerTube','sinkerTube+centerweight']:
+if cageInfo['Weight']['weightType'] in ['sinkerTube', 'sinkerTube+centerweight']:
     output_file = open(cwd + "/ASTER2.comm", 'a')
     output_file.write('''
 if k == 0:
@@ -307,13 +328,13 @@ if k == 0:
                                     GROUP_MA=('bottomring', ),
                                     RELATION='ELAS')
                                   ),
-                    CONVERGENCE=_F(ITER_GLOB_MAXI=1000,
-                                   RESI_GLOB_RELA=2e-05),
+                    CONVERGENCE=_F(ITER_GLOB_MAXI=''' + str(cageInfo['Solver']['MaximumIteration']) + ''' ,
+                                   RESI_GLOB_RELA=''' + str(cageInfo['Solver']['Residuals']) + ''' ),
                     EXCIT=(loadr),
                     OBSERVATION=_F(GROUP_MA='twines', 
                                     NOM_CHAM='DEPL',
                                     NOM_CMP=('DX','DY','DZ'),
-                                    INST=k+0.10,
+                                    INST=k+dt,
                                     OBSE_ETAT_INIT='NON'),
                     SCHEMA_TEMPS=_F(FORMULATION='DEPLACEMENT',
                                    SCHEMA='HHT',
@@ -334,13 +355,13 @@ else:
                                     GROUP_MA=('bottomring', ),
                                     RELATION='ELAS')
                                   ),
-                   CONVERGENCE=_F(ITER_GLOB_MAXI=1000,
-                                  RESI_GLOB_RELA=2e-05),
+                    CONVERGENCE=_F(ITER_GLOB_MAXI=''' + str(cageInfo['Solver']['MaximumIteration']) + ''' ,
+                                   RESI_GLOB_RELA=''' + str(cageInfo['Solver']['Residuals']) + ''' ),
                     EXCIT=(loadr),
                     OBSERVATION=_F(GROUP_MA='twines', 
                                     NOM_CHAM='DEPL',
                                     NOM_CMP=('DX','DY','DZ'),
-                                    INST=k+0.10,
+                                    INST=k+dt,
                                     OBSE_ETAT_INIT='NON'),
                     SCHEMA_TEMPS=_F(FORMULATION='DEPLACEMENT',
                                    SCHEMA='HHT',
@@ -362,13 +383,13 @@ if k == 0:
                                     GROUP_MA=('twines', ),
                                     RELATION='CABLE'),
                                   ),
-                    CONVERGENCE=_F(ITER_GLOB_MAXI=1000,
-                                   RESI_GLOB_RELA=2e-05),
+                    CONVERGENCE=_F(ITER_GLOB_MAXI=''' + str(cageInfo['Solver']['MaximumIteration']) + ''' ,
+                                   RESI_GLOB_RELA=''' + str(cageInfo['Solver']['Residuals']) + ''' ),
                     EXCIT=(loadr),
                     OBSERVATION=_F(GROUP_MA='twines', 
                                     NOM_CHAM='DEPL',
                                     NOM_CMP=('DX','DY','DZ'),
-                                    INST=k+0.10,
+                                    INST=k+dt,
                                     OBSE_ETAT_INIT='NON'),
                     SCHEMA_TEMPS=_F(FORMULATION='DEPLACEMENT',
                                    SCHEMA='HHT',
@@ -386,13 +407,13 @@ else:
                                     GROUP_MA=('twines', ),
                                     RELATION='CABLE'),
                                   ),
-                   CONVERGENCE=_F(ITER_GLOB_MAXI=1000,
-                                  RESI_GLOB_RELA=2e-05),
+                    CONVERGENCE=_F(ITER_GLOB_MAXI=''' + str(cageInfo['Solver']['MaximumIteration']) + ''' ,
+                                   RESI_GLOB_RELA=''' + str(cageInfo['Solver']['Residuals']) + ''' ),
                     EXCIT=(loadr),
                     OBSERVATION=_F(GROUP_MA='twines', 
                                     NOM_CHAM='DEPL',
                                     NOM_CMP=('DX','DY','DZ'),
-                                    INST=k+0.10,
+                                    INST=k+dt,
                                     OBSE_ETAT_INIT='NON'),
                     SCHEMA_TEMPS=_F(FORMULATION='DEPLACEMENT',
                                    SCHEMA='HHT',
@@ -405,18 +426,16 @@ else:
     ''')
     output_file.close()
 
-
-
 # >>>>>>>>>>>>>>>    POST_RELEVE_T       >>>>>>>>>>>>
 output_file = open(cwd + "/ASTER2.comm", 'a')
 output_file.write('''
-tblp = POST_RELEVE_T(ACTION=(_F(OPERATION='EXTRACTION',   # For Extraction of values
-                          INTITULE='Nodal Displacements', # Name of the table in .resu file
-                          RESULTAT=resn,                   # The result from which values will be extracted(STAT_NON_LINE)
-                          NOM_CHAM=('DEPL'),              # Field to extract. DEPL = Displacements
+tblp = POST_RELEVE_T(ACTION=(_F(OPERATION='EXTRACTION',      # For Extraction of values
+                          INTITULE='Nodal Displacements',    # Name of the table in .resu file
+                          RESULTAT=resn,                     # The result from which values will be extracted(STAT_NON_LINE)
+                          NOM_CHAM=('DEPL'),                 # Field to extract. DEPL = Displacements
                           #TOUT_CMP='OUI',
-                          NOM_CMP=('DX','DY','DZ'),       # Components of DISP to extract
-                          GROUP_NO='allnodes',                 # Extract only for nodes of group DISP
+                          NOM_CMP=('DX','DY','DZ'),          # Components of DISP to extract
+                          GROUP_NO='allnodes',               # Extract only for nodes of group DISP
                           INST=(1+k)*dt,                     # STAT_NON_LINE calculates for 10 INST. I want only last INST
                            ),),
                   );
@@ -424,12 +443,12 @@ if k < itimes-1:
     del Fnh
 posi=hy.Get_posi(tblp)  
 if k==0:
-    con=''' + str(meshinfo['netLines']) + ''' 
-    sur=''' + str(meshinfo['netSurfaces']) + '''
-    Uinput=''' + str(cageinfo['Environment']['current']) + '''
-    hymo=hy.HydroScreen(posi,sur,''' + str(cageinfo['Net']['Sn']) + ''',np.array(Uinput[0]),''' + str(
-        dwh) + ''',''' + str(
-        cageinfo['Net']['twineDiameter']) + ''')
+    con=''' + str(meshInfo['netLines']) + ''' 
+    sur=''' + str(meshInfo['netSurfaces']) + '''
+    Uinput=''' + str(cageInfo['Environment']['current']) + '''
+    hymo=hy.HydroScreen(posi,sur,''' + str(cageInfo['Net']['Sn']) + ''',np.array(Uinput[0]),''' + str(
+    dwh) + ''',''' + str(
+    cageInfo['Net']['twineDiameter']) + ''')
     elementinwake=hymo.Save_ref()
     np.savetxt(cwd+'/asteroutput/elementinwake.txt', elementinwake)                 
     ''')
@@ -447,12 +466,13 @@ if k < itimes-1:
         DETRUIRE(CONCEPT=_F( NOM=(l[i])))
         ''')
     output_file.close()
+
 elif switcher in ["FSI"]:
     output_file = open(cwd + "/ASTER2.comm", 'a')
     output_file.write('''
-re=cwd+'velo.pkl'
+UFile=cwd+'velo.pkl'
 timeFE=dt*k
-U=hy.FSI_mapvelocity(re,timeFE)
+U=hy.FSI_mapvelocity(UFile,timeFE)
 Fh_elem=hymo.screenFsi(posi,U)
 Fnh=hymo.distributeForce()
 np.save(cwd+'posi.npy', posi)
@@ -465,10 +485,9 @@ if k < itimes-1:
         ''')
     output_file.close()
 
-
 # >>>>>>>>>>>>>>>    ASTERRUN.export       >>>>>>>>>>>>
 suffix = rd.randint(1, 10000)
-output_file = open(cwd+'/ASTERRUN.export', 'w')
+output_file = open(cwd + '/ASTERRUN.export', 'w')
 output_file.write('''P actions make_etude
 P aster_root ''' + workPath.aster_path[:-25] + '''
 P consbtc oui
@@ -511,7 +530,7 @@ P exectool
 P multiple 
 P only_nook 
 P rep_trav /tmp/hui-UiS-interactif_1''' + str(suffix) + '''
-F mmed ''' + cwd + '''/asterinput/''' + str(meshinfo['meshName']) + ''' D 20
+F mmed ''' + cwd + '''/asterinput/''' + str(meshInfo['meshName']) + ''' D 20
 F comm ''' + cwd + '''/asterinput/ASTER1.comm D 1
 F comm ''' + cwd + '''/asterinput/ASTER2.comm D 91
 F rmed ''' + cwd + '''/asteroutput/paravisresults.rmed R 80
@@ -519,21 +538,3 @@ F resu ''' + cwd + '''/asteroutput/reactionforce.txt R 8
 F mess ''' + cwd + '''/asteroutput/mess.log R 6\n''')
 output_file.write('\n')
 output_file.close()
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
