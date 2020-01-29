@@ -330,7 +330,7 @@ if k == 0:
                                     INST=k+dt,
                                     OBSE_ETAT_INIT='NON'),
                     SCHEMA_TEMPS=_F(FORMULATION='DEPLACEMENT',
-                                   SCHEMA=''' + str(cageInfo['Solver']['method']) + ''',
+                                   SCHEMA="''' + str(cageInfo['Solver']['method']) + '''",
                                    ALPHA=-0.1,
                                    ),
                                    #add damping stablize the oscilations Need to study in the future                        
@@ -357,7 +357,7 @@ else:
                                     INST=k+dt,
                                     OBSE_ETAT_INIT='NON'),
                     SCHEMA_TEMPS=_F(FORMULATION='DEPLACEMENT',
-                                   SCHEMA=''' + str(cageInfo['Solver']['method']) + ''',
+                                   SCHEMA="''' + str(cageInfo['Solver']['method']) + '''",
                                     ALPHA=-''' + str(cageInfo['Solver']['alptha']) + '''
                                    ),
                                    #add damping stablize the oscilations Need to study in the future                        
@@ -385,7 +385,7 @@ if k == 0:
                                     INST=k+dt,
                                     OBSE_ETAT_INIT='NON'),
                     SCHEMA_TEMPS=_F(FORMULATION='DEPLACEMENT',
-                                   SCHEMA=''' + str(cageInfo['Solver']['method']) + ''',
+                                   SCHEMA="''' + str(cageInfo['Solver']['method']) + '''",
                                    ALPHA=-0.1,
                                    ),
                                    #add damping stablize the oscilations Need to study in the future                        
@@ -409,7 +409,7 @@ else:
                                     INST=k+dt,
                                     OBSE_ETAT_INIT='NON'),
                     SCHEMA_TEMPS=_F(FORMULATION='DEPLACEMENT',
-                                   SCHEMA=''' + str(cageInfo['Solver']['method']) + ''',
+                                   SCHEMA="''' +str(cageInfo['Solver']['method']) + '''",
                                     ALPHA=-''' + str(cageInfo['Solver']['alptha']) + '''
                                    ),
                                    #add damping stablize the oscilations Need to study in the future                        
@@ -439,7 +439,7 @@ if k==0:
     con=''' + str(meshInfo['netLines']) + ''' 
     sur=''' + str(meshInfo['netSurfaces']) + '''
     Uinput=''' + str(cageInfo['Environment']['current']) + '''
-    hymo=hy.Hydro''' + hydroModel.split('-')[0] + '''(''' + hydroModel.split('-')[1] + ''',posi,sur,''' + str(cageInfo['Net']['Sn']) + ''',np.array(Uinput[0]),''' + str(
+    hymo=hy.Hydro''' + hydroModel.split('-')[0] + '''("''' + hydroModel.split('-')[1] + '''",posi,sur,''' + str(cageInfo['Net']['Sn']) + ''',np.array(Uinput[0]),''' + str(
     dwh) + ''',''' + str(
     cageInfo['Net']['twineDiameter']) + ''')
     elementinwake=hymo.Save_ref()
@@ -454,7 +454,7 @@ if switcher in ["False"]:
     output_file.write('''
 U=np.array(Uinput[int(k*dt/10.0)])
 hymo.elementForce(posi,U)
-Fnh=hymo.distributeForce()
+Fnh=hymo.distribute_force()
 np.savetxt(cwd+'asteroutput/posi'+str((k)*dt)+'.txt', posi)
         ''')
     output_file.close()
@@ -464,7 +464,7 @@ if switcher in ["simiFSI"]:
     output_file.write('''
 U=np.array(Uinput[int(k*dt/10.0)])
 hymo.elementForce(posi,U)
-Fnh=hymo.distributeForce()
+Fnh=hymo.distribute_force()
 np.save(cwd+'posi.npy', posi)
 np.savetxt(cwd+'asteroutput/posi'+str((k)*dt)+'.txt', posi)
         ''')
@@ -479,7 +479,7 @@ UFile=cwd+'velo.pkl'
 timeFE=dt*k
 U=hy.FSI_mapvelocity(UFile,timeFE)
 Fh_elem=hymo.screenFsi(posi,U)
-Fnh=hymo.distributeForce()
+Fnh=hymo.distribute_force()
 np.save(cwd+'posi.npy', posi)
 np.save(cwd+'Fh.npy', Fh_elem)
 np.savetxt(cwd+'asteroutput/posi'+str((k)*dt)+'.txt', posi)

@@ -17,7 +17,7 @@
   },
 'Net':
   {
-  'HydroModel':'Screen-S1',
+  'HydroModel':'Screen-S1',  #'Morison-M1'
   'nettingType':'square',
   'Sn': 0.347,   # solidity ratio
   'twineDiameter': 1.41e-3, # [m]the twine diameter of the physical net

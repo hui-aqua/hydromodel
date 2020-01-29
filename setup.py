@@ -17,4 +17,5 @@ setup(
     author='Hui Cheng',
     author_email='hui.cheng@uis.no',
     description='A simulator for aquaculture structures',
+    install_requires=['numpy']
 )
