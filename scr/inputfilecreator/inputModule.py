@@ -15,23 +15,16 @@ import numpy as np
 cwd = os.getcwd()
 argument = sys.argv
 
-switcher = argument[1].split("-")[1]
-if switcher not in ["FE", "FSI", "simiFSI"]:
-    print("The argument are not recognized by the program, Please use one of the following argements: \n"
-          "Available arguments:\n"
-          "1. FE\n"
-          "2. FSI\n"
-          "3. simiFSI\n")
-    exit()
-
-Dictname = argument[1].split("-")[0]
-with open(cwd + '/' + Dictname, 'r') as f:
+with open(str(sys.argv[1]), 'r') as f:
     content = f.read()
     cageInfo = eval(content)
 
 with open(cwd + '/meshinfomation.txt', 'r') as f:
     content = f.read()
     meshInfo = eval(content)
+switcher = cageInfo['Solver']['coupling']
+hydroModel = str(cageInfo['Net']['HydroModel'])
+
 
 Fbuoy = meshInfo['horizontalElementLength'] * meshInfo['verticalElementLength'] * cageInfo['Net']['Sn'] / \
         cageInfo['Net']['twineDiameter'] * 0.25 * np.pi * pow(cageInfo['Net']['twineDiameter'], 2) * 9.81 * float(
@@ -337,7 +330,7 @@ if k == 0:
                                     INST=k+dt,
                                     OBSE_ETAT_INIT='NON'),
                     SCHEMA_TEMPS=_F(FORMULATION='DEPLACEMENT',
-                                   SCHEMA='HHT',
+                                   SCHEMA=''' + str(cageInfo['Solver']['method']) + ''',
                                    ALPHA=-0.1,
                                    ),
                                    #add damping stablize the oscilations Need to study in the future                        
@@ -364,8 +357,8 @@ else:
                                     INST=k+dt,
                                     OBSE_ETAT_INIT='NON'),
                     SCHEMA_TEMPS=_F(FORMULATION='DEPLACEMENT',
-                                   SCHEMA='HHT',
-                                    ALPHA=-24.4,
+                                   SCHEMA=''' + str(cageInfo['Solver']['method']) + ''',
+                                    ALPHA=-''' + str(cageInfo['Solver']['alptha']) + '''
                                    ),
                                    #add damping stablize the oscilations Need to study in the future                        
                     INCREMENT=_F(LIST_INST=times,INST_FIN=(1+k)*dt),
@@ -392,7 +385,7 @@ if k == 0:
                                     INST=k+dt,
                                     OBSE_ETAT_INIT='NON'),
                     SCHEMA_TEMPS=_F(FORMULATION='DEPLACEMENT',
-                                   SCHEMA='HHT',
+                                   SCHEMA=''' + str(cageInfo['Solver']['method']) + ''',
                                    ALPHA=-0.1,
                                    ),
                                    #add damping stablize the oscilations Need to study in the future                        
@@ -416,8 +409,8 @@ else:
                                     INST=k+dt,
                                     OBSE_ETAT_INIT='NON'),
                     SCHEMA_TEMPS=_F(FORMULATION='DEPLACEMENT',
-                                   SCHEMA='HHT',
-                                    ALPHA=-24.3,
+                                   SCHEMA=''' + str(cageInfo['Solver']['method']) + ''',
+                                    ALPHA=-''' + str(cageInfo['Solver']['alptha']) + '''
                                    ),
                                    #add damping stablize the oscilations Need to study in the future                        
                     INCREMENT=_F(LIST_INST=times,INST_FIN=(1+k)*dt),
@@ -446,26 +439,38 @@ if k==0:
     con=''' + str(meshInfo['netLines']) + ''' 
     sur=''' + str(meshInfo['netSurfaces']) + '''
     Uinput=''' + str(cageInfo['Environment']['current']) + '''
-    hymo=hy.HydroScreen(posi,sur,''' + str(cageInfo['Net']['Sn']) + ''',np.array(Uinput[0]),''' + str(
+    hymo=hy.Hydro''' + hydroModel.split('-')[0] + '''(''' + hydroModel.split('-')[1] + ''',posi,sur,''' + str(cageInfo['Net']['Sn']) + ''',np.array(Uinput[0]),''' + str(
     dwh) + ''',''' + str(
     cageInfo['Net']['twineDiameter']) + ''')
     elementinwake=hymo.Save_ref()
     np.savetxt(cwd+'/asteroutput/elementinwake.txt', elementinwake)                 
     ''')
 output_file.close()
-if switcher in ["FE", "simiFSI"]:
+
+
+# >>>>>>>>>>>>>>>>>>>>>> Coupling >>>>>>>>>>>>>>>>>>>
+if switcher in ["False"]:
     output_file = open(cwd + "/ASTER2.comm", 'a')
     output_file.write('''
 U=np.array(Uinput[int(k*dt/10.0)])
-hymo.screenForce(posi,U)
+hymo.elementForce(posi,U)
 Fnh=hymo.distributeForce()
 np.savetxt(cwd+'asteroutput/posi'+str((k)*dt)+'.txt', posi)
-DETRUIRE(CONCEPT=_F( NOM=(tblp)))
-if k < itimes-1:
-    for i in range (1,len(Fnh)+1):
-        DETRUIRE(CONCEPT=_F( NOM=(l[i])))
         ''')
     output_file.close()
+
+if switcher in ["simiFSI"]:
+    output_file = open(cwd + "/ASTER2.comm", 'a')
+    output_file.write('''
+U=np.array(Uinput[int(k*dt/10.0)])
+hymo.elementForce(posi,U)
+Fnh=hymo.distributeForce()
+np.save(cwd+'posi.npy', posi)
+np.savetxt(cwd+'asteroutput/posi'+str((k)*dt)+'.txt', posi)
+        ''')
+    output_file.close()
+
+
 
 elif switcher in ["FSI"]:
     output_file = open(cwd + "/ASTER2.comm", 'a')
@@ -478,12 +483,20 @@ Fnh=hymo.distributeForce()
 np.save(cwd+'posi.npy', posi)
 np.save(cwd+'Fh.npy', Fh_elem)
 np.savetxt(cwd+'asteroutput/posi'+str((k)*dt)+'.txt', posi)
+        ''')
+    output_file.close()
+
+
+
+output_file = open(cwd + "/ASTER2.comm", 'a')
+output_file.write('''
 DETRUIRE(CONCEPT=_F( NOM=(tblp)))
 if k < itimes-1:
     for i in range (1,len(Fnh)+1):
         DETRUIRE(CONCEPT=_F( NOM=(l[i])))
         ''')
-    output_file.close()
+output_file.close()
+
 
 # >>>>>>>>>>>>>>>    ASTERRUN.export       >>>>>>>>>>>>
 suffix = rd.randint(1, 10000)

@@ -17,6 +17,7 @@
   },
 'Net':
   {
+  'HydroModel':'Screen-S1',
   'nettingType':'square',
   'Sn': 0.347,   # solidity ratio
   'twineDiameter': 1.41e-3, # [m]the twine diameter of the physical net
@@ -54,13 +55,13 @@
   },
   'Solver':
   {
-  'Method':'HHT',  # [m] the length of the buoy line, distance between the buoy and plate
-  'alpth':24.3,
-  'timeStep':0.01,          # [s] time step for simulations
+  'coupling':'False', # 'FSI', 'simiFSI'
+  'method':'HHT',  # [m] the length of the buoy line, distance between the buoy and plate
+  'alptha':24.3,
+  'timeStep':0.1,          # [s] time step for simulations
   'timeLength':10,          # [s] length of time for each current velocity
   'MaximumIteration':1000,
   'Residuals':2e-5, # [N] the Maximum bouncy force that the buoy can provide
-  'mooringLine':20, # [m] the length of the mooring line, distance between the mooring point and plate
   },
 }
 
