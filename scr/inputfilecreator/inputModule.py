@@ -25,7 +25,6 @@ with open(cwd + '/meshinfomation.txt', 'r') as f:
 switcher = cageInfo['Solver']['coupling']
 hydroModel = str(cageInfo['Net']['HydroModel'])
 
-
 Fbuoy = meshInfo['horizontalElementLength'] * meshInfo['verticalElementLength'] * cageInfo['Net']['Sn'] / \
         cageInfo['Net']['twineDiameter'] * 0.25 * np.pi * pow(cageInfo['Net']['twineDiameter'], 2) * 9.81 * float(
     cageInfo['Environment']['fluidDensity'])
@@ -47,6 +46,7 @@ import sys
 import numpy as np
 sys.path.append("''' + workPath.forceModel_path + '''")
 import hydro4c1 as hy
+import fsimapping as fsi
 cwd="''' + cwd + '''/"
 DEBUT(PAR_LOT='NON',
 IGNORE_ALARM=("SUPERVIS_25","DISCRETE_26") )
@@ -409,7 +409,7 @@ else:
                                     INST=k+dt,
                                     OBSE_ETAT_INIT='NON'),
                     SCHEMA_TEMPS=_F(FORMULATION='DEPLACEMENT',
-                                   SCHEMA="''' +str(cageInfo['Solver']['method']) + '''",
+                                   SCHEMA="''' + str(cageInfo['Solver']['method']) + '''",
                                     ALPHA=-''' + str(cageInfo['Solver']['alptha']) + '''
                                    ),
                                    #add damping stablize the oscilations Need to study in the future                        
@@ -434,59 +434,62 @@ tblp = POST_RELEVE_T(ACTION=(_F(OPERATION='EXTRACTION',      # For Extraction of
                   );
 if k < itimes-1:
     del Fnh
-posi=hy.Get_posi(tblp)  
+posi=hy.get_position(tblp)  
 if k==0:
     con=''' + str(meshInfo['netLines']) + ''' 
     sur=''' + str(meshInfo['netSurfaces']) + '''
     Uinput=''' + str(cageInfo['Environment']['current']) + '''
-    hymo=hy.Hydro''' + hydroModel.split('-')[0] + '''("''' + hydroModel.split('-')[1] + '''",posi,sur,''' + str(cageInfo['Net']['Sn']) + ''',np.array(Uinput[0]),''' + str(
+    hydroModel=hy.Hydro''' + hydroModel.split('-')[0] + '''("''' + hydroModel.split('-')[1] + '''",posi,sur,''' + str(
+    cageInfo['Net']['Sn']) + ''',np.array(Uinput[0]),''' + str(
     dwh) + ''',''' + str(
     cageInfo['Net']['twineDiameter']) + ''')
-    elementinwake=hymo.Save_ref()
-    np.savetxt(cwd+'/asteroutput/elementinwake.txt', elementinwake)                 
+    elementinwake=hydroModel.output_element_in_wake()
+    np.savetxt(cwd+'/asteroutput/elementinwake.txt', elementinwake)       
+    hydro_element=hydroModel.output_hydro_element()
     ''')
 output_file.close()
-
 
 # >>>>>>>>>>>>>>>>>>>>>> Coupling >>>>>>>>>>>>>>>>>>>
 if switcher in ["False"]:
     output_file = open(cwd + "/ASTER2.comm", 'a')
     output_file.write('''
 U=np.array(Uinput[int(k*dt/10.0)])
-hymo.elementForce(posi,U)
-Fnh=hymo.distribute_force()
+hydroModel.force_on_element(posi,U)
+Fnh=hydroModel.distribute_force()
 np.savetxt(cwd+'asteroutput/posi'+str((k)*dt)+'.txt', posi)
         ''')
     output_file.close()
 
-if switcher in ["simiFSI"]:
+
+elif switcher in ["simiFSI"]:
     output_file = open(cwd + "/ASTER2.comm", 'a')
     output_file.write('''
+    fsi.write_element(hydro_element,cwd)
 U=np.array(Uinput[int(k*dt/10.0)])
-hymo.elementForce(posi,U)
-Fnh=hymo.distribute_force()
+hydroModel.force_on_element(posi,U)
+Fnh=hydroModel.distribute_force()
 np.save(cwd+'posi.npy', posi)
+fsi.write_position(posi,cwd)
 np.savetxt(cwd+'asteroutput/posi'+str((k)*dt)+'.txt', posi)
         ''')
     output_file.close()
-
-
 
 elif switcher in ["FSI"]:
     output_file = open(cwd + "/ASTER2.comm", 'a')
     output_file.write('''
+    fsi.write_element(hydro_element,cwd)
 UFile=cwd+'velo.pkl'
 timeFE=dt*k
-U=hy.FSI_mapvelocity(UFile,timeFE)
-Fh_elem=hymo.screenFsi(posi,U)
+U=hy.fsi_velocity_mapping(UFile,timeFE)
+Fh_elem=hymo.screen_fsi(posi,U)
 Fnh=hymo.distribute_force()
+fsi.write_position(posi,cwd)
+fsi.write_fh(Fh_elem,cwd)
 np.save(cwd+'posi.npy', posi)
 np.save(cwd+'Fh.npy', Fh_elem)
 np.savetxt(cwd+'asteroutput/posi'+str((k)*dt)+'.txt', posi)
         ''')
     output_file.close()
-
-
 
 output_file = open(cwd + "/ASTER2.comm", 'a')
 output_file.write('''
@@ -496,7 +499,6 @@ if k < itimes-1:
         DETRUIRE(CONCEPT=_F( NOM=(l[i])))
         ''')
 output_file.close()
-
 
 # >>>>>>>>>>>>>>>    ASTERRUN.export       >>>>>>>>>>>>
 suffix = rd.randint(1, 10000)
