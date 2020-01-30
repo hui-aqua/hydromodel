@@ -136,6 +136,7 @@ class HydroMorison:
                 (velocity - np.dot(a, velocity) * a))
             hydro_force_on_element.append(ft + fn)
         self.hydroForces_Element = np.array(hydro_force_on_element)
+        return np.array(hydro_force_on_element)
 
     def distribute_force(self):
         """
@@ -292,6 +293,7 @@ class HydroScreen:
             hydro_force_on_element.append((fd + fl) / 2.0)
         if np.size(np.array(hydro_force_on_element)) == np.size(self.hydro_element):
             self.force_on_elements = np.array(hydro_force_on_element)
+            return np.array(hydro_force_on_element)
         else:
             print("\nError! the size of hydrodynamic force on element is not equal to the number of element."
                   "\nPlease cheack you code.")
@@ -397,17 +399,3 @@ def calculation_on_element(point1, point2, point3, velocity):
     return alpha, normal_vector, lift_vector, surface_area
 
 
-def fsi_velocity_mapping(velocity_foam, time_aster):
-    pk_file = open(velocity_foam, 'rb')
-    re = pickle.load(pk_file)
-    pk_file.close()
-    print("time in FE solver is " + str(time_aster))
-    print("time in FV solver is " + str(re['Time']))
-    while float(time_aster) > float(re['Time']):
-        time.sleep(10)
-        pk_file = open(velocity_foam, 'rb')
-        re = pickle.load(pk_file)
-        pk_file.close()
-    else:
-        print("Now, the time in FV solver is " + str(re['Time']))
-        return re['velo']

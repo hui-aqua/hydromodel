@@ -454,7 +454,7 @@ if switcher in ["False"]:
     output_file = open(cwd + "/ASTER2.comm", 'a')
     output_file.write('''
 U=np.array(Uinput[int(k*dt/10.0)])
-hydroModel.force_on_element(posi,U)
+force_on_element=hydroModel.force_on_element(posi,U)
 Fnh=hydroModel.distribute_force()
 np.savetxt(cwd+'asteroutput/posi'+str((k)*dt)+'.txt', posi)
         ''')
@@ -466,7 +466,7 @@ elif switcher in ["simiFSI"]:
     output_file.write('''
     fsi.write_element(hydro_element,cwd)
 U=np.array(Uinput[int(k*dt/10.0)])
-hydroModel.force_on_element(posi,U)
+force_on_element=hydroModel.force_on_element(posi,U)
 Fnh=hydroModel.distribute_force()
 np.save(cwd+'posi.npy', posi)
 fsi.write_position(posi,cwd)
@@ -477,16 +477,20 @@ np.savetxt(cwd+'asteroutput/posi'+str((k)*dt)+'.txt', posi)
 elif switcher in ["FSI"]:
     output_file = open(cwd + "/ASTER2.comm", 'a')
     output_file.write('''
+    fsi.write_position(posi,cwd)
     fsi.write_element(hydro_element,cwd)
-UFile=cwd+'velo.pkl'
+    U=np.array(Uinput[0])
+    hydroModel.force_on_element(posi,U)
+    force_on_element=hydroModel.force_on_element(posi,U)
+    fsi.write_fh(force_on_element,cwd)
+    
+
 timeFE=dt*k
-U=hy.fsi_velocity_mapping(UFile,timeFE)
-Fh_elem=hymo.screen_fsi(posi,U)
+U=fsi.read_velocity(cwd,len(force_on_element),timeFE)
+force_on_element=hymo.screen_fsi(posi,U)
 Fnh=hymo.distribute_force()
 fsi.write_position(posi,cwd)
 fsi.write_fh(Fh_elem,cwd)
-np.save(cwd+'posi.npy', posi)
-np.save(cwd+'Fh.npy', Fh_elem)
 np.savetxt(cwd+'asteroutput/posi'+str((k)*dt)+'.txt', posi)
         ''')
     output_file.close()
