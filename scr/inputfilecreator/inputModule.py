@@ -480,9 +480,7 @@ elif switcher in ["FSI"]:
     fsi.write_position(posi,cwd)
     fsi.write_element(hydro_element,cwd)
     U=np.array(Uinput[0])
-    hydroModel.force_on_element(posi,U)
-    force_on_element=hydroModel.force_on_element(posi,U)
-    fsi.write_fh(force_on_element,cwd)
+    fsi.write_fh(np.zeros((len(hydro_element),3)),cwd)
     
 
 timeFE=dt*k
