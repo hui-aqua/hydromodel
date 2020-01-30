@@ -12,6 +12,10 @@ if salomePath == str(1):
     salomePath = "/opt/salome2019/appli_V2019_univ/salome"
 if salomePath == str(2):
     salomePath = "/opt/salome2018/appli_V2018.0.1_public/salome"
+if salomePath == str(3):
+    salomePath = "/home/hui/salome_meca/appli_V2018.0.1_public/salome"
+
+
 while not os.path.isfile(salomePath):
     salomePath = input("Sorry, I cannot find salome in your given path, please input it again \n")
     if salomePath == str(1):

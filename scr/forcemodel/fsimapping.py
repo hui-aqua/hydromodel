@@ -126,9 +126,12 @@ def read_velocity(cwd, length_velocity,time_aster):
     lines = control_file.readlines()
     for line in lines:
         if "deltaT" in line:
-            dt_foam = float(line.split(" ")[-1])
+            dt_foam = float(line.split(" ")[-1].split(";")[0])
 
-    while os.path.isfile(cwd_foam_root + "/velocityOnNetpanels.dat"):
+    while not os.path.isfile(cwd_foam_root + "/velocityOnNetpanels.dat"):
+        print("Wait for velocity from OpenFoam")
+        time.sleep(10)
+    else:
         f = open(cwd_foam_root + "/velocityOnNetpanels.dat", "r")
         lines = f.readlines()
         velocitydict['Numoflist'] = 0
@@ -136,7 +139,7 @@ def read_velocity(cwd, length_velocity,time_aster):
             if str() + "\n" in line:
                 velocitydict['Numoflist'] += 1
                 velocitydict['time_foam'] += 1*dt_foam
-
+        #todo update the function for velocity read
         for time_foam in range(velocitydict['Numoflist']):
             data_velocity = lines[3 + time_foam * 1157:1155 + time_foam * 1157]
             velocity = []
@@ -145,26 +148,24 @@ def read_velocity(cwd, length_velocity,time_aster):
                 velocity.append([float(vector[0][1:]), float(vector[1]), float(vector[2][:-1])])
             velocitydict['velocityinsurfaceAt' + str(time_foam + 1)] = velocity
         f.close()
-    else:
-        print("Wait for velocity from OpenFoam")
-        time.sleep(10)
 
-    output = open(cwd + 'velocityfile.pkl', 'wb')
-    pickle.dump(velocitydict, output)
-    output.close()
+        output = open(cwd + 'velocityfile.pkl', 'wb')
+        pickle.dump(velocitydict, output)
+        output.close()
 
-    pkfile = open(cwd + 'velocityfile.pkl', 'rb')
-    re = pickle.load(pkfile)
-    pkfile.close()
+        pkfile = open(cwd + 'velocityfile.pkl', 'rb')
+        re = pickle.load(pkfile)
+        pkfile.close()
 
-    T = re['Numoflist'] * dt_foam
-    Velo = re['velocityinsurfaceAt' + str(re['Numoflist'])]
-    data = {'Time': T,
-            'velo': Velo}
-    while float(time_aster) > float(data['Time']):
-        time.sleep(10)
-        print("Now, the time in Openfoam solver is " + str(re['Time']) +
-              "\nThe time in Code_Aster is " + str(time_aster))
+        T = re['Numoflist'] * dt_foam
+        Velo = re['velocityinsurfaceAt' + str(re['Numoflist'])]
+        data = {'Time': T,
+                'velo': Velo}
+        while float(time_aster) > float(data['Time']):
+            time.sleep(10)
+            print("Now, the time in Openfoam solver is " + str(re['Time']) +
+                  "\nThe time in Code_Aster is " + str(time_aster))
 
-    else:
-        return data['velo']
+        else:
+            return data['velo']
+
