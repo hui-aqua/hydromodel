@@ -32,7 +32,7 @@ for j in range(0, NN + 1):
         p.append([D / 2 * np.cos(i * 2 * pi / float(NT)), D / 2 * np.sin(i * 2 * pi / float(NT)), -j * H / float(NN)])
 p.append(cagebottomcenter)
 
-# This part is for the mooring system # todo for one by one cage
+# This part is for the mooring system # todo for singe cage
 
 
 # the below is the commond in the Mesh, Salome.

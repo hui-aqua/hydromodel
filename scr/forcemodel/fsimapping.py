@@ -82,7 +82,7 @@ numOfSurf   ''' + str(len(hydro_element)) + ''' ;''')
     output_file.close()
 
 
-def write_fh(hydro_force, cwd):
+def write_fh(hydro_force, timeFE,cwd):
     # step 1 the head
     output_file = open(cwd + 'Fh', 'w+')
     output_file.write('''
@@ -99,6 +99,7 @@ FoamFile
 }
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 {
+timeInFE  ''' + str(len(timeFE)) + ''' ;
 numOfFh   ''' + str(len(hydro_force)) + ''' ;''')
     output_file.write('\n')
     output_file.close()
