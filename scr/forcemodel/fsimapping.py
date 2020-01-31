@@ -99,7 +99,7 @@ FoamFile
 }
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 {
-timeInFE  ''' + str(len(timeFE)) + ''' ;
+timeInFE  ''' + str(timeFE) + ''' ;
 numOfFh   ''' + str(len(hydro_force)) + ''' ;''')
     output_file.write('\n')
     output_file.close()
