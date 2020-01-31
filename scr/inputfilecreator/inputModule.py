@@ -484,11 +484,11 @@ elif switcher in ["FSI"]:
     
 
 timeFE=dt*k
-U=fsi.read_velocity(cwd,len(hydro_element),timeFE)
+U=fsi.get_velocity(cwd,len(hydro_element),timeFE)
 force_on_element=hydroModel.screen_fsi(posi,U)
 Fnh=hydroModel.distribute_force()
 fsi.write_position(posi,cwd)
-fsi.write_fh(Fh_elem,cwd)
+fsi.write_fh(force_on_element,cwd)
 np.savetxt(cwd+'asteroutput/posi'+str((k)*dt)+'.txt', posi)
         ''')
     output_file.close()

@@ -118,54 +118,34 @@ numOfFh   ''' + str(len(hydro_force)) + ''' ;''')
     output_file.write('\n')
     output_file.close()
 
-
-def read_velocity(cwd, length_velocity,time_aster):
-    velocitydict = {}
+# here we assume Code_aster is much faster than OpenFoam, thus OpenFOAM do not need to wait .
+def get_velocity(cwd, length_velocity, time_aster):
     cwd_foam_root = "/".join(cwd.split("/")[0:-2])
-    control_file = open(cwd_foam_root + '/system/controlDict', 'r')
-    lines = control_file.readlines()
-    for line in lines:
-        if "deltaT" in line:
-            dt_foam = float(line.split(" ")[-1].split(";")[0])
+    velocity_file, time_foam = read_velocity(cwd_foam_root, length_velocity)
+    while float(time_aster) > float(time_foam) or time_foam == 0:
+        time.sleep(2)
+        velocity_file, time_foam = read_velocity(cwd_foam_root, length_velocity)
+    else:
+        return velocity_file["velocities_at_" + str(time_foam)]
 
-    while not os.path.isfile(cwd_foam_root + "/velocityOnNetpanels.dat"):
+
+def read_velocity(cwd_foam_root, length_velocity):
+    velocity_dict = {}
+    while not os.path.isfile(cwd_foam_root + "/velocity_on_elements.txt"):
         print("Wait for velocity from OpenFoam")
         time.sleep(10)
     else:
-        f = open(cwd_foam_root + "/velocityOnNetpanels.dat", "r")
+        f = open(cwd_foam_root + "/velocity_on_elements.txt", "r")
         lines = f.readlines()
-        velocitydict['Numoflist'] = 0
+        velocity_dict['time_slice'] = []
+        time_foam = 0
         for line in lines:
-            if str() + "\n" in line:
-                velocitydict['Numoflist'] += 1
-                velocitydict['time_foam'] += 1*dt_foam
-        #todo update the function for velocity read
-        for time_foam in range(velocitydict['Numoflist']):
-            data_velocity = lines[3 + time_foam * 1157:1155 + time_foam * 1157]
-            velocity = []
-            for item in data_velocity:
-                vector = item.split()
-                velocity.append([float(vector[0][1:]), float(vector[1]), float(vector[2][:-1])])
-            velocitydict['velocityinsurfaceAt' + str(time_foam + 1)] = velocity
-        f.close()
-
-        output = open(cwd + 'velocityfile.pkl', 'wb')
-        pickle.dump(velocitydict, output)
-        output.close()
-
-        pkfile = open(cwd + 'velocityfile.pkl', 'rb')
-        re = pickle.load(pkfile)
-        pkfile.close()
-
-        T = re['Numoflist'] * dt_foam
-        Velo = re['velocityinsurfaceAt' + str(re['Numoflist'])]
-        data = {'Time': T,
-                'velo': Velo}
-        while float(time_aster) > float(data['Time']):
-            time.sleep(10)
-            print("Now, the time in Openfoam solver is " + str(re['Time']) +
-                  "\nThe time in Code_Aster is " + str(time_aster))
-
-        else:
-            return data['velo']
-
+            if "The velocities at" in line:
+                time_foam = line.split(" ")[-3][:-1]
+                velocity_dict['time_slice'].append(time_foam)
+                start_line = lines.index(line) + 3
+                velocity_dict["velocities_at_" + str(time_foam)] = []
+                for element in lines[start_line:start_line + length_velocity]:
+                    velocity_dict["velocities_at_" + str(time_foam)].append(
+                        [float(element.split()[0][1:]), float(element.split()[1]), float(element.split()[2][:-1])])
+    return velocity_dict, time_foam
