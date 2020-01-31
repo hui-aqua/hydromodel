@@ -301,7 +301,7 @@ class HydroScreen:
             print("\nThe size of hydrodynamic force is " + str(len(np.array(hydro_force_on_element))))
             exit()
 
-    def screen_fsi(self, realtime_node_position, velocity_on_element):
+    def screen_fsi(self, realtime_node_position, velo_nodes,velocity_on_element):
         """
         :param realtime_node_position: a list of positions of all nodes
         :param velocity_on_element: a list of velocity on the centers of all net panels
@@ -314,7 +314,8 @@ class HydroScreen:
             p1 = realtime_node_position[panel[0]]
             p2 = realtime_node_position[panel[1]]
             p3 = realtime_node_position[panel[2]]
-            alpha, drag_direction, lift_direction, surface_area = calculation_on_element(p1, p2, p3, velocity)
+            velocity_of_net=np.mean(velo_nodes[panel[0]]+velo_nodes[panel[1]]+velo_nodes[panel[2]])
+            alpha, drag_direction, lift_direction, surface_area = calculation_on_element(p1, p2, p3, velocity-velocity_of_net)
             drag_coefficient, lift_coefficient = self.hydro_coefficients(alpha, velocity, knot=False)
             fd = 0.5 * row * surface_area * drag_coefficient * np.linalg.norm(np.array(velocity)) * np.array(velocity)
             fl = 0.5 * row * surface_area * lift_coefficient * pow(np.linalg.norm(velocity), 2) * lift_direction
@@ -368,7 +369,6 @@ def get_position(table_aster):
     delta_y = content.values()['DY']
     delta_z = content.values()['DZ']
     position = np.array([original_x, original_y, original_z]) + np.array([delta_x, delta_y, delta_z])
-    # print('In hy, the posi is'+str(np.transpose(POSI)))
     return np.transpose(position)
 
 
@@ -380,7 +380,7 @@ def get_velocity(table_aster):  # to get the velocity
     velocity = np.array([velocity_x, velocity_y, velocity_z])
     return np.transpose(velocity)
 
-
+# one function used by screen model
 def calculation_on_element(point1, point2, point3, velocity):
     # because the mesh construction, the first two node cannot have same index
     a1 = get_orientation(point1, point2)

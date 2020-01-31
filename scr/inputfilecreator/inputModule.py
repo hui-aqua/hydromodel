@@ -432,9 +432,21 @@ tblp = POST_RELEVE_T(ACTION=(_F(OPERATION='EXTRACTION',      # For Extraction of
                           INST=(1+k)*dt,                     # STAT_NON_LINE calculates for 10 INST. I want only last INST
                            ),),
                   );
+tblp2 = POST_RELEVE_T(ACTION=(_F(OPERATION='EXTRACTION',      # For Extraction of values
+                          INTITULE='Nodal Displacements',    # Name of the table in .resu file
+                          RESULTAT=resn,                     # The result from which values will be extracted(STAT_NON_LINE)
+                          NOM_CHAM=('VITE'),                 # Field to extract. VITE = velocity,
+                          #TOUT_CMP='OUI',
+                          NOM_CMP=('DX','DY','DZ'),          # Components of DISP to extract
+                          GROUP_NO='allnodes',               # Extract only for nodes of group DISP
+                          INST=(1+k)*dt,                     # STAT_NON_LINE calculates for 10 INST. I want only last INST
+                           ),),
+                  );
+
 if k < itimes-1:
     del Fnh
 posi=hy.get_position(tblp)  
+velo_nodes=hy.get_velocity(tblp2)
 if k==0:
     con=''' + str(meshInfo['netLines']) + ''' 
     sur=''' + str(meshInfo['netSurfaces']) + '''
@@ -485,7 +497,7 @@ elif switcher in ["FSI"]:
 
 timeFE=dt*k
 U=fsi.get_velocity(cwd,len(hydro_element),timeFE)
-force_on_element=hydroModel.screen_fsi(posi,U)
+force_on_element=hydroModel.screen_fsi(posi,velo_nodes,U)
 Fnh=hydroModel.distribute_force()
 fsi.write_position(posi,cwd)
 fsi.write_fh(force_on_element,timeFE,cwd)
@@ -496,6 +508,7 @@ np.savetxt(cwd+'asteroutput/posi'+str((k)*dt)+'.txt', posi)
 output_file = open(cwd + "/ASTER2.comm", 'a')
 output_file.write('''
 DETRUIRE(CONCEPT=_F( NOM=(tblp)))
+DETRUIRE(CONCEPT=_F( NOM=(tblp2)))
 if k < itimes-1:
     for i in range (1,len(Fnh)+1):
         DETRUIRE(CONCEPT=_F( NOM=(l[i])))
