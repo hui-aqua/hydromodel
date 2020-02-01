@@ -82,8 +82,8 @@ smesh = smeshBuilder.New(theStudy)
 Mesh_1 = smesh.Mesh()
 
 # add the pints into geometry
-for i in range(len(point)):
-    nodeID = Mesh_1.AddNode(float(point[i][0]), float(point[i][1]), float(point[i][2]))
+for each_node in point:
+    nodeID = Mesh_1.AddNode(float(each_node[0]), float(each_node[1]), float(each_node[2]))
 
 for i in range(1, NT + 1):
     for j in range(0, NN + 1):

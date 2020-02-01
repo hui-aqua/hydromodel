@@ -38,7 +38,7 @@ cageTypes = [
 ]  # add more models if it is ready
 if cageinfo['CageShape']['shape'] in cageTypes:
     if cageinfo['Mooring']['mooringType'] in ['None']:
-        os.system(str(workPath.salome_path) + " -t " + workPath.mesh_path + "ME_singleCage.py " + "args:" + Dictname)
+        os.system(str(workPath.salome_path) + " -t " + workPath.mesh_path + "ME_single_cage.py " + "args:" + Dictname)
     else:
         print("cage with mooring system is not finished yet, please wait for a update.")
         exit()

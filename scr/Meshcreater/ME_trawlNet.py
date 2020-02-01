@@ -1,25 +1,35 @@
-#!/usr/bin/env python3
-# -*- coding: utf-8 -*-
 '''
-based on the extral csv files
+"""
+/--------------------------------\
+|    University of Stavanger     |
+|           Hui Cheng            |
+\--------------------------------/
+Any questions about this code, please email: hui.cheng@uis.no
 
-email hui.cheng@uis.no for mmore information
+Run with a arguement [casename]
+"""
+
 '''
+nokey = input(
+    "Please make sure you have prepared the nodes and elements files, and keep them in the same folder of creatmesh.py")
+
 import numpy as np
 import salome
+import csv
+
 salome.salome_init()
 theStudy = salome.myStudy
 import SMESH
 from salome.smesh import smeshBuilder
+
 smesh = smeshBuilder.New(theStudy)
 Mesh_1 = smesh.Mesh()
 
-import csv
 # import the node coordinations and generate the nodes
 totalnodenumber = 0
-cwd="/home/hui/aster/trawlnet/tes1trawl"
+cwd = "/home/hui/aster/trawlnet/tes1trawl"
 # change the path of the input file
-with open(cwd+"/Nodes.csv", "r") as f:
+with open(cwd + "/Nodes.csv", "r") as f:
     kk = csv.reader(f)
     i = 1
     for p in kk:
@@ -28,17 +38,17 @@ with open(cwd+"/Nodes.csv", "r") as f:
 
 # import the line elements connection file and generate the lines
 totallinenumber = 0
-con=[]
-with open(cwd+"/Nele.csv", "r") as f:
+con = []
+with open(cwd + "/Nele.csv", "r") as f:
     kk = csv.reader(f)
     i = 1
     for pp in kk:
         print(int(pp[1]), int(pp[2]))
         edge = Mesh_1.AddEdge([int(pp[1]), int(pp[2])])
-        con.append([float(pp[1])-1, float(pp[2])]-1)
+        con.append([float(pp[1]) - 1, float(pp[2])] - 1)
         totallinenumber += 1
 
-np.savetxt(cwd+'/lineconnections.txt', con)
+np.savetxt(cwd + '/lineconnections.txt', con)
 
 isDone = Mesh_1.Compute()
 
