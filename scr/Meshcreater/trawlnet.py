@@ -13,7 +13,7 @@ import salome
 
 salome.salome_init()
 theStudy = salome.myStudy
-import SMESH, SALOMEDS
+import SMESH
 from salome.smesh import smeshBuilder
 
 smesh = smeshBuilder.New(theStudy)

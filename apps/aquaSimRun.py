@@ -7,9 +7,7 @@ Any questions about this code, please email: hui.cheng@uis.no
 
 """
 import os
-import sys
 import workPath
-import numpy as np
 
 cwd=os.getcwd()
 print("\nThe working folder is ' "+str(cwd)+ " ' \n")

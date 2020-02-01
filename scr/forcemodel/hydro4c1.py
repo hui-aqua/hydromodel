@@ -7,8 +7,6 @@ Any questions about this code, please email: hui.cheng@uis.no
 A module can be used to calculate the hydrodynamic forces on nets in Code_Aster.
 To use this module, one should be import this into the input file for calculations.
 """
-import time
-import pickle
 import numpy as np
 
 row = 1025  # kg/m3   sea water density
@@ -279,7 +277,6 @@ class HydroScreen:
             p3 = realtime_node_position[panel[2]]
             alpha, drag_direction, lift_direction, surface_area = calculation_on_element(p1, p2, p3, current_velocity)
             # calculate the inflow angel, normal vector, lift force factor, area of the hydrodynamic element
-            # set([int(k) for k in set(panel)])   # get a set of the node sequence in the element
             if self.hydro_element.index(panel) in self.ref:  # if the element in the wake region
                 velocity = current_velocity * self.wake.reduction_factor2(alpha)
             else:
@@ -301,9 +298,10 @@ class HydroScreen:
             print("\nThe size of hydrodynamic force is " + str(len(np.array(hydro_force_on_element))))
             exit()
 
-    def screen_fsi(self, realtime_node_position, velo_nodes,velocity_on_element):
+    def screen_fsi(self, realtime_node_position, velocity_of_nodes, velocity_on_element):
         """
-        :param realtime_node_position: a list of positions of all nodes
+        :param velocity_of_nodes: a list of velocities for all nodes
+        :param realtime_node_position: a list of positions for all nodes
         :param velocity_on_element: a list of velocity on the centers of all net panels
         :return: update the self.hydroForces_Element and output the forces on all the net panels.
         """
@@ -314,8 +312,10 @@ class HydroScreen:
             p1 = realtime_node_position[panel[0]]
             p2 = realtime_node_position[panel[1]]
             p3 = realtime_node_position[panel[2]]
-            velocity_of_net=np.mean(velo_nodes[panel[0]]+velo_nodes[panel[1]]+velo_nodes[panel[2]])
-            alpha, drag_direction, lift_direction, surface_area = calculation_on_element(p1, p2, p3, velocity-velocity_of_net)
+            velocity_of_net = (velocity_of_nodes[panel[0]] + velocity_of_nodes[panel[1]] + velocity_of_nodes[
+                panel[2]]) / (len(panel))
+            alpha, drag_direction, lift_direction, surface_area = calculation_on_element(p1, p2, p3,
+                                                                                         velocity - velocity_of_net)
             drag_coefficient, lift_coefficient = self.hydro_coefficients(alpha, velocity, knot=False)
             fd = 0.5 * row * surface_area * drag_coefficient * np.linalg.norm(np.array(velocity)) * np.array(velocity)
             fl = 0.5 * row * surface_area * lift_coefficient * pow(np.linalg.norm(velocity), 2) * lift_direction
@@ -380,6 +380,7 @@ def get_velocity(table_aster):  # to get the velocity
     velocity = np.array([velocity_x, velocity_y, velocity_z])
     return np.transpose(velocity)
 
+
 # one function used by screen model
 def calculation_on_element(point1, point2, point3, velocity):
     # because the mesh construction, the first two node cannot have same index
@@ -397,5 +398,3 @@ def calculation_on_element(point1, point2, point3, velocity):
     coin_alpha = abs(np.dot(normal_vector, velocity) / np.linalg.norm(velocity))
     alpha = np.arccos(coin_alpha)
     return alpha, normal_vector, lift_vector, surface_area
-
-

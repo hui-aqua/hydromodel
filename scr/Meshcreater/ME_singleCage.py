@@ -17,7 +17,7 @@ import os
 import numpy as np
 from numpy import pi
 
-point= []
+point = []
 con = []
 sur = []
 cwd = os.getcwd()
@@ -41,7 +41,7 @@ if shape in ['cylindrical']:
             point.append(
                 [D / 2 * np.cos(i * 2 * pi / float(NT)), D / 2 * np.sin(i * 2 * pi / float(NT)), -j * H / float(NN)])
     if 'Tube' in cageInfo['Weight']['weightType']:
-        tubeDepth=float(cageInfo['Weight']['bottomRingDepth'])
+        tubeDepth = float(cageInfo['Weight']['bottomRingDepth'])
         for i in range(0, NT):
             point.append([D / 2 * np.cos(i * 2 * pi / float(NT)), D / 2 * np.sin(i * 2 * pi / float(NT)), -tubeDepth])
 

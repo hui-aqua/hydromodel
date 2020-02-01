@@ -2,7 +2,7 @@
 from scr.enviroments import seacondition as sea
 import numpy as np
 import matplotlib.pyplot as plt
-from matplotlib.animation import FuncAnimation
+# from matplotlib.animation import FuncAnimation
 
 wave1 = sea.Airywave(1.91, 125, 20)
 wave2 = sea.Stocks2wave(1.91, 125, 20)

@@ -240,7 +240,6 @@ class HydroScreen:
             pass
 
     def screenForce(self, realTimePositions, Ucurrent, Uwave):
-        num_node = len(self.posi)  # the number of the node
         hydroForce_elements = []  # force on netpanel, initial as zeros
         for panel in self.hydroelems:  # loop based on the hydrodynamic elements
             alpha, surN, surL, surA = Cal_element(panel, realTimePositions, Ucurrent)

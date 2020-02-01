@@ -6,7 +6,6 @@
 Any questions about this code, please email: hui.cheng@uis.no
 
 """
-import pickle
 import os
 import time
 
@@ -82,7 +81,7 @@ numOfSurf   ''' + str(len(hydro_element)) + ''' ;''')
     output_file.close()
 
 
-def write_fh(hydro_force, timeFE,cwd):
+def write_fh(hydro_force, timeFE, cwd):
     # step 1 the head
     output_file = open(cwd + 'Fh', 'w+')
     output_file.write('''
@@ -119,8 +118,15 @@ numOfFh   ''' + str(len(hydro_force)) + ''' ;''')
     output_file.write('\n')
     output_file.close()
 
+
 # here we assume Code_aster is much faster than OpenFoam, thus OpenFOAM do not need to wait .
 def get_velocity(cwd, length_velocity, time_aster):
+    """
+    :param cwd: working path for code aster
+    :param length_velocity: the length of the list of element(or vlocity)
+    :param time_aster:
+    :return:
+    """
     cwd_foam_root = "/".join(cwd.split("/")[0:-2])
     velocity_file, time_foam = read_velocity(cwd_foam_root, length_velocity)
     while float(time_aster) > float(time_foam) or time_foam == 0:
