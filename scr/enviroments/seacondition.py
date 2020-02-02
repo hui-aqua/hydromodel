@@ -19,7 +19,7 @@ class Airywave:
     """
     Using Airy wave theory      \n
     To define this class, need to import:    \n
-    waveheight [m], wavelength [m], waveperiod [s], waterdepth [m] \n
+    wave height [m], wavelength [m], wave period [s], water depth [m] \n
     in this library, I assume the wave is coming from -X, and long X-axis,
     Z is the gravity direction,Z=0 iz the water level, and the water is below z=0
     If there are any questions, please contact hui.cheng@uis.no
@@ -46,9 +46,9 @@ class Airywave:
         S = s0 + s1 + s2 + s3 + s4
         return S
 
-    def Get_Velo(self, posi, time):
+    def get_velocity(self, posi, time):
         zeta = self.wavek * posi[0] - 2 * pi / self.wavePeriod * time
-        yita = self.Get_Surface(posi, time)
+        yita = self.get_surface(posi, time)
         if posi[2] < yita:
             horizonvelocity = self.piht * np.cosh(self.wavek * (posi[2] + self.waterDepth)) * np.cos(zeta) / np.sinh(
                 self.wavek * self.waterDepth)
@@ -68,9 +68,9 @@ class Airywave:
         velo[2] = vericalvelocity
         return velo
 
-    def Get_Acce(self, posi, time):
+    def get_acceleration(self, posi, time):
         zeta = self.wavek * posi[0] - 2 * pi / self.wavePeriod * time
-        yita = self.Get_Surface(posi, time)
+        yita = self.get_surface(posi, time)
         if posi[2] < yita:
             horizontalacceleration = self.piht2 * np.cosh(self.wavek * (posi[2] + self.waterDepth)) * np.sin(
                 zeta) / np.sinh(self.wavek * self.waterDepth)
@@ -88,37 +88,37 @@ class Airywave:
         acce[2] = vericalaccelateration
         return acce
 
-    def Get_Surface(self, posi, time):
-        zeta = self.wavek * posi[0] - 2 * pi / self.wavePeriod * time
+    def get_surface(self, positions, time):
+        zeta = self.wavek * positions[0] - 2 * pi / self.wavePeriod * time
         yita = self.waveHeight / 2 * np.cos(zeta)
         return yita
 
-    def Get_posiVelos(self, listofpoint, Golbaltime):
-        '''
+    def get_velocity_at_nodes(self, list_of_point, global_time):
+        """
         Get a list of velocity at a list of point
-        '''
-        listOfVelo = []
-        for point in listofpoint:
-            velocityAtPoint = self.Get_Velo(point, Golbaltime)
-            listOfVelo.append(velocityAtPoint)
-        return listOfVelo
+        """
+        list_of_velocity = []
+        for point in list_of_point:
+            velocity_at_point = self.get_velocity(point, global_time)
+            list_of_velocity.append(velocity_at_point)
+        return list_of_velocity
 
-    def Get_elemVelos(self, listofpoint, listofelement, Golbaltime):
-        '''
-        Get a list of velocity at a list of element
-        '''
-        listOfveloatElem = []
-        for element in listofelement:
-            lenngthofelement = len(element)
-            xs, ys, zs = 0, 0, 0
-            for point in element:
-                xs += listofpoint[point][0]
-                ys += listofpoint[point][1]
-                zs += listofpoint[point][2]
-            centerP = [xs / lenngthofelement, ys / lenngthofelement, zs / lenngthofelement, ]
-            velocityAtPoint = self.Get_Velo(centerP, Golbaltime)
-            listOfveloatElem.append(velocityAtPoint)
-        return listOfveloatElem
+    def get_velocity_at_elements(self, position_nodes, elements, global_time):
+        """
+        Get a list of velocity at a list of elements
+        :param position_nodes: a numpy list of position
+        :param elements: a python list of element
+        :param global_time: time [s]
+        :return: a numpy list of velocities on elements
+        """
+        velocity_list = []
+        for element in elements:
+            element_center = np.array([0, 0, 0])
+            for node in element:
+                element_center += self.positions[node] / len(element)
+            velocity_on_element = self.get_velocity(element_center, global_time)
+            velocity_list.append(velocity_on_element)
+        return np.array(velocity_list)
 
 
 class Stocks2wave(Airywave):
@@ -131,9 +131,9 @@ class Stocks2wave(Airywave):
         S = s0 + s1 + s2 + s3 + s4
         return S
 
-    def Get_Velo(self, posi, time):
+    def get_velocity(self, posi, time):
         zeta = self.wavek * posi[0] - 2 * pi / self.wavePeriod * time
-        yita = self.Get_Surface(posi, time)
+        yita = self.get_surface(posi, time)
         if posi[2] < yita:
             horizonvelocity = self.piht * np.cosh(self.wavek * (posi[2] + self.waterDepth)) * np.cos(zeta) / np.sinh(
                 self.wavek * self.waterDepth) + 0.75 * self.piht * self.pihl * np.cosh(
@@ -161,9 +161,9 @@ class Stocks2wave(Airywave):
         velo[2] = vericalvelocity
         return velo
 
-    def Get_Acce(self, posi, time):
+    def get_acceleration(self, posi, time):
         zeta = self.wavek * posi[0] - 2 * pi / self.wavePeriod * time
-        yita = self.Get_Surface(posi, time)
+        yita = self.get_surface(posi, time)
         if posi[2] < yita:
             horizontalacceleration = self.piht2 * np.cosh(self.wavek * (posi[2] + self.waterDepth)) * np.sin(
                 zeta) / np.sinh(self.wavek * self.waterDepth) + 1.5 * self.piht2 * self.pihl * np.cosh(
@@ -191,7 +191,7 @@ class Stocks2wave(Airywave):
         acce[2] = vericalaccelateration
         return acce
 
-    def Get_Surface(self, posi, time):
+    def get_surface(self, posi, time):
         zeta = self.wavek * posi[0] - 2 * pi / self.wavePeriod * time
         yita = self.waveHeight / 2 * np.cos(
             zeta) + pi * self.waveHeight * self.waveHeight / 8.0 / self.waveLength * np.cosh(

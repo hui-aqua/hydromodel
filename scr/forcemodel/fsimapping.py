@@ -8,7 +8,7 @@ Any questions about this code, please email: hui.cheng@uis.no
 """
 import os
 import time
-
+import numpy as np
 
 def write_position(position, cwd):
     # step 1 the head
@@ -133,13 +133,13 @@ def get_velocity(cwd, length_velocity, time_aster):
         time.sleep(2)
         velocity_file, time_foam = read_velocity(cwd_foam_root, length_velocity)
     else:
-        return velocity_file["velocities_at_" + str(time_foam)]
+        return np.array(velocity_file["velocities_at_" + str(time_foam)])
 
 
 def read_velocity(cwd_foam_root, length_velocity):
     velocity_dict = {}
     while not os.path.isfile(cwd_foam_root + "/velocity_on_elements.txt"):
-        print("Wait for velocity from OpenFoam")
+        print("Wait for velocity from OpenFoam......")
         time.sleep(10)
     else:
         f = open(cwd_foam_root + "/velocity_on_elements.txt", "r")

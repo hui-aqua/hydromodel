@@ -9,32 +9,29 @@ To use this module, one should be import this into the input file for calculatio
 """
 import numpy as np
 
-row = 1025  # kg/m3   sea water density
+row = 1025  # [kg/m3]   sea water density
 kinematic_viscosity = 1.004e-6  # when the water temperature is 20 degree.
 dynamic_viscosity = 1.002e-3  # when the water temperature is 20 degree.
 
 
 class Net2NetWake:
-    def __init__(self, node_position, hydro_element, current_velocity, net_solidity):
-        self.positions = node_position  # a list of all the nodes for net
+    def __init__(self, node_position: list or np.array, hydro_element: list, current_velocity: list or np.array,
+                 net_solidity):
+        self.positions = np.array(node_position)  # a list of all the nodes for net, convert to numpy list
         self.elements = hydro_element  # a list of all the elements for net
-        self.U = current_velocity  # incoming velocity for cage
-        self.cage_center = np.array([0, 0, 0])  # set the cage center is [0,0,0]
+        self.U = np.array(current_velocity)  # incoming velocity for cage
+        self.cage_center = np.array([0.0, 0.0, 0.0])  # set the cage center is [0,0,0]
         self.Sn = net_solidity
 
     def get_element_in_wake(self):
         element_in_wake = []
-        for i in range(len(self.elements)):
-            for j in range(len(self.elements[i])):
-                x = 0
-                y = 0
-                z = 0
-                x += self.positions[self.elements[i][j]][0] / len(self.elements[i])
-                y += self.positions[self.elements[i][j]][1] / len(self.elements[i])
-                z += self.positions[self.elements[i][j]][2] / len(self.elements[i])
-            vector_point_to_cage_center = (np.array([x, y, z]) - self.cage_center)
-            if np.dot(vector_point_to_cage_center, self.U) < 0:
-                element_in_wake.append(i)
+        for element in self.elements:
+            element_center = np.array([3.0, 0.0, 0.0])  # must be a float
+            for node in element:
+                element_center += np.array(self.positions[int(node)] / len(element))
+            vector_point_to_cage_center = np.array(element_center - self.cage_center)
+        if np.dot(vector_point_to_cage_center, self.U) < 0:
+            element_in_wake.append(self.elements.index(element))
         return element_in_wake
 
     def reduction_factor2(self, alf):  # alf is the inflow angle
@@ -74,7 +71,7 @@ class HydroMorison:
     def hydro_coefficients(self, current_velocity, knot=False):
         drag_normal = 0
         drag_tangent = 0
-        if self.modelIndex not in 'S1,S2,S3,S4,S5,S6':
+        if self.modelIndex not in 'M1,M2,M3,M4,M5':
             print("The selected hydrodynamic model is not included in the present program")
             exit()
         elif self.modelIndex == 'M1':  # Bessonneau 1998
@@ -108,14 +105,26 @@ class HydroMorison:
             else:
                 print("Reynold number=" + str(reynolds_number) + ", and it exceeds the range.")
                 exit()
+        elif self.modelIndex == 'M5':  # cifuentes 2017
+            reynolds_number = row * self.dw0 * np.linalg.norm(current_velocity) / dynamic_viscosity
+            drag_normal = -3.2891e-5 * pow(reynolds_number * self.Sn * self.Sn,
+                                           2) + 0.00068 * reynolds_number * self.Sn * self.Sn + 1.4253
         return drag_normal, drag_tangent
 
-    def force_on_element(self, realtime_node_position, current_velocity):
+    def force_on_element(self, realtime_node_position, current_velocity, wave=[]):
         """
+        :param wave: a numpy list of wave on element, optional.
         :param realtime_node_position: a list of positions of all nodes
-        :param current_velocity: [ux,uy,uz], Unit [m/s]
+        :param current_velocity: np.array([ux,uy,uz]), Unit [m/s]
         :return: update the self.hydroForces_Element
         """
+        if len(wave) == 0:
+            wave_velocity = np.zeros((len(self.elements), 3))
+        elif len(wave) == len(self.elements):
+            wave_velocity = wave
+        else:
+            print("The length of wave velocity is unequal ot the length of element, Please check your code.")
+            exit()
         num_line = len(self.elements)
         hydro_force_on_element = []  # force on line element, initial as zeros
         for i in range(num_line):
@@ -124,38 +133,10 @@ class HydroMorison:
             a = get_orientation(realtime_node_position[int(self.elements[i][0])],
                                 realtime_node_position[int(self.elements[i][1])])
             if i in self.ref:
-                velocity = 0.8 * np.array(current_velocity)
+                velocity = 0.8 * np.array(current_velocity) + wave_velocity[i]
             else:
-                velocity = np.array(current_velocity)
+                velocity = np.array(current_velocity) + wave_velocity[i]
             drag_n, drag_t = self.hydro_coefficients(current_velocity, knot=False)
-            ft = 0.5 * row * self.dwh * (b - self.dwh) * drag_t * np.dot(a, velocity) * a * np.linalg.norm(
-                np.dot(a, velocity))
-            fn = 0.5 * row * self.dwh * (b - self.dwh) * drag_n * (velocity - np.dot(a, velocity) * a) * np.linalg.norm(
-                (velocity - np.dot(a, velocity) * a))
-            hydro_force_on_element.append(ft + fn)
-        self.hydroForces_Element = np.array(hydro_force_on_element)
-        return np.array(hydro_force_on_element)
-
-    def force_cw_on_element(self, realtime_node_position, current_velocity, Uwave):
-        """
-        :param Uwave: velocity on the center of element
-        :param realtime_node_position: a list of positions of all nodes
-        :param current_velocity: [ux,uy,uz], Unit [m/s]
-        :return: update the self.hydroForces_Element
-        """
-        num_line = len(self.elements)
-        hydro_force_on_element = []  # force on line element, initial as zeros
-        for i in range(num_line):
-            b = get_distance(realtime_node_position[int(self.elements[i][0])],
-                             realtime_node_position[int(self.elements[i][1])])
-            a = get_orientation(realtime_node_position[int(self.elements[i][0])],
-                                realtime_node_position[int(self.elements[i][1])])
-            if i in self.ref:
-                velocity = 0.8 * np.array(current_velocity)
-            else:
-                velocity = np.array(current_velocity)
-
-            drag_n, drag_t = self.hydro_coefficients(current_velocity + Uwave[i], knot=False)
             ft = 0.5 * row * self.dwh * (b - self.dwh) * drag_t * np.dot(a, velocity) * a * np.linalg.norm(
                 np.dot(a, velocity))
             fn = 0.5 * row * self.dwh * (b - self.dwh) * drag_n * (velocity - np.dot(a, velocity) * a) * np.linalg.norm(
@@ -187,13 +168,14 @@ class HydroScreen:
     def __init__(self, model_index, node_position, elements, solidity, current_direction, dwh=0.0, dw0=0.0):
         self.modelIndex = str(model_index)
         self.node_position = node_position  # the position matrix [[x1,y1,z1][x2,y2,z2]]
-        self.hydro_element = self.convert_hydro_element(elements)  # the connections of the twines[[p1,p2][p2,p3]]
+        self.hydro_element = convert_hydro_element(elements)  # the connections of the twines[[p1,p2][p2,p3]]
         self.dwh = dwh  # used for the force calculation (reference area)
         self.dw0 = dw0  # used for the hydrodynamic coefficients
         self.Sn = solidity  # solidity of th net
         self.wake = Net2NetWake(self.node_position, self.hydro_element, current_direction,
                                 self.Sn)  # create wake object
         self.ref = self.wake.get_element_in_wake()  # get the elements in the wake
+
         self.force_on_elements = np.zeros((len(self.hydro_element), 3))
 
     def output_element_in_wake(self):
@@ -203,18 +185,6 @@ class HydroScreen:
     def output_hydro_element(self):
         # return the index of the elements in the wake region
         return self.hydro_element
-
-    def convert_hydro_element(self, elements):
-        hydro_elements = []
-        for panel in elements:  # loop based on the hydrodynamic elements
-            if len([int(k) for k in set(panel)]) == 3:  # the hydrodynamic element is a triangle
-                hydro_elements.append([k for k in set([int(k) for k in set(panel)])])  # a list of the node sequence
-            else:
-                for i in range(len(panel)):  # loop 4 times to map the force
-                    nodes = [int(k) for k in panel]  # get the list of nodes [p1,p2,p3,p4]
-                    nodes.pop(i)  # delete the i node to make the square to a triangle
-                    hydro_elements.append(nodes)  # delete the i node to make the square to a triangle
-        return hydro_elements
 
     def hydro_coefficients(self, inflow_angle, current_velocity, knot=False):
         drag_coefficient, lift_coefficient = 0, 0
@@ -292,63 +262,36 @@ class HydroScreen:
                 pass
         return drag_coefficient, lift_coefficient
 
-    def force_on_element(self, realtime_node_position, current_velocity):
+    def force_on_element(self, realtime_node_position, current_velocity, wave):
         """
+        :param wave: a numpy list of wave on element, optional.
         :param realtime_node_position: a list of positions of all nodes
         :param current_velocity: [ux,uy,uz], Unit [m/s]
         :return:  update the self.hydroForces_Element
         """
+        if len(wave) == 0:
+            wave_velocity = np.zeros((len(self.elements), 3))
+        elif len(wave) == len(self.elements):
+            wave_velocity = wave
+        else:
+            print("The length of wave velocity is unequal ot the length of element, Please check your code.")
+            exit()
         hydro_force_on_element = []  # force on net panel, initial as zeros
         for panel in self.hydro_element:  # loop based on the hydrodynamic elements
             p1 = realtime_node_position[panel[0]]
             p2 = realtime_node_position[panel[1]]
             p3 = realtime_node_position[panel[2]]
-            alpha, drag_direction, lift_direction, surface_area = calculation_on_element(p1, p2, p3, current_velocity)
+            alpha, lift_direction, surface_area = calculation_on_element(p1, p2, p3, current_velocity)
             # calculate the inflow angel, normal vector, lift force factor, area of the hydrodynamic element
             if self.hydro_element.index(panel) in self.ref:  # if the element in the wake region
-                velocity = current_velocity * self.wake.reduction_factor2(alpha)
+                velocity = current_velocity * self.wake.reduction_factor2(alpha) + wave_velocity[
+                    self.hydro_element.index(panel)]
             else:
-                velocity = current_velocity
+                velocity = current_velocity + wave_velocity[self.hydro_element.index(panel)]
                 # * 0.8 ** int((self.hydro_element.index(panel) + 1) / 672)
                 # if not in the wake region, the effective velocity is the undisturbed velocity
 
             drag_coefficient, lift_coefficient = self.hydro_coefficients(alpha, velocity, knot=False)
-            fd = 0.5 * row * surface_area * drag_coefficient * np.linalg.norm(velocity) * velocity
-            fl = 0.5 * row * surface_area * lift_coefficient * pow(np.linalg.norm(velocity), 2) * lift_direction
-            hydro_force_on_element.append((fd + fl) / 2.0)
-        if np.size(np.array(hydro_force_on_element)) == np.size(self.hydro_element):
-            self.force_on_elements = np.array(hydro_force_on_element)
-            return np.array(hydro_force_on_element)
-        else:
-            print("\nError! the size of hydrodynamic force on element is not equal to the number of element."
-                  "\nPlease cheack you code.")
-            print("\nThe size of element is " + str(len(self.hydro_element)))
-            print("\nThe size of hydrodynamic force is " + str(len(np.array(hydro_force_on_element))))
-            exit()
-
-    def force_cw_on_element(self, realtime_node_position, current_velocity, Uwave):
-        """
-        :param Uwave: list of wave velocity on center of elements
-        :param realtime_node_position: a list of positions of all nodes
-        :param current_velocity: [ux,uy,uz], Unit [m/s]
-        :return:  update the self.hydroForces_Element
-        """
-        hydro_force_on_element = []  # force on net panel, initial as zeros
-        for panel in self.hydro_element:  # loop based on the hydrodynamic elements
-            p1 = realtime_node_position[panel[0]]
-            p2 = realtime_node_position[panel[1]]
-            p3 = realtime_node_position[panel[2]]
-            alpha, drag_direction, lift_direction, surface_area = calculation_on_element(p1, p2, p3, current_velocity)
-            # calculate the inflow angel, normal vector, lift force factor, area of the hydrodynamic element
-            if self.hydro_element.index(panel) in self.ref:  # if the element in the wake region
-                velocity = current_velocity * self.wake.reduction_factor2(alpha)
-            else:
-                velocity = current_velocity
-                # * 0.8 ** int((self.hydro_element.index(panel) + 1) / 672)
-                # if not in the wake region, the effective velocity is the undisturbed velocity
-
-            drag_coefficient, lift_coefficient = self.hydro_coefficients(alpha, velocity + Uwave[
-                self.hydro_element.index(panel)], knot=False)
             fd = 0.5 * row * surface_area * drag_coefficient * np.linalg.norm(velocity) * velocity
             fl = 0.5 * row * surface_area * lift_coefficient * pow(np.linalg.norm(velocity), 2) * lift_direction
             hydro_force_on_element.append((fd + fl) / 2.0)
@@ -364,25 +307,26 @@ class HydroScreen:
 
     def screen_fsi(self, realtime_node_position, velocity_of_nodes, velocity_on_element):
         """
-        :param velocity_of_nodes: a list of velocities for all nodes
-        :param realtime_node_position: a list of positions for all nodes
-        :param velocity_on_element: a list of velocity on the centers of all net panels
+        :param velocity_of_nodes: a numpy array of velocities for all nodes
+        :param realtime_node_position: a numpy array of positions for all nodes
+        :param velocity_on_element: a numpy array on the centers of all net panels
         :return: update the self.hydroForces_Element and output the forces on all the net panels.
         """
-        print("The length of U vector is " + str(len(velocity_on_element)))
+        # print("The length of U vector is " + str(len(velocity_on_element)))
         hydro_force_on_element = []  # force on net panel, initial as zeros
         for panel in self.hydro_element:  # loop based on the hydrodynamic elements
-            velocity = velocity_on_element[self.hydro_element.index(panel)]
+            velocity_fluid = velocity_on_element[self.hydro_element.index(panel)]
+            velocity_structure = (velocity_of_nodes[panel[0]] + velocity_of_nodes[panel[1]] + velocity_of_nodes[
+                panel[2]]) / (len(panel))
             p1 = realtime_node_position[panel[0]]
             p2 = realtime_node_position[panel[1]]
             p3 = realtime_node_position[panel[2]]
-            velocity_of_net = (velocity_of_nodes[panel[0]] + velocity_of_nodes[panel[1]] + velocity_of_nodes[
-                panel[2]]) / (len(panel))
-            alpha, drag_direction, lift_direction, surface_area = calculation_on_element(p1, p2, p3,
-                                                                                         velocity - velocity_of_net)
-            drag_coefficient, lift_coefficient = self.hydro_coefficients(alpha, velocity, knot=False)
-            fd = 0.5 * row * surface_area * drag_coefficient * np.linalg.norm(np.array(velocity)) * np.array(velocity)
-            fl = 0.5 * row * surface_area * lift_coefficient * pow(np.linalg.norm(velocity), 2) * lift_direction
+            alpha, lift_direction, surface_area = calculation_on_element(p1, p2, p3,
+                                                                         velocity_fluid - velocity_structure)
+            drag_coefficient, lift_coefficient = self.hydro_coefficients(alpha, velocity_fluid, knot=False)
+            fd = 0.5 * row * surface_area * drag_coefficient * np.linalg.norm(np.array(velocity_fluid)) * np.array(
+                velocity_fluid)
+            fl = 0.5 * row * surface_area * lift_coefficient * pow(np.linalg.norm(velocity_fluid), 2) * lift_direction
             hydro_force_on_element.append((fd + fl) / 2.0)
         if np.size(np.array(hydro_force_on_element)) == np.size(self.hydro_element):
             self.force_on_elements = np.array(hydro_force_on_element)
@@ -390,6 +334,25 @@ class HydroScreen:
         else:
             print("Error!, the size of hydrodynamic force on element is not equal to the number of element."
                   "Please cheack you code.")
+            exit()
+
+    def distribute_velocity(self, current_velocity, wave_velocity=[]):
+        velocity_on_element = []  # velocity on net panel, initial as zeros
+        if len(current_velocity) < 4:
+            velocity_on_element=np.ones((len(self.hydro_element),3))*current_velocity
+        elif len(current_velocity) == len(self.hydro_element):
+            velocity_on_element = np.array(current_velocity)
+
+        if not wave_velocity == []:
+            for panel in self.hydro_element:  # loop based on the hydrodynamic elements
+                velocity_on_element[self.hydro_element.index(panel)] = +wave_velocity[self.hydro_element.index(panel)]
+        if len(velocity_on_element) == len(self.hydro_element):
+            return velocity_on_element
+        else:
+            print("\nError! the size of velocity on element is not equal to the number of element."
+                  "\nPlease cheack you code.")
+            print("\nThe size of element is " + str(len(self.hydro_element)))
+            print("\nThe size of hydrodynamic force is " + str(len(velocity_on_element)))
             exit()
 
     def distribute_force(self):
@@ -461,4 +424,26 @@ def calculation_on_element(point1, point2, point3, velocity):
 
     coin_alpha = abs(np.dot(normal_vector, velocity) / np.linalg.norm(velocity))
     alpha = np.arccos(coin_alpha)
-    return alpha, normal_vector, lift_vector, surface_area
+    return alpha, lift_vector, surface_area
+
+
+# one function used by screen model
+def convert_hydro_element(elements):
+    hydro_elements = []
+    for panel in elements:  # loop based on the hydrodynamic elements
+        if len([int(k) for k in set(panel)]) == 3:  # the hydrodynamic element is a triangle
+            hydro_elements.append([k for k in set([int(k) for k in set(panel)])])  # a list of the node sequence
+        else:
+            for i in range(len(panel)):
+                nodes = [int(k) for k in panel]  # get the list of nodes [p1,p2,p3,p4]
+                nodes.pop(i)  # delete the i node to make the square to a triangle
+                hydro_elements.append(nodes)  # delete the i node to make the square to a triangle
+    return hydro_elements
+
+
+# note:
+'''
+In the present program, the nodes' position is stored as numpy array not a python list for easier manipulation.
+Velocity of current and/or wave is also a numpy array.
+Element index is stored as a python list for fast running. 
+'''

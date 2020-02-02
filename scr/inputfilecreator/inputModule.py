@@ -529,6 +529,7 @@ P facmtps 1
 P lang en
 P mclient UiS.D202
 P memjob 5224448
+P memory_limit 5102.0
 P mode interactif
 P mpi_nbcpu 1
 P mpi_nbnoeud 1
@@ -543,23 +544,17 @@ P protocol_copyfrom asrun.plugins.server.SCPServer
 P protocol_copyto asrun.plugins.server.SCPServer
 P protocol_exec asrun.plugins.server.SSHServer
 P proxy_dir /tmp
+P rep_trav /tmp/hui-UiS-interactif_1''' + str(suffix) + '''
 P serveur localhost
 P soumbtc oui
+P time_limit 9000060.0
 P tpsjob 1501
 P uclient hui
 P username hui
 P version stable
 A args 
 A memjeveux 637.75
-A tpmax 90000.0
-P classe 
-P depart 
-P after_job 
-P distrib 
-P exectool 
-P multiple 
-P only_nook 
-P rep_trav /tmp/hui-UiS-interactif_1''' + str(suffix) + '''
+A tpmax 9000000.0
 F mmed ''' + cwd + '''/asterinput/''' + str(meshInfo['meshName']) + ''' D 20
 F comm ''' + cwd + '''/asterinput/ASTER1.comm D 1
 F comm ''' + cwd + '''/asterinput/ASTER2.comm D 91
@@ -568,3 +563,13 @@ F resu ''' + cwd + '''/asteroutput/reactionforce.txt R 8
 F mess ''' + cwd + '''/asteroutput/mess.log R 6\n''')
 output_file.write('\n')
 output_file.close()
+
+
+# might be used in export file
+# P classe
+# P depart
+# P after_job
+# P distrib
+# P exectool
+# P multiple
+# P only_nook
