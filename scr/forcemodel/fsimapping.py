@@ -125,7 +125,7 @@ def get_velocity(cwd, length_velocity, time_aster):
     :param cwd: working path for code aster
     :param length_velocity: the length of the list of element(or vlocity)
     :param time_aster:
-    :return:
+    :return: a numpy array of velocity on elements
     """
     cwd_foam_root = "/".join(cwd.split("/")[0:-2])
     velocity_file, time_foam = read_velocity(cwd_foam_root, length_velocity)

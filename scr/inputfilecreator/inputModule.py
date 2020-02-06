@@ -447,6 +447,7 @@ if k < itimes-1:
     del Fnh
 posi=hy.get_position(tblp)  
 velo_nodes=hy.get_velocity(tblp2)
+
 if k==0:
     con=''' + str(meshInfo['netLines']) + ''' 
     sur=''' + str(meshInfo['netSurfaces']) + '''
@@ -466,7 +467,7 @@ if switcher in ["False"]:
     output_file = open(cwd + "/ASTER2.comm", 'a')
     output_file.write('''
 U=np.array(Uinput[int(k*dt/10.0)])
-force_on_element=hydroModel.force_on_element(posi,U)
+force_on_element=hydroModel.force_on_element(posi,velo_nodes,U)
 Fnh=hydroModel.distribute_force()
 np.savetxt(cwd+'asteroutput/posi'+str((k)*dt)+'.txt', posi)
         ''')
@@ -478,7 +479,7 @@ elif switcher in ["simiFSI"]:
     output_file.write('''
     fsi.write_element(hydro_element,cwd)
 U=np.array(Uinput[int(k*dt/10.0)])
-force_on_element=hydroModel.force_on_element(posi,U)
+force_on_element=hydroModel.force_on_element(posi,velo_nodes,U)
 Fnh=hydroModel.distribute_force()
 fsi.write_position(posi,cwd)
 fsi.write_fh(force_on_element,cwd)

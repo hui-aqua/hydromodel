@@ -15,8 +15,7 @@ dynamic_viscosity = 1.002e-3  # when the water temperature is 20 degree.
 
 
 class Net2NetWake:
-    def __init__(self, node_position: list or np.array, hydro_element: list, current_velocity: list or np.array,
-                 net_solidity):
+    def __init__(self, node_position: np.array, hydro_element: list, current_velocity: np.array, net_solidity):
         self.positions = np.array(node_position)  # a list of all the nodes for net, convert to numpy list
         self.elements = hydro_element  # a list of all the elements for net
         self.U = np.array(current_velocity)  # incoming velocity for cage
@@ -111,14 +110,14 @@ class HydroMorison:
                                            2) + 0.00068 * reynolds_number * self.Sn * self.Sn + 1.4253
         return drag_normal, drag_tangent
 
-    def force_on_element(self, realtime_node_position, current_velocity, wave=[]):
+    def force_on_element(self, realtime_node_position, current_velocity, wave=0):
         """
         :param wave: a numpy list of wave on element, optional.
         :param realtime_node_position: a list of positions of all nodes
         :param current_velocity: np.array([ux,uy,uz]), Unit [m/s]
         :return: update the self.hydroForces_Element
         """
-        if len(wave) == 0:
+        if wave == 0:
             wave_velocity = np.zeros((len(self.elements), 3))
         elif len(wave) == len(self.elements):
             wave_velocity = wave
@@ -262,22 +261,26 @@ class HydroScreen:
                 pass
         return drag_coefficient, lift_coefficient
 
-    def force_on_element(self, realtime_node_position, current_velocity, wave):
+    def force_on_element(self, realtime_node_position, velocity_nodes, current_velocity, wave=0):
         """
-        :param wave: a numpy list of wave on element, optional.
+        :param velocity_nodes: a numpy array of velocities for all nodes
+        :param wave: a numpy array of wave on element, optional.
         :param realtime_node_position: a list of positions of all nodes
-        :param current_velocity: [ux,uy,uz], Unit [m/s]
+        :param current_velocity: numpy array ([ux,uy,uz]), Unit [m/s]
         :return:  update the self.hydroForces_Element
         """
-        if len(wave) == 0:
-            wave_velocity = np.zeros((len(self.elements), 3))
-        elif len(wave) == len(self.elements):
+        if wave == 0:
+            wave_velocity = np.zeros((len(self.hydro_element), 3))
+        elif len(wave) == len(self.hydro_element):
             wave_velocity = wave
         else:
             print("The length of wave velocity is unequal ot the length of element, Please check your code.")
             exit()
         hydro_force_on_element = []  # force on net panel, initial as zeros
         for panel in self.hydro_element:  # loop based on the hydrodynamic elements
+            # velocity_structure = (velocity_nodes[panel[0]] + velocity_nodes[panel[1]] + velocity_nodes[panel[2]]) / (
+            #     len(panel))
+            velocity_structure = np.array([0.0, 0.0, 0.0])
             p1 = realtime_node_position[panel[0]]
             p2 = realtime_node_position[panel[1]]
             p3 = realtime_node_position[panel[2]]
@@ -290,10 +293,11 @@ class HydroScreen:
                 velocity = current_velocity + wave_velocity[self.hydro_element.index(panel)]
                 # * 0.8 ** int((self.hydro_element.index(panel) + 1) / 672)
                 # if not in the wake region, the effective velocity is the undisturbed velocity
-
-            drag_coefficient, lift_coefficient = self.hydro_coefficients(alpha, velocity, knot=False)
-            fd = 0.5 * row * surface_area * drag_coefficient * np.linalg.norm(velocity) * velocity
-            fl = 0.5 * row * surface_area * lift_coefficient * pow(np.linalg.norm(velocity), 2) * lift_direction
+            velocity_relative = velocity - velocity_structure
+            drag_coefficient, lift_coefficient = self.hydro_coefficients(alpha, velocity_relative, knot=False)
+            fd = 0.5 * row * surface_area * drag_coefficient * np.linalg.norm(velocity_relative) * velocity_relative
+            fl = 0.5 * row * surface_area * lift_coefficient * pow(np.linalg.norm(velocity_relative),
+                                                                   2) * lift_direction
             hydro_force_on_element.append((fd + fl) / 2.0)
         if np.size(np.array(hydro_force_on_element)) == np.size(self.hydro_element):
             self.force_on_elements = np.array(hydro_force_on_element)
@@ -318,15 +322,17 @@ class HydroScreen:
             velocity_fluid = velocity_on_element[self.hydro_element.index(panel)]
             velocity_structure = (velocity_of_nodes[panel[0]] + velocity_of_nodes[panel[1]] + velocity_of_nodes[
                 panel[2]]) / (len(panel))
+            velocity_relative = velocity_fluid - velocity_structure
             p1 = realtime_node_position[panel[0]]
             p2 = realtime_node_position[panel[1]]
             p3 = realtime_node_position[panel[2]]
-            alpha, lift_direction, surface_area = calculation_on_element(p1, p2, p3,
-                                                                         velocity_fluid - velocity_structure)
-            drag_coefficient, lift_coefficient = self.hydro_coefficients(alpha, velocity_fluid, knot=False)
-            fd = 0.5 * row * surface_area * drag_coefficient * np.linalg.norm(np.array(velocity_fluid)) * np.array(
-                velocity_fluid)
-            fl = 0.5 * row * surface_area * lift_coefficient * pow(np.linalg.norm(velocity_fluid), 2) * lift_direction
+            alpha, lift_direction, surface_area = calculation_on_element(p1, p2, p3, velocity_relative)
+            drag_coefficient, lift_coefficient = self.hydro_coefficients(alpha, velocity_relative, knot=False)
+
+            fd = 0.5 * row * surface_area * drag_coefficient * np.linalg.norm(np.array(velocity_relative)) * np.array(
+                velocity_relative)
+            fl = 0.5 * row * surface_area * lift_coefficient * pow(np.linalg.norm(velocity_relative),
+                                                                   2) * lift_direction
             hydro_force_on_element.append((fd + fl) / 2.0)
         if np.size(np.array(hydro_force_on_element)) == np.size(self.hydro_element):
             self.force_on_elements = np.array(hydro_force_on_element)
@@ -336,14 +342,14 @@ class HydroScreen:
                   "Please cheack you code.")
             exit()
 
-    def distribute_velocity(self, current_velocity, wave_velocity=[]):
+    def distribute_velocity(self, current_velocity, wave_velocity=0):
         velocity_on_element = []  # velocity on net panel, initial as zeros
         if len(current_velocity) < 4:
-            velocity_on_element=np.ones((len(self.hydro_element),3))*current_velocity
+            velocity_on_element = np.ones((len(self.hydro_element), 3)) * current_velocity
         elif len(current_velocity) == len(self.hydro_element):
             velocity_on_element = np.array(current_velocity)
 
-        if not wave_velocity == []:
+        if not wave_velocity == 0:
             for panel in self.hydro_element:  # loop based on the hydrodynamic elements
                 velocity_on_element[self.hydro_element.index(panel)] = +wave_velocity[self.hydro_element.index(panel)]
         if len(velocity_on_element) == len(self.hydro_element):
