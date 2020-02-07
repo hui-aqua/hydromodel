@@ -448,8 +448,8 @@ def convert_hydro_element(elements):
 
 
 # note:
-'''
-In the present program, the nodes' position is stored as numpy array not a python list for easier manipulation.
-Velocity of current and/or wave is also a numpy array.
-Element index is stored as a python list for fast running. 
-'''
+#
+# In the present program, the nodes' position is stored as numpy array not a python list for easier manipulation.
+# Velocity of current and/or wave is also a numpy array.
+# Element index is stored as a python list for fast running.
+#

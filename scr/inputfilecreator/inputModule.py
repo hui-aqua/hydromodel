@@ -55,7 +55,7 @@ output_file.write('\n')
 output_file.close()
 
 # >>>>>>>>>>>>>>>    AFFE_MODELE       >>>>>>>>>>>>
-if cageInfo['Weight']['weightType'] in ['sinkers']:
+if cageInfo['Weight']['weightType'] in ['sinkers', 'allfixed']:
     output_file = open(cwd + '/ASTER1.comm', 'a')
     output_file.write('''
 model = AFFE_MODELE(AFFE=(_F(GROUP_MA=('twines'),
@@ -69,8 +69,6 @@ elif cageInfo['Weight']['weightType'] in ['sinkerTube', 'sinkerTube+centerweight
     output_file = open(cwd + '/ASTER1.comm', 'a')
     output_file.write('''
 model = AFFE_MODELE(AFFE=(_F(GROUP_MA=('twines'), 
-
-
                              MODELISATION=('CABLE'), 
                              PHENOMENE='MECANIQUE'), 
                           _F(GROUP_MA=('bottomring'), 
@@ -81,11 +79,12 @@ model = AFFE_MODELE(AFFE=(_F(GROUP_MA=('twines'),
 ''')
     output_file.close()
 else:
+    print("Warning!!! >>>>>AFFE_MODELE")
     print("The present weight type '" + cageInfo['Weight']['weightType'] + "' is not included in the present program, "
                                                                            "Please check the guide for input file.")
 
 # >>>>>>>>>>>>>>>    AFFE_CARA_ELEM       >>>>>>>>>>>>
-if cageInfo['Weight']['weightType'] in ['sinkers']:
+if cageInfo['Weight']['weightType'] in ['sinkers', 'allfixed']:
     output_file = open(cwd + '/ASTER1.comm', 'a')
     output_file.write('''
 elemprop = AFFE_CARA_ELEM(CABLE=_F(GROUP_MA=('twines'),
@@ -109,11 +108,12 @@ elemprop = AFFE_CARA_ELEM(CABLE=_F(GROUP_MA=('twines'),
 ''')
     output_file.close()
 else:
+    print("Warning!!! >>>>>AFFE_CARA_ELEM")
     print("The present weight type '" + cageInfo['Weight']['weightType'] + "' is not included in the present program, "
                                                                            "Please check the guide for input file.")
 
 # >>>>>>>>>>>>>>>    DEFI_MATERIAU       >>>>>>>>>>>>
-if cageInfo['Weight']['weightType'] in ['sinkers']:
+if cageInfo['Weight']['weightType'] in ['sinkers', 'allfixed']:
     output_file = open(cwd + '/ASTER1.comm', 'a')
     output_file.write('''
 net = DEFI_MATERIAU(CABLE=_F(EC_SUR_E=0.0001),
@@ -141,11 +141,12 @@ fe = DEFI_MATERIAU(ELAS=_F(E=''' + str(cageInfo['Weight']["bottomRingYoungModule
 ''')
     output_file.close()
 else:
+    print("Warning!!! >>>>>DEFI_MATERIAU")
     print("The present weight type '" + cageInfo['Weight']['weightType'] + "' is not included in the present program, "
                                                                            "Please check the guide for input file.")
 
 # >>>>>>>>>>>>>>>    AFFE_MATERIAU       >>>>>>>>>>>>
-if cageInfo['Weight']['weightType'] in ['sinkers']:
+if cageInfo['Weight']['weightType'] in ['sinkers', 'allfixed']:
     output_file = open(cwd + '/ASTER1.comm', 'a')
     output_file.write('''
 fieldmat = AFFE_MATERIAU(AFFE=(_F(GROUP_MA=('twines'),
@@ -166,6 +167,7 @@ fieldmat = AFFE_MATERIAU(AFFE=(_F(GROUP_MA=('twines'),
 ''')
     output_file.close()
 else:
+    print("Warning!!! >>>>>AFFE_MATERIAU")
     print("The present weight type '" + cageInfo['Weight']['weightType'] + "' is not included in the present program, "
                                                                            "Please check the guide for input file.")
 
@@ -186,7 +188,7 @@ if cageInfo['Mooring']['mooringType'] in ['None']:
     if cageInfo['Weight']['weightType'] in ['allfixed']:
         output_file = open(cwd + '/ASTER1.comm', 'a')
         output_file.write('''
-fix = AFFE_CHAR_MECA(DDL_IMPO=_F(GROUP_MA=('allnodes'),
+fix = AFFE_CHAR_MECA(DDL_IMPO=_F(GROUP_NO=('allnodes'),
                                          LIAISON='ENCASTRE'),
                              MODELE=model)
         ''')
@@ -201,6 +203,7 @@ fix = AFFE_CHAR_MECA(DDL_IMPO=_F(GROUP_MA=('topring'),
         output_file.close()
 
 else:
+    print("Warning!!! >>>>>AFFE_CHAR_MECA    fixed ")
     print('need to update the script')
     exit()
 
@@ -264,7 +267,15 @@ IMPR_RESU(FORMAT='MED',
 stat = CALC_CHAMP(CONTRAINTE=('SIEF_ELNO', ),
                   FORCE=('REAC_NODA', ),
                   RESULTAT=resn)
-reac = POST_RELEVE_T(ACTION=_F(GROUP_NO=('topnodes'),
+''')
+output_file.close()
+
+# >>>>>>>>> reaction force >>>>>>>>>>>>
+if cageInfo['Mooring']['mooringType'] in ['None']:
+    if cageInfo['Weight']['weightType'] in ['allfixed']:
+        output_file = open(cwd + '/ASTER1.comm', 'a')
+        output_file.write('''
+reac = POST_RELEVE_T(ACTION=_F(GROUP_NO=('allnodes'),
                                INTITULE='sum reactions',
                                MOMENT=('DRX', 'DRY', 'DRZ'),
                                NOM_CHAM=('REAC_NODA'),
@@ -277,8 +288,30 @@ IMPR_TABLE(FORMAT_R='1PE12.3',
            UNITE=8)
 
 FIN()                                        
-''')
-output_file.close()
+        ''')
+        output_file.close()
+    else:
+        output_file = open(cwd + '/ASTER1.comm', 'a')
+        output_file.write('''
+reac = POST_RELEVE_T(ACTION=_F(GROUP_NO=('topnodes'),
+                               INTITULE='sum reactions',
+                               MOMENT=('DRX', 'DRY', 'DRZ'),
+                               NOM_CHAM=('REAC_NODA'),
+                               OPERATION=('EXTRACTION', ),
+                               POINT=(0.0, 0.0, 0.0),
+                               RESULTANTE=('DX', 'DY', 'DZ'),
+                               RESULTAT=stat))
+IMPR_TABLE(FORMAT_R='1PE12.3',
+           TABLE=reac,
+           UNITE=8)
+
+FIN()  
+            ''')
+    output_file.close()
+
+else:
+    print("Warning!!! >>>>>reaction force")
+    print('need to update the script')
 
 # >>>>>>>>>>>>>>>    DEFI_LIST_INST       >>>>>>>>>>>>
 output_file = open(cwd + "/ASTER2.comm", 'w')
@@ -478,11 +511,11 @@ elif switcher in ["simiFSI"]:
     output_file = open(cwd + "/ASTER2.comm", 'a')
     output_file.write('''
     fsi.write_element(hydro_element,cwd)
+timeFE=dt*k    
 U=np.array(Uinput[int(k*dt/10.0)])
 force_on_element=hydroModel.force_on_element(posi,velo_nodes,U)
 Fnh=hydroModel.distribute_force()
 fsi.write_position(posi,cwd)
-fsi.write_fh(force_on_element,cwd)
 np.savetxt(cwd+'asteroutput/posi'+str((k)*dt)+'.txt', posi)
         ''')
     output_file.close()
@@ -564,7 +597,6 @@ F resu ''' + cwd + '''/asteroutput/reactionforce.txt R 8
 F mess ''' + cwd + '''/asteroutput/mess.log R 6\n''')
 output_file.write('\n')
 output_file.close()
-
 
 # might be used in export file
 # P classe

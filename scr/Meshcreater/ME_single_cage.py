@@ -31,6 +31,7 @@ NN = cageInfo['CageShape']['elementOverHeight']  # number of section in the heig
 shapeKey = str(cageInfo['CageShape']['shape'])
 shape = shapeKey.split('-')[0]
 bottomSwitcher = shapeKey.split('-')[1]
+floater_center = cageInfo['FloatingCollar']['floaterCenter']
 
 if shape in ['cylindrical']:
     D = cageInfo['CageShape']['cageDiameter']
@@ -39,11 +40,15 @@ if shape in ['cylindrical']:
     for j in range(0, NN + 1):
         for i in range(0, NT):
             point.append(
-                [D / 2 * np.cos(i * 2 * pi / float(NT)), D / 2 * np.sin(i * 2 * pi / float(NT)), -j * H / float(NN)])
+                [floater_center[0] + D / 2 * np.cos(i * 2 * pi / float(NT)),
+                 floater_center[1] + D / 2 * np.sin(i * 2 * pi / float(NT)),
+                 floater_center[2] - j * H / float(NN)])
     if 'Tube' in cageInfo['Weight']['weightType']:
         tubeDepth = float(cageInfo['Weight']['bottomRingDepth'])
         for i in range(0, NT):
-            point.append([D / 2 * np.cos(i * 2 * pi / float(NT)), D / 2 * np.sin(i * 2 * pi / float(NT)), -tubeDepth])
+            point.append([floater_center[0] + D / 2 * np.cos(i * 2 * pi / float(NT)),
+                          floater_center[1] + D / 2 * np.sin(i * 2 * pi / float(NT)),
+                          floater_center[2] - tubeDepth])
 
 elif shape in ['squared']:
     # generate the point coordinates matrix for squared cage

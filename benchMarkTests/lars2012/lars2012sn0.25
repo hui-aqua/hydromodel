@@ -1,42 +1,42 @@
 {
 'Environment':
   {
-  'current':[[0.12,0,0],[0.26,0,0], [0.50,0,0],[0.76,0,0],[0.93,0,0]], # A list of currents
-  'waterDepth':2.2,      # [m] the water depth
+  'current':[[0.01,0,0],[0.05,0,0], [0.20,0,0]], # A list of currents
+  'waterDepth':1.1,      # [m] the water depth
   'waves':'False',       # wave type : will be add in next version
   'fluidDensity':1000.0, # [kg/m3] fluid density
   },
 'CageShape':
   {
   'shape':'cylindrical-NoBottom', # "cylindricalWithBottom", "squaredNoBottom",  "squaredWithBottom", 'conical'
-  'elementOverCir': 32,
-  'elementOverHeight': 8,
-  'cageDiameter':1.75, # [m] diameter of the fish cage
-  'cageHeight':1.5,  # [m] height of the fish cage
+  'elementOverCir': 12,
+  'elementOverHeight': 12,
+  'cageDiameter':0.1, # [m] diameter of the fish cage
+  'cageHeight':0.3,  # [m] height of the fish cage
   # 'cageCenterTipDepth':1.7, # [m]  the height of the cage center in metter
   },
 'Net':
   {
   'HydroModel':'Screen-S1',  #'Morison-M1'
   'nettingType':'square',
-  'Sn': 0.347,   # solidity ratio
-  'twineDiameter': 1.41e-3, # [m]the twine diameter of the physical net
-  'meshLength': 8.3e-3, # [m]the half mesh length
+  'Sn': 0.25,   # solidity ratio
+  'twineDiameter': 1.5e-3, # [m]the twine diameter of the physical net
+  'meshLength': 12e-3, # [m]the half mesh length
   'netYoungmodule':40000000, # [Pa]
   'netRho':1140.0, #[kg/m3] density of the net material
   },
 'FloatingCollar':
     {
     'floaterCenter':[0,0,-0.3],
-    'collarNumber':2, # number of pipe
+    'collarNumber':0, # number of pipe
     'topRingRadius':10e-3,  # [m] the pipe diameter of the floating pipe
     'SDR':9,       # SDR is the ratio of pipe diameter to wall thickness
-    'bottomRingRho':6e3,
-    'bottomRingYoungModule':160e9,
+    'topRingRho':6e3,
+    'topRingYoungModule':160e9,
     },
 'Weight':
     {
-    'weightType':'sinkers', # 'allfixed','sinkerTube', 'sinkerTube+centerweight'
+    'weightType':'allfixed', #'sinkers', # ,'sinkerTube', 'sinkerTube+centerweight'
     #'bottomRingRadius':0.64e-3,  # [m] the pipe diameter of the sinker tube
     #'bottomRingDepth': 2.0,   #[m]
     #'SDR':9,       # SDR is the ratio of pipe diameter to wall thickness
