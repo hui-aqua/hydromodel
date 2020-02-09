@@ -15,23 +15,25 @@ dynamic_viscosity = 1.002e-3  # when the water temperature is 20 degree.
 
 
 class Net2NetWake:
-    def __init__(self, node_position: np.array, hydro_element: list, current_velocity: np.array, net_solidity):
-        self.positions = np.array(node_position)  # a list of all the nodes for net, convert to numpy list
-        self.elements = hydro_element  # a list of all the elements for net
-        self.U = np.array(current_velocity)  # incoming velocity for cage
+    def __init__(self, node_position, hydro_element, current_velocity, net_solidity):
+        self.positions = np.array(node_position)  # a np.array for all the nodes for net, convert to numpy list
+        self.elements = hydro_element  # a python list of all the elements for net
+        self.U = np.array(current_velocity)  # np.array for incoming velocity to a cage
         self.cage_center = np.array([0.0, 0.0, 0.0])  # set the cage center is [0,0,0]
         self.Sn = net_solidity
+        print("The net-to-net wake effect is initialized")
 
     def get_element_in_wake(self):
         element_in_wake = []
         for element in self.elements:
-            element_center = np.array([3.0, 0.0, 0.0])  # must be a float
+            element_center = np.array([0.0, 0.0, 0.0])  # must be a float
             for node in element:
                 element_center += np.array(self.positions[int(node)] / len(element))
             vector_point_to_cage_center = np.array(element_center - self.cage_center)
-        if np.dot(vector_point_to_cage_center, self.U) < 0:
-            element_in_wake.append(self.elements.index(element))
+            if np.dot(vector_point_to_cage_center, self.U) < 0:
+                element_in_wake.append(self.elements.index(element))
         return element_in_wake
+
 
     def reduction_factor2(self, alf):  # alf is the inflow angle
         alf = np.abs(alf)
