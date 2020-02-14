@@ -16,6 +16,7 @@ import sys
 import os
 import numpy as np
 from numpy import pi
+import ast
 
 point = []
 con = []
@@ -24,7 +25,7 @@ cwd = os.getcwd()
 
 with open(str(sys.argv[1]), 'r') as f:
     content = f.read()
-    cageInfo = eval(content)
+    cageInfo = ast.literal_eval(content)
 
 NT = cageInfo['CageShape']['elementOverCir']  # Number of the nodes in circumference
 NN = cageInfo['CageShape']['elementOverHeight']  # number of section in the height, thus, the nodes should be NN+1
@@ -94,23 +95,33 @@ for i in range(1, NT + 1):
     for j in range(0, NN + 1):
         if j == NN:
             if i == NT:
-                edge = Mesh_1.AddEdge([i + j * NT, 1 + i + (j - 1) * NT])  # add the horizontal line into geometry
-                con.append([i + j * NT - 1, 1 + i + (j - 1) * NT - 1])  # add the horizontal line into con
+                edge = Mesh_1.AddEdge([i + j * NT,
+                                       1 + i + (j - 1) * NT])  # add the horizontal line into geometry
+                con.append([i + j * NT - 1,
+                            1 + i + (j - 1) * NT - 1])  # add the horizontal line into con
             else:
-                edge = Mesh_1.AddEdge([i + j * NT, 1 + i + j * NT])  # add the horizontal line into geometry
-                con.append([i + j * NT - 1, 1 + i + j * NT - 1])  # add the horizontal line into con
+                edge = Mesh_1.AddEdge([i + j * NT,
+                                       1 + i + j * NT])  # add the horizontal line into geometry
+                con.append([i + j * NT - 1,
+                            1 + i + j * NT - 1])  # add the horizontal line into con
         else:
             edge = Mesh_1.AddEdge([i + j * NT, i + (j + 1) * NT])  # add the vertical line into geometry
             con.append([i + j * NT - 1, i + (j + 1) * NT - 1])  # add the vertical line into con
             if i == NT:
                 edge = Mesh_1.AddEdge([i + j * NT, 1 + i + (j - 1) * NT])  # add the horizontal line into geometry
                 con.append([i + j * NT - 1, 1 + i + (j - 1) * NT - 1])  # add the horizontal line into con
-                sur.append([i + j * NT - 1, 1 + i + (j - 1) * NT - 1, i + (j + 1) * NT - 1, 1 + i + j * NT - 1])
+                sur.append([i + j * NT - 1,
+                            1 + i + (j - 1) * NT - 1,
+                            i + (j + 1) * NT - 1,
+                            1 + i + j * NT - 1])
                 # add the horizontal surface into sur
             else:
                 edge = Mesh_1.AddEdge([i + j * NT, 1 + i + j * NT])  # add the horizontal line into geometry
                 con.append([i + j * NT - 1, 1 + i + j * NT - 1])  # add the horizontal line into con
-                sur.append([i + j * NT - 1, 1 + i + j * NT - 1, i + (j + 1) * NT - 1, 1 + i + (j + 1) * NT - 1])
+                sur.append([i + j * NT - 1,
+                            1 + i + j * NT - 1,
+                            i + (j + 1) * NT - 1,
+                            1 + i + (j + 1) * NT - 1])
                 # add the horizontal surface into sur
 
 isDone = Mesh_1.Compute()
@@ -145,6 +156,8 @@ if cageInfo['Weight']['weightType'] in ['sinkers']:
               "\nYou need to add the sinker manually.")
 else:
     print("\nThere is no sinkers on the bottom ring")
+
+
 # generate the name for each node to assign the hydrodynamic forces.
 for i in range(1, len(point) + 1):
     node1 = Mesh_1.CreateEmptyGroup(SMESH.NODE, 'node%s' % i)
@@ -166,6 +179,8 @@ smesh.SetName(topring, 'topring')
 bottomring = Mesh_1.CreateEmptyGroup(SMESH.EDGE, 'bottomring')
 nbAdd = bottomring.Add([i for i in range(2 * NN + 1, len(con) + 1, 2 * NN + 1)])
 smesh.SetName(bottomring, 'bottomring')
+
+# give a name to the mesh
 meshname = "CFGNB" + str(D) + "X" + str(H) + ".med"
 Mesh_1.ExportMED(cwd + "/" + meshname)
 

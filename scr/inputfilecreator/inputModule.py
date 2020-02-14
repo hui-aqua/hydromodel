@@ -238,7 +238,8 @@ output_file = open(cwd + '/ASTER1.comm', 'a')
 output_file.write('''
 dt=''' + str(dt) + '''      # time step
 # itimes is the total iterations
-itimes=''' + str(int(cageInfo['Solver']['timeLength'] / dt * len(cageInfo['Environment']['current']))) + '''   
+itimes=''' + str(
+    int(cageInfo['Solver']['timeLength'] / dt * int(np.array(cageInfo['Environment']['current']).size / 3))) + '''   
 tend=itimes*dt
 
 listr = DEFI_LIST_REEL(DEBUT=0.0,
