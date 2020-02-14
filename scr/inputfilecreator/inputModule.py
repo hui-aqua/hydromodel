@@ -532,7 +532,7 @@ elif switcher in ["FSI"]:
 
 timeFE=dt*k
 U=fsi.get_velocity(cwd,len(hydro_element),timeFE)
-force_on_element=hydroModel.screen_fsi(posi,velo_nodes,U)
+force_on_element=hydroModel.screen_fsi(posi,U,velo_nodes)
 Fnh=hydroModel.distribute_force()
 fsi.write_position(posi,cwd)
 fsi.write_fh(force_on_element,timeFE,cwd)

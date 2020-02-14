@@ -311,7 +311,7 @@ class HydroScreen:
             print("\nThe size of hydrodynamic force is " + str(len(np.array(hydro_force_on_element))))
             exit()
 
-    def screen_fsi(self, realtime_node_position, velocity_of_nodes, velocity_on_element):
+    def screen_fsi(self, velocity_of_nodes, velocity_on_element,realtime_node_position=0):
         """
         :param velocity_of_nodes: a numpy array of velocities for all nodes
         :param realtime_node_position: a numpy array of positions for all nodes
@@ -324,7 +324,7 @@ class HydroScreen:
             velocity_fluid = velocity_on_element[self.hydro_element.index(panel)]
             velocity_structure = (velocity_of_nodes[panel[0]] + velocity_of_nodes[panel[1]] + velocity_of_nodes[
                 panel[2]]) / (len(panel))
-            velocity_relative = velocity_fluid - velocity_structure
+            velocity_relative = velocity_fluid - velocity_structure*0
             p1 = realtime_node_position[panel[0]]
             p2 = realtime_node_position[panel[1]]
             p3 = realtime_node_position[panel[2]]

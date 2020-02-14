@@ -148,11 +148,14 @@ def read_velocity(cwd_foam_root, length_velocity):
         time_foam = 0
         for line in lines:
             if "The velocities at" in line:
-                time_foam = line.split(" ")[-3][:-1]
+                time_foam = line.split(" ")[3][:-1]
                 velocity_dict['time_slice'].append(time_foam)
-                start_line = lines.index(line) + 3
-                velocity_dict["velocities_at_" + str(time_foam)] = []
-                for element in lines[start_line:start_line + length_velocity]:
-                    velocity_dict["velocities_at_" + str(time_foam)].append(
-                        [float(element.split()[0][1:]), float(element.split()[1]), float(element.split()[2][:-1])])
+                if len(line.split(" ")) == 6:
+                    start_line = lines.index(line) + 3
+                    velocity_dict["velocities_at_" + str(time_foam)] = []
+                    for element in lines[start_line:start_line + length_velocity]:
+                        velocity_dict["velocities_at_" + str(time_foam)].append(
+                            [float(element.split()[0][1:]), float(element.split()[1]), float(element.split()[2][:-1])])
+                else:
+                    velocity_dict["velocities_at_" + str(time_foam)] =np.zeros((length_velocity,3))
     return velocity_dict, time_foam

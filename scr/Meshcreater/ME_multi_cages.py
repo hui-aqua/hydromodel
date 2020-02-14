@@ -193,7 +193,8 @@ meshinfo = {
     "netNodes": point,
     "NN": NN,
     "NT": NT,
-    "meshName": meshname
+    "meshName": meshname,
+    "numberOfCages": num_cages,
 }
 f = open(cwd + "/meshinfomation.txt", "w")
 f.write(str(meshinfo))
