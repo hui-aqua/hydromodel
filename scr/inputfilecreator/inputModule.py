@@ -11,6 +11,9 @@ import sys
 import random as rd
 import workPath
 import numpy as np
+import socket
+import getpass
+
 
 cwd = os.getcwd()
 argument = sys.argv
@@ -559,10 +562,10 @@ P consbtc oui
 P corefilesize unlimited
 P cpresok RESNOOK
 P debug nodebug
-P display UiS.D202.D202:0
+P display ''' + socket.gethostname() + ''':0
 P facmtps 1
 P lang en
-P mclient UiS.D202
+P mclient ''' + socket.gethostname() + '''
 P memjob 5224448
 P memory_limit 5102.0
 P mode interactif
@@ -570,23 +573,23 @@ P mpi_nbcpu 1
 P mpi_nbnoeud 1
 P nbmaxnook 5
 P ncpus 10
-P noeud localhost
+P noeud ''' + socket.gethostname() + '''
 P nomjob astk
 P origine ASTK 2019.0.final
 P platform LINUX64
-P profastk hui@UiS.D202:''' + cwd + '''/run.astk
+P profastk ''' + getpass.getuser()+ '''@''' + socket.gethostname() + ''':''' + cwd + '''/run.astk
 P protocol_copyfrom asrun.plugins.server.SCPServer
 P protocol_copyto asrun.plugins.server.SCPServer
 P protocol_exec asrun.plugins.server.SSHServer
 P proxy_dir /tmp
 P rep_trav /tmp/hui-UiS-interactif_1''' + str(suffix) + '''
-P serveur localhost
+P serveur ''' + socket.gethostname() + '''
 P soumbtc oui
 P time_limit 9000060.0
 P tpsjob 1501
-P uclient hui
-P username hui
-P version stable
+P uclient ''' + getpass.getuser()+ '''
+P username ''' + getpass.getuser()+ '''
+P version testing
 A args 
 A memjeveux 637.75
 A tpmax 9000000.0
