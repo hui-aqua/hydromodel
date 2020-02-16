@@ -138,18 +138,13 @@ def get_velocity(cwd, length_velocity, time_aster):
         time.sleep(2)
         velocity_file, time_foam = read_velocity(cwd_foam_root, length_velocity)
     else:
-        while len(velocity_file["velocities_at_" + str(time_foam)]) < length_velocity:
-            # make sure that the length of the variable is long enough for Code_Aster calculation.
-            time.sleep(0.2)
-            velocity_file, time_foam = read_velocity(cwd_foam_root, length_velocity)
-        else:
-            while len(velocity_dict['time_slice']) > 25:
-                time_to_drop = velocity_dict['time_slice'].pop(3)
-                velocity_dict.pop(str(time_to_drop), None)
-            f = open(os.path.join(cwd, "velocity.txt"), "w")
-            f.write(str(velocity_dict))
-            f.close()
-            return np.array(velocity_file["velocities_at_" + str(time_foam)])
+        while len(velocity_dict['time_slice']) > 25:
+            time_to_drop = velocity_dict['time_slice'].pop(3)
+            velocity_dict.pop(str(time_to_drop), None)
+        f = open(os.path.join(cwd, "velocity.txt"), "w")
+        f.write(str(velocity_dict))
+        f.close()
+        return np.array(velocity_file["velocities_at_" + str(time_foam)])
 
 
 def read_velocity(cwd_foam_root, length_velocity):
