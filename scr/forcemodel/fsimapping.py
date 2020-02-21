@@ -121,8 +121,7 @@ numOfFh   ''' + str(len(hydro_force)) + ''' ;''')
 
 
 # here we assume Code_aster is much faster than OpenFoam, thus OpenFOAM do not need to wait .
-velocity_dict = {'time_slice': [],
-                 'time_record': []}
+velocity_dict = {'time_record': [0]}
 
 
 def get_velocity(cwd, length_velocity, time_aster):
@@ -133,18 +132,12 @@ def get_velocity(cwd, length_velocity, time_aster):
     :return: a numpy array of velocity on elements
     """
     cwd_foam_root = "/".join(cwd.split("/")[0:-2])
-    velocity_file, time_foam = read_velocity(cwd_foam_root, length_velocity)
-    while float(time_aster) > float(time_foam) or time_foam == 0:
-        time.sleep(2)
+    time_foam = velocity_dict['time_record'][-1]
+    while float(time_aster) > float(time_foam) or str(time_foam) == str(0):
+        time.sleep(1)
         velocity_file, time_foam = read_velocity(cwd_foam_root, length_velocity)
     else:
-        while len(velocity_dict['time_slice']) > 25:
-            time_to_drop = velocity_dict['time_slice'].pop(3)
-            velocity_dict.pop(str(time_to_drop), None)
-        f = open(os.path.join(cwd, "velocity.txt"), "w")
-        f.write(str(velocity_dict))
-        f.close()
-        return np.array(velocity_file["velocities_at_" + str(time_foam)])
+        return np.array(velocity_dict["velocities_at_" + str(time_foam)])
 
 
 def read_velocity(cwd_foam_root, length_velocity):
@@ -155,7 +148,7 @@ def read_velocity(cwd_foam_root, length_velocity):
         f = open(cwd_foam_root + "/velocity_on_elements.txt", "r")
         lines = f.readlines()
         time_foam = 0
-        for line in lines:
+        for line in lines[-length_velocity * 5:]:
             if "The velocities at" in line:
                 time_foam = line.split(" ")[3][:-1]
                 if str(time_foam) not in velocity_dict['time_record']:
@@ -163,16 +156,15 @@ def read_velocity(cwd_foam_root, length_velocity):
                     if len(line.split(" ")) == 6:
                         start_line = lines.index(line) + 3
                         velocity_dict["velocities_at_" + str(time_foam)] = []
-                        for element in lines[start_line:start_line + length_velocity]:
+                        for item in range(length_velocity):
                             try:
                                 velocity_dict["velocities_at_" + str(time_foam)].append(
-                                    [float(element.split()[0][1:]), float(element.split()[1]),
-                                     float(element.split()[2][:-1])])
+                                    [float(lines[item + start_line].split()[0][1:]),
+                                     float(lines[item + start_line].split()[1]),
+                                     float(lines[item + start_line].split()[2][:-1])])
                             except:
                                 velocity_dict["velocities_at_" + str(time_foam)].append([0.0, 0.0, 0.0])
                     else:
                         velocity_dict["velocities_at_" + str(time_foam)] = np.zeros((length_velocity, 3))
 
-    for key in velocity_dict.keys():
-        velocity_dict['time_slice'].append(key)
     return velocity_dict, time_foam
