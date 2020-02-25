@@ -589,7 +589,7 @@ P time_limit 9000060.0
 P tpsjob 1501
 P uclient ''' + getpass.getuser()+ '''
 P username ''' + getpass.getuser()+ '''
-P version testing
+P version ''' + str(cageInfo['Solver']['version']) + '''
 A args 
 A memjeveux 637.75
 A tpmax 9000000.0
