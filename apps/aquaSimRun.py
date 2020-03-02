@@ -24,6 +24,12 @@ def run_simulation():
         os.mkdir("asterinput")
     if not os.path.exists("asteroutput"):
         os.mkdir("asteroutput")
+    if not os.path.exists("positionOutput"):
+        os.mkdir("positionOutput")
+    if not os.path.exists("midOutput"):
+        os.mkdir("midOutput")
+    if not os.path.exists("midOutput/REPE_OUT"):
+        os.mkdir("midOutput/REPE_OUT")
     files = os.listdir(cwd)
     for file in files:
         if file.endswith(".med") or file.endswith(".txt") or file.endswith(".comm") or file.endswith(".export"):
