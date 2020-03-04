@@ -32,17 +32,16 @@ If you have any questions about this program, please email: hui.cheng@uis.no
    
 <details>
 <summary>shortcut</summary>
- User configuration
+<p> 
+User configuration
 In order to use the installed aquaSimulator, complete the following:
-    1. Open the $HOME/.bashrc file in the user's home directory in an editor, e.g., by typing in a terminal (note the dot)
-    ```
-   vi ~/.bashrc 
-   ```
-   2. Add the following line at the bottom of that file and save the file
-   ```
-    alias aqua='source [source folder]/hydromodel/etc/aliases.sh'
-   ```
-   3. type aqua in your terminal. 
+
+- 1. Open the $HOME/.bashrc file in the user's home directory in an editor, e.g., by typing in a terminal (note the dot)
+    ```  vi ~/.bashrc ```
+- 2. Add the following line at the bottom of that file and save the file
+   ```    alias aqua='source [source folder]/hydromodel/etc/aliases.sh'```
+- 3. type aqua in your terminal. 
+</p>
 </details>
 
 3. Now there are three applications that can be used for simulations:
