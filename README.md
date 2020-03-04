@@ -44,7 +44,7 @@ In order to use the installed aquaSimulator, complete the following:
 </p>
 </details>
 
-3. Now there are three applications that can be used for simulations:
+3. Now there are few applications that can be used for simulations:
     - aquaMesh + input dict: To create mesh
     - aquaAster + input dict: To generate the input files for code_Aster
     - aquaSim + input dict: To run simulation
