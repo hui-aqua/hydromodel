@@ -548,17 +548,19 @@ np.savetxt(cwd+'positionOutput/posi'+str((k)*dt)+'.txt', posi)
 output_file = open(cwd + "/ASTER2.comm", 'a')
 output_file.write('''
 
-filename = "REPE_OUT/output.rmed"
-DEFI_FICHIER(FICHIER=filename, UNITE=180,TYPE='BINARY')
+filename = "REPE_OUT/output+"str(k)"+.rmed"
+
+DEFI_FICHIER(FICHIER=filename, UNITE=180+k,TYPE='BINARY')
+
 IMPR_RESU(FORMAT='MED', 
-          UNITE=180, 
+          UNITE=180+k, 
           RESU=_F(CARA_ELEM=elemprop,
                   NOM_CHAM=('DEPL' ,'SIEF_ELGA'),
                   LIST_INST=listr, 
                   RESULTAT=resn,
                   TOUT_CMP='OUI'),
           )
-DEFI_FICHIER(ACTION='LIBERER', UNITE=180)
+DEFI_FICHIER(ACTION='LIBERER', UNITE=180+k)
 
 stat = CALC_CHAMP(CONTRAINTE=('SIEF_ELNO', ),
                   FORCE=('REAC_NODA', ),
