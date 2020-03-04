@@ -448,7 +448,7 @@ else:
                                     OBSE_ETAT_INIT='NON'),
                     SCHEMA_TEMPS=_F(FORMULATION='DEPLACEMENT',
                                    SCHEMA="''' + str(cageInfo['Solver']['method']) + '''",
-                                    ALPHA=-''' + str(cageInfo['Solver']['alptha']) + '''
+                                    ALPHA=-''' + str(cageInfo['Solver']['alpha']) + '''
                                    ),
                                    #add damping stablize the oscilations Need to study in the future                        
                     INCREMENT=_F(LIST_INST=times,INST_FIN=(1+k)*dt),
