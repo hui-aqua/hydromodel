@@ -37,14 +37,14 @@
 'Weight':
     {
     'weightType':'sinkers', # 'allfixed','sinkerTube', 'sinkerTube+centerweight'
-    #'bottomRingRadius':0.64e-3,  # [m] the pipe diameter of the sinker tube
-    #'bottomRingDepth': 2.0,   #[m]
-    #'SDR':9,       # SDR is the ratio of pipe diameter to wall thickness
-    #'bottomRingRho':7.87e3,
-    #'bottomRingYoungModule':9e11,
+    'bottomRingRadius':0.64e-3,  # [m] the pipe diameter of the sinker tube
+    'bottomRingDepth': 2.0,   #[m]
+    'SDR':9,       # SDR is the ratio of pipe diameter to wall thickness
+    'bottomRingRho':7.87e3,
+    'bottomRingYoungModule':9e11,
     'numOfSinkers':16,
     'sinkerWeight':4.48, #[N]
-    # 'tipWeight':10,  #[N]
+    'tipWeight':10,  #[N]
     },
   'Mooring':
   {
@@ -56,6 +56,7 @@
   },
   'Solver':
   {
+  'version':'stable',
   'coupling':'False', # 'FSI', 'simiFSI'
   'method':'HHT',  # [m] the length of the buoy line, distance between the buoy and plate
   'alptha':24.3,

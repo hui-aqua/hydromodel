@@ -4,11 +4,13 @@
 
 This is a project within the Ocean Technology Innovation Cluster Stavanger (OTICS) at the University of Stavanger. 
 This program it is not ready for release now.
+
 If you have any questions about this program, please email: hui.cheng@uis.no
+
 * Requirements
-    * Salome-Meca (Ver2019, Ver2018)  
+    * Salome-Meca (Ver2019 or Ver2018)  
     https://www.code-aster.org/V2/spip.php?article303
-    * Code_Aster (stable version)  
+    * Code_Aster   
     https://www.code-aster.org/V2/spip.php?article272
     * Python3
      
@@ -19,25 +21,31 @@ If you have any questions about this program, please email: hui.cheng@uis.no
         python3 install.py
         ```
  * How to use this program   
+ 
 1. The users has to prepare the the 'cageDict' in your working path. 
- You can find a template and introduction of this input file in the examples folder.
+ You can find a template and introduction of this input file [Here](https://github.com/hui-aqua/hydromodel/tree/master/benchMarkTests).
         
 2. To use the applications, the user needs to source the environment:
    ```
-   source $HOME/aqua/etc/aliases.sh 
+   source [source folder]/hydromodel/etc/aliases.sh 
    ```
-3. User configuration
+   
+<details>
+<summary>shortcut</summary>
+<p> 
+User configuration
 In order to use the installed aquaSimulator, complete the following:
-    1. Open the $HOME/.bashrc file in the user's home directory in an editor, e.g., by typing in a terminal (note the dot)
-    ```
-   vi ~/.bashrc 
-   ```
-   2. Add the following line at the bottom of that file and save the file
-   ```
-    alias aqua='source [source folder]/hydromodel/etc/aliases.sh'
-   ```
 
-4. Now there are three applications that can be used for simulations:
-    - amesh : To creat mesh
-    - arun : To auto run simulation
-    - aclean : To clean working folder 
+- 1. Open the $HOME/.bashrc file in the user's home directory in an editor, e.g., by typing in a terminal (note the dot)
+    ```  vi ~/.bashrc ```
+- 2. Add the following line at the bottom of that file and save the file
+   ```    alias aqua='source [source folder]/hydromodel/etc/aliases.sh'```
+- 3. type aqua in your terminal. 
+</p>
+</details>
+
+3. Now there are few applications that can be used for simulations:
+    - aquaMesh + input dict: To create mesh
+    - aquaAster + input dict: To generate the input files for code_Aster
+    - aquaSim + input dict: To run simulation
+    - aquaClean : To clean working folder 

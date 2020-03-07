@@ -448,7 +448,7 @@ else:
                                     OBSE_ETAT_INIT='NON'),
                     SCHEMA_TEMPS=_F(FORMULATION='DEPLACEMENT',
                                    SCHEMA="''' + str(cageInfo['Solver']['method']) + '''",
-                                    ALPHA=-''' + str(cageInfo['Solver']['alptha']) + '''
+                                    ALPHA=-''' + str(cageInfo['Solver']['alpha']) + '''
                                    ),
                                    #add damping stablize the oscilations Need to study in the future                        
                     INCREMENT=_F(LIST_INST=times,INST_FIN=(1+k)*dt),
@@ -548,15 +548,14 @@ np.savetxt(cwd+'positionOutput/posi'+str((k)*dt)+'.txt', posi)
 output_file = open(cwd + "/ASTER2.comm", 'a')
 output_file.write('''
 
-filename = "REPE_OUT/output+"str(k)"+.rmed"
-
+filename = "REPE_OUT/output-"+str((1+k)*dt)+".rmed"
 DEFI_FICHIER(FICHIER=filename, UNITE=180+k,TYPE='BINARY')
-
 IMPR_RESU(FORMAT='MED', 
           UNITE=180+k, 
           RESU=_F(CARA_ELEM=elemprop,
                   NOM_CHAM=('DEPL' ,'SIEF_ELGA'),
-                  LIST_INST=listr, 
+                  # LIST_INST=listr, 
+                  INST=(1+k)*dt, 
                   RESULTAT=resn,
                   TOUT_CMP='OUI'),
           )
