@@ -7,7 +7,6 @@ Any questions about this code, please email: hui.cheng@uis.no
 
 """
 import os
-import workPath
 import sys
 import ast
 
@@ -36,9 +35,8 @@ def run_simulation():
             os.rename(os.path.join(cwd, file), os.path.join(os.path.join(cwd, "asterinput"), file))
     print("\n"
           "Remember to source your Code_Aster before running simulations.\n"
-          "i.e., source " + workPath.aster_path + "\n"
-                                                  "Any questions about this code, please email: hui.cheng@uis.no")
-    os.system("source " + workPath.aster_path)
+          "i.e., source /opt/aster144/etc/codeaster/profile.sh \n"
+          "Any questions about this code, please email: hui.cheng@uis.no")
     os.system("as_run " + os.path.join(cwd, 'asterinput/ASTERRUN.export'))
 
 

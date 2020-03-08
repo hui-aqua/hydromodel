@@ -14,7 +14,7 @@ Here is the explanation of the parameters in the dictionary.
 The information about the environmental conditions.  
 1. **current**: a python list. Unit: [m/s]. 
     
--  One velocity,  ```[u,v,w] ```.  Input the three components of the current velocity that you are indented to use.     
+-  One velocity,  ```[[u,v,w]]```.  Input the three components of the current velocity that you are indented to use.     
 -  Multiple velocities,  ```[[u1,v1,w1],[u2,v2,w2],[u3,v3,w3]...[un,vn,wn]]``` . Input the current velocities as a list of velocity. The program will run each velocity within the given timeLength sequentially.    
   
 2. **waterDepth**:  a floating point number. Unit: [m]. The depth of water. 

@@ -72,18 +72,15 @@ elif shape in ['squared']:
         print("NT must be 4 times interger.")
         exit()
 
-if bottomSwitcher in ['WithBottom']:
-    tipDepth = cageInfo['CageShape']['cageCenterTipDepth']
-    point.append([0, 0, -tipDepth])
+
+# >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>> salome
 # the below is the commond in the Mesh, Salome.
 # the mesh creater script
 import salome
-
 salome.salome_init()
 theStudy = salome.myStudy
 import SMESH
 from salome.smesh import smeshBuilder
-
 smesh = smeshBuilder.New(theStudy)
 Mesh_1 = smesh.Mesh()
 
@@ -93,6 +90,7 @@ for each_node in point:
 
 for i in range(1, NT + 1):
     for j in range(0, NN + 1):
+        # the last horizontal line
         if j == NN:
             if i == NT:
                 edge = Mesh_1.AddEdge([i + j * NT,
@@ -104,6 +102,7 @@ for i in range(1, NT + 1):
                                        1 + i + j * NT])  # add the horizontal line into geometry
                 con.append([i + j * NT - 1,
                             1 + i + j * NT - 1])  # add the horizontal line into con
+        # the rest lines and all vertical surfaces
         else:
             edge = Mesh_1.AddEdge([i + j * NT, i + (j + 1) * NT])  # add the vertical line into geometry
             con.append([i + j * NT - 1, i + (j + 1) * NT - 1])  # add the vertical line into con
@@ -114,7 +113,6 @@ for i in range(1, NT + 1):
                             1 + i + (j - 1) * NT - 1,
                             i + (j + 1) * NT - 1,
                             1 + i + j * NT - 1])
-                # add the horizontal surface into sur
             else:
                 edge = Mesh_1.AddEdge([i + j * NT, 1 + i + j * NT])  # add the horizontal line into geometry
                 con.append([i + j * NT - 1, 1 + i + j * NT - 1])  # add the horizontal line into con
@@ -122,7 +120,39 @@ for i in range(1, NT + 1):
                             1 + i + j * NT - 1,
                             i + (j + 1) * NT - 1,
                             1 + i + (j + 1) * NT - 1])
-                # add the horizontal surface into sur
+
+if bottomSwitcher in ['WithBottom']:
+    tipDepth = cageInfo['CageShape']['cageCenterTipDepth']
+    point.append([0, 0, floater_center[2]-tipDepth])
+    nodeID = Mesh_1.AddNode(float(point[-1][0]), float(point[-1][1]), float(point[-1][2]))
+    # line the node to the bottom tips
+    print("total number of node is " + str(len(point)))
+    for i in range(1, NT + 1):
+        edge = Mesh_1.AddEdge([NN * NT + i, len(point)])  # add the horizontal line into geometry
+        con.append([NN * NT + i, len(point) - 1])  # add the horizontal line into con
+        # todo sur add here
+
+
+if "Tube" in cageInfo["Weight"]["weightType"]:
+    # sinkerTube is added at the bottom.
+    bottomRingDepth=float(cageInfo["Weight"]["bottomRingDepth"])
+    if shape in ['cylindrical']:
+        for i in range(NT):
+            point.append(
+                [floater_center[0] + D / 2 * np.cos(i * 2 * pi / float(NT)),
+                 floater_center[1] + D / 2 * np.sin(i * 2 * pi / float(NT)),
+                 floater_center[2] -bottomRingDepth- j * H / float(NN)])
+        #     nodeID = Mesh_1.AddNode(float(floater_center[0] + D / 2 * np.cos(i * 2 * pi / float(NT))),
+        #                             float(floater_center[1] + D / 2 * np.sin(i * 2 * pi / float(NT))),
+        #                             float(floater_center[2] -bottomRingDepth))
+        # for i in range(1, NT + 1):
+        #     if i == NT:
+        #         edge = Mesh_1.AddEdge([len(point), len(point) -NT])  # add the horizontal line into geometry
+        #     else:
+        #         edge = Mesh_1.AddEdge([len(point)-i,len(point)-i-1,])  # add the horizontal line into geometry
+        #         # con.append([NN * NT + i, len(point) - 1])  # add the horizontal line into con
+
+
 
 isDone = Mesh_1.Compute()
 # naming  the group
@@ -156,7 +186,6 @@ if cageInfo['Weight']['weightType'] in ['sinkers']:
               "\nYou need to add the sinker manually.")
 else:
     print("\nThere is no sinkers on the bottom ring")
-
 
 # generate the name for each node to assign the hydrodynamic forces.
 for i in range(1, len(point) + 1):

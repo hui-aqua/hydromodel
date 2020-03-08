@@ -420,14 +420,15 @@ if k == 0:
                     OBSERVATION=_F(GROUP_MA='twines', 
                                     NOM_CHAM='DEPL',
                                     NOM_CMP=('DX','DY','DZ'),
-                                    INST=k+dt,
+                                    INST=(1+k)*dt,
                                     OBSE_ETAT_INIT='NON'),
                     SCHEMA_TEMPS=_F(FORMULATION='DEPLACEMENT',
                                    SCHEMA="''' + str(cageInfo['Solver']['method']) + '''",
                                    ALPHA=-0.1,
                                    ),
                                    #add damping stablize the oscilations Need to study in the future                        
-                    INCREMENT=_F(LIST_INST=times,INST_FIN=(1+k)*dt),
+                    INCREMENT=_F(LIST_INST=times,
+                                 INST_FIN=(1+k)*dt),
                     MODELE=model)
 else:
     resn = DYNA_NON_LINE(CARA_ELEM=elemprop,
@@ -444,14 +445,15 @@ else:
                     OBSERVATION=_F(GROUP_MA='twines', 
                                     NOM_CHAM='DEPL',
                                     NOM_CMP=('DX','DY','DZ'),
-                                    INST=k+dt,
+                                    INST=(1+k)*dt,
                                     OBSE_ETAT_INIT='NON'),
                     SCHEMA_TEMPS=_F(FORMULATION='DEPLACEMENT',
                                    SCHEMA="''' + str(cageInfo['Solver']['method']) + '''",
                                     ALPHA=-''' + str(cageInfo['Solver']['alpha']) + '''
                                    ),
                                    #add damping stablize the oscilations Need to study in the future                        
-                    INCREMENT=_F(LIST_INST=times,INST_FIN=(1+k)*dt),
+                    INCREMENT=_F(LIST_INST=times,
+                                 INST_FIN=(1+k)*dt),
                     MODELE=model,
                     )         
     ''')
@@ -521,7 +523,7 @@ U=np.array(Uinput[int(k*dt/10.0)])
 force_on_element=hydroModel.force_on_element(posi,velo_nodes,U)
 Fnh=hydroModel.distribute_force()
 fsi.write_position(posi,cwd)
-np.savetxt(cwd+'positionOutput/posi'+str((k)*dt)+'.txt', posi)
+np.savetxt(cwd+'positionOutput/posi'+str((1+k)*dt)+'.txt', posi)
         ''')
     output_file.close()
 
@@ -544,44 +546,49 @@ np.savetxt(cwd+'positionOutput/posi'+str((k)*dt)+'.txt', posi)
         ''')
     output_file.close()
 # >>>>>>>>>>>>>>> midOutput >>>>>>>>>>>>>>>>>>>>>>>>>
+if cageInfo['Solver']['saveMid_result'] is not False:
+    output_file = open(cwd + "/ASTER2.comm", 'a')
+    output_file.write('''
+    if ((1+k)*dt)%'''+str(float(cageInfo['Solver']['saveMid_result']))+''''==0:
+        filename = "REPE_OUT/output-"+str((1+k)*dt)+".rmed"
+        DEFI_FICHIER(FICHIER=filename, UNITE=180+k,TYPE='BINARY')
+        IMPR_RESU(FORMAT='MED', 
+              UNITE=180+k, 
+              RESU=_F(CARA_ELEM=elemprop,
+                      NOM_CHAM=('DEPL' ,'SIEF_ELGA'),
+                      LIST_INST=listr, 
+                      # INST=(1+k)*dt, 
+                      RESULTAT=resn,
+                      TOUT_CMP='OUI'),
+              )
+        DEFI_FICHIER(ACTION='LIBERER', UNITE=180+k)
+    
+    
+        stat = CALC_CHAMP(CONTRAINTE=('SIEF_ELNO', ),
+                          FORCE=('REAC_NODA', ),
+                          RESULTAT=resn)  
+        reac = POST_RELEVE_T(ACTION=_F(GROUP_NO=('topnodes'),
+                                       INTITULE='sum reactions',
+                                       MOMENT=('DRX', 'DRY', 'DRZ'),
+                                       NOM_CHAM=('REAC_NODA'),
+                                       OPERATION=('EXTRACTION', ),
+                                       POINT=(0.0, 0.0, 0.0),
+                                       RESULTANTE=('DX', 'DY', 'DZ'),
+                                       RESULTAT=stat))
+        IMPR_TABLE(FORMAT_R='1PE12.3',
+                   TABLE=reac,
+                   UNITE=9)              
+        DETRUIRE(CONCEPT=_F( NOM=(stat)))
+        DETRUIRE(CONCEPT=_F( NOM=(reac)))
+        
+            ''')
+    output_file.close()
+
 
 output_file = open(cwd + "/ASTER2.comm", 'a')
-output_file.write('''
-
-filename = "REPE_OUT/output-"+str((1+k)*dt)+".rmed"
-DEFI_FICHIER(FICHIER=filename, UNITE=180+k,TYPE='BINARY')
-IMPR_RESU(FORMAT='MED', 
-          UNITE=180+k, 
-          RESU=_F(CARA_ELEM=elemprop,
-                  NOM_CHAM=('DEPL' ,'SIEF_ELGA'),
-                  # LIST_INST=listr, 
-                  INST=(1+k)*dt, 
-                  RESULTAT=resn,
-                  TOUT_CMP='OUI'),
-          )
-DEFI_FICHIER(ACTION='LIBERER', UNITE=180+k)
-
-stat = CALC_CHAMP(CONTRAINTE=('SIEF_ELNO', ),
-                  FORCE=('REAC_NODA', ),
-                  RESULTAT=resn)
-
-reac = POST_RELEVE_T(ACTION=_F(GROUP_NO=('topnodes'),
-                               INTITULE='sum reactions',
-                               MOMENT=('DRX', 'DRY', 'DRZ'),
-                               NOM_CHAM=('REAC_NODA'),
-                               OPERATION=('EXTRACTION', ),
-                               POINT=(0.0, 0.0, 0.0),
-                               RESULTANTE=('DX', 'DY', 'DZ'),
-                               RESULTAT=stat))
-
-IMPR_TABLE(FORMAT_R='1PE12.3',
-           TABLE=reac,
-           UNITE=9)
-        
+output_file.write('''     
 DETRUIRE(CONCEPT=_F( NOM=(tblp)))
 DETRUIRE(CONCEPT=_F( NOM=(tblp2)))
-DETRUIRE(CONCEPT=_F( NOM=(stat)))
-DETRUIRE(CONCEPT=_F( NOM=(reac)))
 
 if k < itimes-1:
     for i in range (1,len(Fnh)+1):
