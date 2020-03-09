@@ -64,6 +64,7 @@
   'timeLength':10,          # [s] length of time for each current velocity
   'MaximumIteration':1000,
   'Residuals':2e-5, # [N] the Maximum bouncy force that the buoy can provide
+  'saveMid_result':30,  # [s] save the mid results every 30 second. Will slow down the simulation significantly.
   },
 }
 

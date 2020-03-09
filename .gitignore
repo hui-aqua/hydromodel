@@ -1,1 +1,7 @@
 /scr/test/test.py
+/apps/workPath.py
+/etc/workPath.py
+/etc/aliases.sh
+/scr/forcemodel/workPath.py
+/scr/inputfilecreator/workPath.py
+/scr/Meshcreater/workPath.py
