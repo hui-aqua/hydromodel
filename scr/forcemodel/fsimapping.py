@@ -10,8 +10,18 @@ import os
 import time
 import numpy as np
 
+# here we assume Code_aster is much faster than OpenFoam, thus OpenFOAM do not need to wait .
+velocity_dict = {'time_record': [0]}
+
+def start_flag(cwd,flag):
+    if os.path.exists(cwd+str(flag)):
+        os.remove(cwd+str(flag))
+def finish_flag(cwd,flag):
+    # print("in finish_flag, the cwd is "+cwd)
+    os.mknod(cwd+str(flag))
 
 def write_position(position, cwd):
+    start_flag(cwd,"/position_flag")
     # step 1 the head
     output_file = open(cwd + 'posi', 'w')
     output_file.write('''
@@ -45,7 +55,7 @@ numOfPoint   ''' + str(len(position)) + ''' ;''')
 \n''')
     output_file.write('\n')
     output_file.close()
-
+    finish_flag(cwd,"/position_flag")
 
 def write_element(hydro_element, cwd):
     # step 1 the head
@@ -83,6 +93,7 @@ numOfSurf   ''' + str(len(hydro_element)) + ''' ;''')
 
 
 def write_fh(hydro_force, timeFE, cwd):
+    start_flag(cwd,"/fh_flag")
     # step 1 the head
     output_file = open(cwd + 'Fh', 'w+')
     output_file.write('''
@@ -118,11 +129,7 @@ numOfFh   ''' + str(len(hydro_force)) + ''' ;''')
 \n''')
     output_file.write('\n')
     output_file.close()
-
-
-# here we assume Code_aster is much faster than OpenFoam, thus OpenFOAM do not need to wait .
-velocity_dict = {'time_record': [0]}
-
+    finish_flag(cwd,"/fh_flag")
 
 def get_velocity(cwd, length_velocity, time_aster):
     """
