@@ -506,10 +506,11 @@ output_file.close()
 if switcher in ["False"]:
     output_file = open(cwd + "/ASTER2.comm", 'a')
     output_file.write('''
-U=np.array(Uinput[int(k*dt/10.0)])
-force_on_element=hydroModel.force_on_element(posi,velo_nodes,U)
-Fnh=hydroModel.distribute_force()
-np.savetxt(cwd+'positionOutput/posi'+str((k)*dt)+'.txt', posi)
+else:
+    U=np.array(Uinput[int(k*dt/10.0)])
+    force_on_element=hydroModel.force_on_element(posi,velo_nodes,U)
+    Fnh=hydroModel.distribute_force()
+    np.savetxt(cwd+'positionOutput/posi'+str((k)*dt)+'.txt', posi)
         ''')
     output_file.close()
 
@@ -518,12 +519,13 @@ elif switcher in ["simiFSI"]:
     output_file = open(cwd + "/ASTER2.comm", 'a')
     output_file.write('''
     fsi.write_element(hydro_element,cwd)
-timeFE=dt*k    
-U=np.array(Uinput[int(k*dt/10.0)])
-force_on_element=hydroModel.force_on_element(posi,velo_nodes,U)
-Fnh=hydroModel.distribute_force()
-fsi.write_position(posi,cwd)
-np.savetxt(cwd+'positionOutput/posi'+str((1+k)*dt)+'.txt', posi)
+else:
+    timeFE=dt*k    
+    U=np.array(Uinput[int(k*dt/10.0)])
+    force_on_element=hydroModel.force_on_element(posi,velo_nodes,U)
+    Fnh=hydroModel.distribute_force()
+    fsi.write_position(posi,cwd)
+    np.savetxt(cwd+'positionOutput/posi'+str((1+k)*dt)+'.txt', posi)
         ''')
     output_file.close()
 
@@ -534,15 +536,16 @@ elif switcher in ["FSI"]:
     fsi.write_element(hydro_element,cwd)
     U=np.array(Uinput[0])
     fsi.write_fh(np.zeros((len(hydro_element),3)),0,cwd)
-    
-
-timeFE=dt*k
-U=fsi.get_velocity(cwd,len(hydro_element),timeFE)
-force_on_element=hydroModel.screen_fsi(posi,U,velo_nodes)
-Fnh=hydroModel.distribute_force()
-fsi.write_position(posi,cwd)
-fsi.write_fh(force_on_element,timeFE,cwd)
-np.savetxt(cwd+'positionOutput/posi'+str((k)*dt)+'.txt', posi)
+    force_on_element=hydroModel.screen_fsi(posi,U)
+    Fnh=hydroModel.distribute_force()
+else:     
+    timeFE=dt*k
+    U=fsi.get_velocity(cwd,len(hydro_element),timeFE)
+    force_on_element=hydroModel.screen_fsi(posi,U,velo_nodes)
+    Fnh=hydroModel.distribute_force()
+    fsi.write_position(posi,cwd)
+    fsi.write_fh(force_on_element,timeFE,cwd)
+    np.savetxt(cwd+'positionOutput/posi'+str((k)*dt)+'.txt', posi)
         ''')
     output_file.close()
 # >>>>>>>>>>>>>>> midOutput >>>>>>>>>>>>>>>>>>>>>>>>>

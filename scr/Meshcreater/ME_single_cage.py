@@ -33,54 +33,27 @@ shapeKey = str(cageInfo['CageShape']['shape'])
 shape = shapeKey.split('-')[0]
 bottomSwitcher = shapeKey.split('-')[1]
 floater_center = cageInfo['FloatingCollar']['floaterCenter']
+D = cageInfo['CageShape']['cageDiameter']
+H = cageInfo['CageShape']['cageHeight']
 
-if shape in ['cylindrical']:
-    D = cageInfo['CageShape']['cageDiameter']
-    H = cageInfo['CageShape']['cageHeight']
-    # generate the point coordinates matrix for cylindrical cage
-    for j in range(0, NN + 1):
-        for i in range(0, NT):
-            point.append(
-                [floater_center[0] + D / 2 * np.cos(i * 2 * pi / float(NT)),
-                 floater_center[1] + D / 2 * np.sin(i * 2 * pi / float(NT)),
-                 floater_center[2] - j * H / float(NN)])
-    if 'Tube' in cageInfo['Weight']['weightType']:
-        tubeDepth = float(cageInfo['Weight']['bottomRingDepth'])
-        for i in range(0, NT):
-            point.append([floater_center[0] + D / 2 * np.cos(i * 2 * pi / float(NT)),
-                          floater_center[1] + D / 2 * np.sin(i * 2 * pi / float(NT)),
-                          floater_center[2] - tubeDepth])
-
-elif shape in ['squared']:
-    # generate the point coordinates matrix for squared cage
-    D = cageInfo['CageShape']['cageLength']
-    H = cageInfo['CageShape']['cageHeight']
-    if NT / 4.0 is int:
-        for j in range(0, NN + 1):
-            for i in range(0, NT / 4):
-                point.append([D / 2, -D / 2 + D * i / (NT / 4), -j * H / float(NN)])
-            for i in range(0, NT / 4):
-                point.append([D / 2 - D * i / (NT / 4), D / 2, -j * H / float(NN)])
-            for i in range(0, NT / 4):
-                point.append([-D / 2, D / 2 - D * i / (NT / 4), -j * H / float(NN)])
-            for i in range(0, NT / 4):
-                point.append([-D / 2 + D * i / (NT / 4), -D / 2, -j * H / float(NN)])
-        if 'Tube' in cageInfo['Weight']['weightType']:
-            print("Squared cage with bottom ring is not prepared yet. Please wait for a update.")
-            exit()
-    else:
-        print("NT must be 4 times interger.")
-        exit()
-
+# generate the point coordinates matrix for cylindrical cage
+for j in range(0, NN + 1):
+    for i in range(0, NT):
+        point.append(
+            [floater_center[0] + D / 2 * np.cos(i * 2 * pi / float(NT)),
+             floater_center[1] + D / 2 * np.sin(i * 2 * pi / float(NT)),
+             floater_center[2] - j * H / float(NN)])
 
 # >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>> salome
 # the below is the commond in the Mesh, Salome.
 # the mesh creater script
 import salome
+
 salome.salome_init()
 theStudy = salome.myStudy
 import SMESH
 from salome.smesh import smeshBuilder
+
 smesh = smeshBuilder.New(theStudy)
 Mesh_1 = smesh.Mesh()
 
@@ -123,36 +96,44 @@ for i in range(1, NT + 1):
 
 if bottomSwitcher in ['WithBottom']:
     tipDepth = cageInfo['CageShape']['cageCenterTipDepth']
-    point.append([0, 0, floater_center[2]-tipDepth])
+    point.append([0, 0, floater_center[2] - tipDepth])
     nodeID = Mesh_1.AddNode(float(point[-1][0]), float(point[-1][1]), float(point[-1][2]))
     # line the node to the bottom tips
     print("total number of node is " + str(len(point)))
     for i in range(1, NT + 1):
         edge = Mesh_1.AddEdge([NN * NT + i, len(point)])  # add the horizontal line into geometry
-        con.append([NN * NT + i, len(point) - 1])  # add the horizontal line into con
+        con.append([NN * NT + i - 1, len(point) - 1])  # add the horizontal line into con
+        if i==NT:
+            sur.append([NN * NT + i - 1, len(point) - NT,len(point) - 1 ])
+        else:
+            sur.append([NN * NT + i - 1, NN * NT + i ,len(point) - 1 ])
         # todo sur add here
 
 
 if "Tube" in cageInfo["Weight"]["weightType"]:
     # sinkerTube is added at the bottom.
-    bottomRingDepth=float(cageInfo["Weight"]["bottomRingDepth"])
-    if shape in ['cylindrical']:
-        for i in range(NT):
-            point.append(
-                [floater_center[0] + D / 2 * np.cos(i * 2 * pi / float(NT)),
-                 floater_center[1] + D / 2 * np.sin(i * 2 * pi / float(NT)),
-                 floater_center[2] -bottomRingDepth- j * H / float(NN)])
-        #     nodeID = Mesh_1.AddNode(float(floater_center[0] + D / 2 * np.cos(i * 2 * pi / float(NT))),
-        #                             float(floater_center[1] + D / 2 * np.sin(i * 2 * pi / float(NT))),
-        #                             float(floater_center[2] -bottomRingDepth))
-        # for i in range(1, NT + 1):
-        #     if i == NT:
-        #         edge = Mesh_1.AddEdge([len(point), len(point) -NT])  # add the horizontal line into geometry
-        #     else:
-        #         edge = Mesh_1.AddEdge([len(point)-i,len(point)-i-1,])  # add the horizontal line into geometry
-        #         # con.append([NN * NT + i, len(point) - 1])  # add the horizontal line into con
-
-
+    bottomRingDepth = float(cageInfo["Weight"]["bottomRingDepth"])
+    for i in range(NT):
+        point.append(
+            [floater_center[0] + D / 2 * np.cos(i * 2 * pi / float(NT)),
+             floater_center[1] + D / 2 * np.sin(i * 2 * pi / float(NT)),
+             floater_center[2] - bottomRingDepth])
+        nodeID = Mesh_1.AddNode(float(floater_center[0] + D / 2 * np.cos(i * 2 * pi / float(NT))),
+                                float(floater_center[1] + D / 2 * np.sin(i * 2 * pi / float(NT))),
+                                float(floater_center[2] - bottomRingDepth))
+    for i in range(1, NT + 1):
+        if bottomSwitcher in ['WithBottom']:
+            edge = Mesh_1.AddEdge([len(point)-i+1, len(point)-i - NT ])  # add the vertical line into geometry
+            con.append([len(point)-i , len(point)-i - NT-1])  # add the vertical line into con
+        else:
+            edge = Mesh_1.AddEdge([len(point)-i+1, len(point)-i - NT+1])  # add the vertical line into geometry
+            con.append([len(point) -i, len(point) -i- NT])  # add the vertical line into con
+        if i == NT:
+            edge = Mesh_1.AddEdge([len(point), len(point) - NT + 1])  # add the horizontal line into geometry
+            con.append([len(point)-1, len(point) - NT])  # add the horizontal line into con
+        else:
+            edge = Mesh_1.AddEdge([len(point) - i + 1, len(point) - i])  # add the horizontal line into geometry
+            con.append([len(point) - i , len(point) - i-1])  # add the horizontal line into con
 
 isDone = Mesh_1.Compute()
 # naming  the group
