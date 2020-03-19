@@ -10,18 +10,22 @@ import os
 import time
 import numpy as np
 
+
 # here we assume Code_aster is much faster than OpenFoam, thus OpenFOAM do not need to wait .
 
-def start_flag(cwd,flag):
-    if os.path.exists(cwd+str(flag)):
-        os.remove(cwd+str(flag))
-def finish_flag(cwd,flag):
+def start_flag(cwd, flag):
+    if os.path.exists(cwd + str(flag)):
+        os.remove(cwd + str(flag))
+
+
+def finish_flag(cwd, flag):
     # print("in finish_flag, the cwd is "+cwd)
-    os.mknod(cwd+str(flag))
+    os.mknod(cwd + str(flag))
+
 
 def write_position(position, cwd):
     print("Here>>>>>>>>>>>>>posi")
-    start_flag(cwd,"/position_flag")
+    start_flag(cwd, "/position_flag")
     # step 1 the head
     output_file = open(cwd + 'posi', 'w')
     output_file.write('''
@@ -55,7 +59,8 @@ numOfPoint   ''' + str(len(position)) + ''' ;''')
 \n''')
     output_file.write('\n')
     output_file.close()
-    finish_flag(cwd,"/position_flag")
+    finish_flag(cwd, "/position_flag")
+
 
 def write_element(hydro_element, cwd):
     # step 1 the head
@@ -94,7 +99,7 @@ numOfSurf   ''' + str(len(hydro_element)) + ''' ;''')
 
 def write_fh(hydro_force, timeFE, cwd):
     print("Here>>>>>>>>>>>>>Fh")
-    start_flag(cwd,"/fh_flag")
+    start_flag(cwd, "/fh_flag")
     # step 1 the head
     output_file = open(cwd + 'Fh', 'w+')
     output_file.write('''
@@ -130,9 +135,12 @@ numOfFh   ''' + str(len(hydro_force)) + ''' ;''')
 \n''')
     output_file.write('\n')
     output_file.close()
-    finish_flag(cwd,"/fh_flag")
+    finish_flag(cwd, "/fh_flag")
 
-velocity_dict = {'time_record': [0]}
+
+velocity_dict = {'time_record': ['0']}
+
+
 def get_velocity(cwd, length_velocity, time_aster):
     """
     :param cwd: working path for code aster
@@ -141,7 +149,6 @@ def get_velocity(cwd, length_velocity, time_aster):
     :return: a numpy array of velocity on elements
     """
     print("Here>>>>>>>>>>>>>velo")
-
     cwd_foam_root = "/".join(cwd.split("/")[0:-2])
     velocity_dict, time_foam = read_velocity(cwd_foam_root, length_velocity)
     time_foam = velocity_dict['time_record'][-1]
@@ -157,7 +164,6 @@ def get_velocity(cwd, length_velocity, time_aster):
         return np.array(velocity_dict["velocities_at_" + str(time_foam)])
 
 
-
 def read_velocity(cwd_foam_root, length_velocity):
     while not os.path.isfile(cwd_foam_root + "/velocity_on_elements.txt"):
         print("Wait for velocity from OpenFoam......")
@@ -165,14 +171,15 @@ def read_velocity(cwd_foam_root, length_velocity):
     else:
         f = open(cwd_foam_root + "/velocity_on_elements.txt", "r")
         lines = f.readlines()
-        time_foam = 0
+        time_foam = str(0)
         for line in lines[-length_velocity * 5:]:
             if "The velocities at" in line:
                 time_foam = line.split(" ")[3]
-                if str(time_foam) not in velocity_dict['time_record']:
-                    velocity_dict['time_record'].append(time_foam)
-                    if len(line.split()) == 6:
-                        start_line = lines.index(line) + 3
+                if len(line.split()) == 6:
+                    start_line = lines.index(line) + 3
+                    end_line = lines.index(line) + 3 + length_velocity
+                    if (end_line < len(lines)) and (str(time_foam) not in velocity_dict['time_record']):
+                        velocity_dict['time_record'].append(str(time_foam))
                         velocity_dict["velocities_at_" + str(time_foam)] = []
                         for item in range(length_velocity):
                             try:
@@ -185,7 +192,4 @@ def read_velocity(cwd_foam_root, length_velocity):
                                     [float(lines[start_line].split()[0][1:]),
                                      float(lines[start_line].split()[1]),
                                      float(lines[start_line].split()[2][:-1])])
-                    else:
-                        velocity_dict["velocities_at_" + str(time_foam)] = np.zeros((length_velocity, 3))
-
     return velocity_dict, time_foam
