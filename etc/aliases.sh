@@ -2,7 +2,7 @@
 # Description
 #     Aliases for working with Code_Aster
 # hui.cheng@uis.no
-export APP=/home/hui/GitCode/Code_Aster/hydromodel
+export APP=/home/hui/githubCode/hydromodel
 alias aqua-version='python3 $APP/apps/aqua-version.py'
 alias aquaAster='python3 $APP/apps/creatInputFiles.py'
 alias aquaSim='python3 $APP/apps/aquaSimRun.py'
