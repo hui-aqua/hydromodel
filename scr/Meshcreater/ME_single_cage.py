@@ -182,12 +182,12 @@ smesh.SetName(twines, 'twines')
 
 # the top ring to keep ths shape of the fish cage.
 topring = Mesh_1.CreateEmptyGroup(SMESH.EDGE, 'topring')
-nbAdd = topring.Add([i for i in range(2, len(con) + 1, 2 * NN + 1)])
+nbAdd = topring.Add([i for i in range(2, NT*(2 * NN + 1), 2 * NN + 1)])
 smesh.SetName(topring, 'topring')
 
 # bottom ring will keep the cage and add the sink forces
 bottomring = Mesh_1.CreateEmptyGroup(SMESH.EDGE, 'bottomring')
-nbAdd = bottomring.Add([i for i in range(2 * NN + 1, len(con) + 1, 2 * NN + 1)])
+nbAdd = bottomring.Add([i for i in range(2 * NN + 1, (NT+1)*(2 * NN + 1), 2 * NN + 1)])
 smesh.SetName(bottomring, 'bottomring')
 
 # give a name to the mesh

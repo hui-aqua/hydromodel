@@ -1,8 +1,6 @@
+# Guide for input file  --- cageDict 
 
-  
-# Guide for input file  --- cageDict Currently, 
-
-cageDict is the only one input file for the program and it contains all the necessary information for numerical simulations.     
+Currently, cageDict is the only one input file for the program and it contains all the necessary information for numerical simulations.     
     
 CageDict is a python dictionary style input file. The name of this dictionary can be varied as you wish.     
 Just follow the syntax of a dictionary and record all the necessary parameters for simulations.      
@@ -25,6 +23,16 @@ The information about the environmental conditions.
 - If wave are applied to the environment, Please use ```[wave height, wavelength]``` to define a deep water airy wave. Unit: [m] 
  
 4. **fluidDensity**: a floating point number. Unit: [kg/m^3]. The density of fluid, sea water: 1025, fresh water: 1000.
+
+## MeshLib
+
+**MeshLib** is used to tell the mesh generator which library will be used to generate mesh.
+The value is chosen from following string:
+- ```multi_cage```: multi fish cage without mooring system.
+- ```multi_moored_cages```:multi fish cages with mooring system.
+- ```panel```: a single net panel or few net panels.
+- ```single_cage```: a single fish cage.
+- ```trawlNet```: under construction.
 
 ## CageShape
 Define the shape of cage.

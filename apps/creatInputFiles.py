@@ -10,10 +10,16 @@ import os
 import sys
 import workPath
 import time
+import ast
 if len(sys.argv) < 2:
     print("\nPlease add a argument when using this command.\n"
           "Usage: aquaAster + [dictionary name]\n")
     exit()
-os.system("python3 " + workPath.inputcreater_path + "inputModule.py " + str(sys.argv[1]) )
+with open(str(sys.argv[1]), 'r') as f:
+    content = f.read()
+    cageInfo = ast.literal_eval(content)
+
+meshLib = str(cageInfo['MeshLib'])
+os.system("python3 " + workPath.inputcreater_path + "AS_"+meshLib+".py " + str(sys.argv[1]) )
 time.sleep(1)
 print("\nALL finished! You can check the input file manually and run 'aquaSim' to start the simulation\n")

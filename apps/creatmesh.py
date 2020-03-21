@@ -12,7 +12,6 @@ Z>0 is the air zone
 
 Run with a arguement [casename]
 """
-import numpy as np
 import sys
 import os
 import workPath
@@ -28,36 +27,7 @@ if len(sys.argv) < 2:
 with open(str(sys.argv[1]), 'r') as f:
     content = f.read()
     cageInfo = ast.literal_eval(content)
-floater_num = int(np.array(cageInfo['FloatingCollar']['floaterCenter']).size / 3)
 
-cage_shape_types = [
-    "cylindrical-NoBottom",
-    "cylindrical-WithBottom",
-    "squared-NoBottom",
-    "squared-WithBottom",
-]  # add more models if it is ready
-
-def print_model():
-    print("The cage type '" + cageInfo['CageShape']['CageType'] + "' are not included in this version.\n")
-    print("Currently, the available numerical models are:")
-    for model in cage_shape_types:
-        print(str(cage_shape_types.index(model)) + " " + model)
-
-
-if cageInfo['CageShape']['shape'] not in cage_shape_types:
-    print_model()
-    exit()
-else:
-    if cageInfo['Mooring']['mooringType'] not in ['None']:
-        os.system(
-            str(workPath.salome_path) + " -t " + workPath.mesh_path + "ME_multi_moored_cages.py " + "args:" + str(
-                sys.argv[1]))
-    else:
-        if floater_num == 1:  # Single cage
-            os.system(
-                str(workPath.salome_path) + " -t " + workPath.mesh_path + "ME_single_cage.py " + "args:" + str(
-                    sys.argv[1]))
-        else:
-            os.system(
-                str(workPath.salome_path) + " -t " + workPath.mesh_path + "ME_multi_cages.py " + "args:" + str(
-                    sys.argv[1]))
+meshLib = str(cageInfo['MeshLib'])
+os.system(
+    str(workPath.salome_path) + " -t " + workPath.mesh_path + "ME_" + meshLib + ".py " + "args:" + str(sys.argv[1]))
