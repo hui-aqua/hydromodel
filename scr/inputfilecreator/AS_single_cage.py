@@ -9,12 +9,11 @@ Any questions about this code, please email: hui.cheng@uis.no
 import os
 import sys
 import random as rd
-import workPath
 import numpy as np
 import socket
 import getpass
 import inputModule as im
-
+import ast
 cwd = os.getcwd()
 argument = sys.argv
 
@@ -26,7 +25,7 @@ argument = sys.argv
 
 with open(str(sys.argv[1]), 'r') as f:
     content = f.read()
-    cageInfo = eval(content)
+    cageInfo = ast.literal_eval(content)
 
 sys.path.append(cwd)
 import meshinfomation

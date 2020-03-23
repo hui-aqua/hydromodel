@@ -40,7 +40,7 @@ if nettingType == "square":
                      top_center[net][2] - j / float(NN) * net_height])
 elif nettingType == "rhombus":
     print("Under construction")
-    exit()# todo add the rhombus nodes.
+    exit()  # todo add the rhombus nodes.
 # >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>> salome
 # the below is the commond in the Mesh, Salome.
 # the mesh creater script
@@ -62,14 +62,16 @@ for each_node in point:
 for i in range(0, NT + 1):
     for j in range(0, NN + 1):
         if j != NN:
-            edge = Mesh_1.AddEdge([1+i + j * (NT+1), 1+i + (j+1) * (NT+1)])  # add the vertical line into geometry
-            con.append([i + j * (NT+1), i + (j+1) * (NT+1)])  # add the vertical line into con
+            edge = Mesh_1.AddEdge(
+                [1 + i + j * (NT + 1), 1 + i + (j + 1) * (NT + 1)])  # add the vertical line into geometry
+            con.append([i + j * (NT + 1), i + (j + 1) * (NT + 1)])  # add the vertical line into con
         if i != NT:
-            edge = Mesh_1.AddEdge([1+i + j * (NT+1), 1+ 1 + i + j * (NT+1)])  # add the horizontal line into geometry
-            con.append([i + j * (NT+1), 1 + i + j * (NT+1)])  # add the horizontal line into con
-        if i!=NT and j !=NN:
-            sur.append([i + j * (NT+1), 1 + i + j * (NT+1),
-                        i + (j+1) * (NT+1), 1+i + (j+1) * (NT+1)])
+            edge = Mesh_1.AddEdge(
+                [1 + i + j * (NT + 1), 1 + 1 + i + j * (NT + 1)])  # add the horizontal line into geometry
+            con.append([i + j * (NT + 1), 1 + i + j * (NT + 1)])  # add the horizontal line into con
+        if i != NT and j != NN:
+            sur.append([i + j * (NT + 1), 1 + i + j * (NT + 1),
+                        i + (j + 1) * (NT + 1), 1 + i + (j + 1) * (NT + 1)])
 
 isDone = Mesh_1.Compute()
 # naming  the group
@@ -85,7 +87,7 @@ smesh.SetName(topnodes, 'topnodes')
 
 # define the nodes on bottom ring
 bottomnodes = Mesh_1.CreateEmptyGroup(SMESH.NODE, 'bottomnodes')
-nbAdd = bottomnodes.Add([i for i in range((NN)*(NT+1)+1, (NN+1)*(NT+1)+1)])
+nbAdd = bottomnodes.Add([i for i in range((NN) * (NT + 1) + 1, (NN + 1) * (NT + 1) + 1)])
 smesh.SetName(bottomnodes, 'bottomnodes')
 
 # define the nodes for sinkers
@@ -108,12 +110,12 @@ smesh.SetName(twines, 'twines')
 #
 # # the top ring to keep ths shape of the fish cage.
 topring = Mesh_1.CreateEmptyGroup(SMESH.EDGE, 'topring')
-nbAdd = topring.Add([i for i in range(2, NT*(2 * NN + 1), 2 * NN + 1)])
+nbAdd = topring.Add([i for i in range(2, NT * (2 * NN + 1), 2 * NN + 1)])
 smesh.SetName(topring, 'topring')
 
 # bottom ring will keep the cage and add the sink forces
 bottomring = Mesh_1.CreateEmptyGroup(SMESH.EDGE, 'bottomring')
-nbAdd = bottomring.Add([i for i in range(2 * NN + 1, (NT+1)*(2 * NN + 1), 2 * NN + 1)])
+nbAdd = bottomring.Add([i for i in range(2 * NN + 1, (NT + 1) * (2 * NN + 1), 2 * NN + 1)])
 smesh.SetName(bottomring, 'bottomring')
 
 # # give a name to the mesh
@@ -133,6 +135,18 @@ meshinfo = {
     "NT": NT,
     "meshName": meshname
 }
+print("\n"
+      "  ----------------------------------\n"
+      "  --   University of Stavanger    --\n"
+      "  --           Hui Cheng          --\n"
+      "  ----------------------------------\n"
+      "  Any questions about this code,\n"
+      "  please email: hui.cheng@uis.no\n"
+      "  Net panel(s)")
+print("<<<<<<<<<< Mesh Information >>>>>>>>>>")
+print("Number of node is " + str(meshinfo["numberOfNodes"]) + ".")
+print("Number of line element is " + str(meshinfo["numberOfLines"]) + ".")
+print("Number of surface element is " + str(meshinfo["numberOfSurfaces"]) + ".\n")
 with open(cwd + "/meshinfomation.py", 'w') as f:
     f.write("meshinfo=")
     f.write(str(meshinfo))

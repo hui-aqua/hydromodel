@@ -12,6 +12,7 @@ import random as rd
 import numpy as np
 import socket
 import getpass
+import ast
 # from scr.inputfilecreator import inputModule as im
 
 import inputModule as im
@@ -24,7 +25,7 @@ argument = sys.argv
 
 with open(str(sys.argv[1]), 'r') as f:
     content = f.read()
-    netPanelInfo = eval(content)
+    netPanelInfo = ast.literal_eval(content)
 
 sys.path.append(cwd)
 import meshinfomation

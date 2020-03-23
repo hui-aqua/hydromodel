@@ -382,11 +382,12 @@ tblp2 = POST_RELEVE_T(ACTION=(_F(OPERATION='EXTRACTION',      # For Extraction o
                           INST=(1+k)*dt,                     # STAT_NON_LINE calculates for 10 INST. I want only last INST
                            ),),
                   );
+posi=hy.get_position(tblp)
+velo_nodes=hy.get_velocity(tblp2)
 
 if k < itimes-1:
     del Fnh
-posi=hy.get_position(tblp)
-velo_nodes=hy.get_velocity(tblp2)
+
     ''')
     if coupling_switcher in ["False"]:
         handel.write('''
@@ -398,10 +399,12 @@ np.savetxt(cwd+'positionOutput/posi'+str((k)*dt)+'.txt', posi)
 
     elif coupling_switcher in ["simiFSI"]:
         handel.write('''
-    fsi.write_element(hydro_element,cwd)
+if k == 0:        
+    fsi.write_element(hydroModel.output_hydro_element(),cwd)
+
 timeFE=dt*k
 U=Uinput[int(k*dt/10.0)]
-force_on_element=hydroModel.force_on_element(netWakeModel,posi,velo_nodes,U)
+force_on_element=hydroModel.force_on_element(netWakeModel,posi,U)
 Fnh=hydroModel.distribute_force(meshinfo['numberOfNodes'])
 fsi.write_position(posi,cwd)
 np.savetxt(cwd+'positionOutput/posi'+str((1+k)*dt)+'.txt', posi)
@@ -409,17 +412,20 @@ np.savetxt(cwd+'positionOutput/posi'+str((1+k)*dt)+'.txt', posi)
 
     elif coupling_switcher in ["FSI"]:
         handel.write('''
-    fsi.write_position(posi,cwd)
-    fsi.write_element(hydro_element,cwd)
-    U=np.array(Uinput[0])
-    fsi.write_fh(np.zeros((len(hydro_element),3)),0,cwd)
-    force_on_element=hydroModel.screen_fsi(posi,U)
+if k == 0:
+    hydro_element=hydroModel.output_hydro_element()      
+    force_on_element=np.zeros((len(hydro_element),3))
     Fnh=hydroModel.distribute_force(meshinfo['numberOfNodes'])
+    
+    fsi.write_element(hydro_element,cwd)
+    fsi.write_position(meshinfo['netNodes'],cwd)
+    fsi.write_fh(np.zeros((len(hydro_element),3)),0,cwd)
 else:
     timeFE=dt*k
     U=fsi.get_velocity(cwd,len(hydro_element),timeFE)
     force_on_element=hydroModel.screen_fsi(posi,U,velo_nodes)
     Fnh=hydroModel.distribute_force(meshinfo['numberOfNodes'])
+    
     fsi.write_position(posi,cwd)
     fsi.write_fh(force_on_element,timeFE,cwd)
     np.savetxt(cwd+'positionOutput/posi'+str((k)*dt)+'.txt', posi)
