@@ -22,4 +22,3 @@ with open(str(sys.argv[1]), 'r') as f:
 meshLib = str(cageInfo['MeshLib'])
 os.system("python3 " + workPath.inputcreater_path + "AS_"+meshLib+".py " + str(sys.argv[1]) )
 time.sleep(1)
-print("\nALL finished! You can check the input file manually and run 'aquaSim' to start the simulation\n")

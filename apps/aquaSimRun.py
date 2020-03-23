@@ -7,15 +7,11 @@ Any questions about this code, please email: hui.cheng@uis.no
 
 """
 import os
-import sys
-import ast
-
-with open(str(sys.argv[1]), 'r') as f:
-    content = f.read()
-    cageInfo = ast.literal_eval(content)
 
 cwd = os.getcwd()
 print("\nThe working folder is ' " + str(cwd) + " ' \n")
+print("Please make sure the working path locates ./constant, if you want to do FSI simulation")
+file_names = ['ASTER2.py', 'ASTER1.py', 'meshinfomation.py']
 
 
 def run_simulation():
@@ -31,7 +27,7 @@ def run_simulation():
         os.mkdir("midOutput/REPE_OUT")
     files = os.listdir(cwd)
     for file in files:
-        if file.endswith(".med") or file.endswith(".txt") or file.endswith(".comm") or file.endswith(".export"):
+        if file.endswith(".med") or file in file_names or file.endswith(".export"):
             os.rename(os.path.join(cwd, file), os.path.join(os.path.join(cwd, "asterinput"), file))
     print("\n"
           "Remember to source your Code_Aster before running simulations.\n"
@@ -40,11 +36,4 @@ def run_simulation():
     os.system("as_run " + os.path.join(cwd, 'asterinput/ASTERRUN.export'))
 
 
-if cageInfo['Solver']['coupling'] in ['False']:
-    run_simulation()
-elif cageInfo['Solver']['coupling'] in ['simiFSI', 'FSI']:
-    if cwd.split('/')[-1] not in ['constant']:
-        print("\nError!!! Please prepare the OpenFOAM input file first. And run the Code_Aster in constant")
-        exit()
-    else:
-        run_simulation()
+run_simulation()

@@ -1,9 +1,18 @@
 # Guide for input file  --- cageDict 
 
+![alt text](../figures/Figure19.png)
+
 Currently, cageDict is the only one input file for the program and it contains all the necessary information for numerical simulations.     
     
 CageDict is a python dictionary style input file. The name of this dictionary can be varied as you wish.     
 Just follow the syntax of a dictionary and record all the necessary parameters for simulations.      
+
+There are some assumptions when we generate mesh for simulations:
+
+* Although the flow direction can be change in the **Environment**, we assume the X+ is the flow direction when we generate the mesh.
+* 
+
+
 Here is the explanation of the parameters in the dictionary.    
   
   

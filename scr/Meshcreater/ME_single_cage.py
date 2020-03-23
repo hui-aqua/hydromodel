@@ -103,14 +103,13 @@ if bottomSwitcher in ['WithBottom']:
     for i in range(1, NT + 1):
         edge = Mesh_1.AddEdge([NN * NT + i, len(point)])  # add the horizontal line into geometry
         con.append([NN * NT + i - 1, len(point) - 1])  # add the horizontal line into con
-        if i==NT:
-            sur.append([NN * NT + i - 1, len(point) - NT,len(point) - 1 ])
+        if i == NT:
+            sur.append([NN * NT + i - 1, len(point) - NT, len(point) - 1])
         else:
-            sur.append([NN * NT + i - 1, NN * NT + i ,len(point) - 1 ])
+            sur.append([NN * NT + i - 1, NN * NT + i, len(point) - 1])
         # todo sur add here
 
-
-if "Tube" in cageInfo["Weight"]["weightType"]:
+if "Tube" in cageInfo["Weight"]["weightType"] and float(cageInfo["Weight"]["bottomRingDepth"]) != float(H):
     # sinkerTube is added at the bottom.
     bottomRingDepth = float(cageInfo["Weight"]["bottomRingDepth"])
     for i in range(NT):
@@ -123,17 +122,17 @@ if "Tube" in cageInfo["Weight"]["weightType"]:
                                 float(floater_center[2] - bottomRingDepth))
     for i in range(1, NT + 1):
         if bottomSwitcher in ['WithBottom']:
-            edge = Mesh_1.AddEdge([len(point)-i+1, len(point)-i - NT ])  # add the vertical line into geometry
-            con.append([len(point)-i , len(point)-i - NT-1])  # add the vertical line into con
+            edge = Mesh_1.AddEdge([len(point) - i + 1, len(point) - i - NT])  # add the vertical line into geometry
+            con.append([len(point) - i, len(point) - i - NT - 1])  # add the vertical line into con
         else:
-            edge = Mesh_1.AddEdge([len(point)-i+1, len(point)-i - NT+1])  # add the vertical line into geometry
-            con.append([len(point) -i, len(point) -i- NT])  # add the vertical line into con
+            edge = Mesh_1.AddEdge([len(point) - i + 1, len(point) - i - NT + 1])  # add the vertical line into geometry
+            con.append([len(point) - i, len(point) - i - NT])  # add the vertical line into con
         if i == NT:
             edge = Mesh_1.AddEdge([len(point), len(point) - NT + 1])  # add the horizontal line into geometry
-            con.append([len(point)-1, len(point) - NT])  # add the horizontal line into con
+            con.append([len(point) - 1, len(point) - NT])  # add the horizontal line into con
         else:
             edge = Mesh_1.AddEdge([len(point) - i + 1, len(point) - i])  # add the horizontal line into geometry
-            con.append([len(point) - i , len(point) - i-1])  # add the horizontal line into con
+            con.append([len(point) - i, len(point) - i - 1])  # add the horizontal line into con
 
 isDone = Mesh_1.Compute()
 # naming  the group
@@ -174,6 +173,11 @@ for i in range(1, len(point) + 1):
     nbAdd = node1.Add([i])
     smesh.SetName(node1, 'node%s' % i)
 
+if "centerweight" in cageInfo['Weight']['weightType']:
+    node1 = Mesh_1.CreateEmptyGroup(SMESH.NODE, 'bottom_tit')
+    nbAdd = node1.Add([len(point) - NT])
+    smesh.SetName(node1, 'bottom_tit')
+
 # GROUP_MA
 # defaults names for all the twines and nodes.
 twines = Mesh_1.CreateEmptyGroup(SMESH.EDGE, 'twines')
@@ -182,21 +186,21 @@ smesh.SetName(twines, 'twines')
 
 # the top ring to keep ths shape of the fish cage.
 topring = Mesh_1.CreateEmptyGroup(SMESH.EDGE, 'topring')
-nbAdd = topring.Add([i for i in range(2, NT*(2 * NN + 1), 2 * NN + 1)])
+nbAdd = topring.Add([i for i in range(2, NT * (2 * NN + 1), 2 * NN + 1)])
 smesh.SetName(topring, 'topring')
 
 # bottom ring will keep the cage and add the sink forces
 bottomring = Mesh_1.CreateEmptyGroup(SMESH.EDGE, 'bottomring')
-nbAdd = bottomring.Add([i for i in range(2 * NN + 1, (NT+1)*(2 * NN + 1), 2 * NN + 1)])
+nbAdd = bottomring.Add([i for i in range(2 * NN + 1, (NT + 1) * (2 * NN + 1), 2 * NN + 1)])
 smesh.SetName(bottomring, 'bottomring')
 
 # give a name to the mesh
-meshname = "CFGNB" + str(D) + "X" + str(H) + ".med"
+meshname = "single_cage_" + str(sys.argv[1]).split('.')[0] + ".med"
 Mesh_1.ExportMED(cwd + "/" + meshname)
 
 meshinfo = {
-    "horizontalElementLength": float(pi * D / NT),
-    "verticalElementLength": float(H / NN),
+    "horizontalElementLength": float(pi * D / float(NT)),
+    "verticalElementLength": float(H / float(NN)),
     "numberOfNodes": len(point),
     "numberOfLines": len(con),
     "numberOfSurfaces": len(sur),
@@ -207,6 +211,7 @@ meshinfo = {
     "NT": NT,
     "meshName": meshname
 }
-f = open(cwd + "/meshinfomation.txt", "w")
-f.write(str(meshinfo))
+with open(cwd + "/meshinfomation.py", 'w') as f:
+    f.write("meshinfo=")
+    f.write(str(meshinfo))
 f.close()

@@ -8,6 +8,7 @@ Any questions about this code, please email: hui.cheng@uis.no
 """
 import workPath
 
+
 # >>>>>>>>>>>>>>> Start to write input file>>>>>>>>>>>>
 def head(handel, cwd):
     handel.write('''# ----------------------------------
@@ -170,9 +171,9 @@ def assign_bc_force_on_nodes(handel, arg, name_of_nodes, force):
     """
     handel.write('''
 ''' + str(arg) + '''= AFFE_CHAR_MECA(FORCE_NODALE=_F(GROUP_NO=("''' + str(name_of_nodes) + '''"),
-                                      FZ=''' + str(force[0]) + ''',
                                       FX=''' + str(force[0]) + ''',
-                                      FY=''' + str(force[0]) + ''',
+                                      FY=''' + str(force[1]) + ''',
+                                      FZ=''' + str(force[2]) + ''',
                                       ),
                       MODELE=model)
             ''')
@@ -193,9 +194,40 @@ times = DEFI_LIST_INST(DEFI_LIST=_F(LIST_INST=listr,PAS_MINI=1e-8),
                        METHODE='AUTO')
 
 NODEnumber=meshinfo['numberOfNodes']
-
+''')
+def set_hydrodynamic_model(handel,hydroModel, wake_model, Sn, dwh, dw0, velocities):
+    handel.write('''
+Uinput = ''' + str(velocities) + '''
 Fnh= np.zeros((NODEnumber,3)) # initial hydrodynamic forces=0
 l=['None']*((len(Fnh)+1))
+con = meshinfo['netLines']
+sur = meshinfo['netSurfaces']
+    ''')
+
+    if hydroModel.split('-')[0] in ["Screen"]:
+        handel.write('''
+hydroModel=hy.HydroScreen("''' + hydroModel.split('-')[1] + '''",sur,''' + str(Sn) + ''',''' + str(dwh) + ''',''' + str(dw0) + ''')     
+netWakeModel=hy.Net2NetWake("''' + str(wake_model) + '''",meshinfo['netNodes'],sur,Uinput[0],[0,0,0],''' + str(
+            dw0) + ''',''' + str(Sn) + ''')
+    
+        ''')
+    elif hydroModel.split('-')[0] in ["Morison"]:
+        handel.write('''
+hydroModel=hy.HydroMorison("''' + hydroModel.split('-')[1] + '''",con,''' + str(Sn) + ''',''' + str(dwh) + ''',''' + str(dw0) + ''')   
+netWakeModel=hy.Net2NetWake("''' + str(wake_model) + '''",meshinfo['netNodes'],con,Uinput[0],[0,0,0],''' + str(
+            dw0) + ''',''' + str(Sn) + ''')
+       ''')
+    else:
+        print("The selected hydrodynamic model: " + hydroModel.split('-')[0] + " is not supported")
+        exit()
+
+    handel.write('''
+with open(cwd+'/positionOutput/element_in_wake.txt', "w") as file:
+    file.write(str(netWakeModel.get_element_in_wake()))
+file.close()
+with open(cwd+'/positionOutput/hydro_elements.txt', "w") as file:
+    file.write(str(hydroModel.output_hydro_element()))
+file.close()
 
 for k in range(0,itimes):
     Fnh=tuple(Fnh)
@@ -219,7 +251,7 @@ stat = CALC_CHAMP(CONTRAINTE=('SIEF_ELNO', ),
 # >>>>>>>>> reaction force >>>>>>>>>>>>
 def reaction_force(handel, name_of_nodes):
     handel.write('''
-reac = POST_RELEVE_T(ACTION=_F(GROUP_NO=(' ''' + str(name_of_nodes) + ''' '),
+reac = POST_RELEVE_T(ACTION=_F(GROUP_NO=("''' + str(name_of_nodes) + '''"),
                                INTITULE='sum reactions',
                                MOMENT=('DRX', 'DRY', 'DRZ'),
                                NOM_CHAM=('REAC_NODA'),
@@ -272,11 +304,11 @@ if k == 0:
                                     RELATION='CABLE'),''')
     if weight_type in ['sinkerTube', 'sinkerTube+centerweight', 'tube']:
         handel.write('''                             
-                                  _F(DEFORMATION='GROT_GDEP',
+                                  _F(DEFORMATION='PETIT',
                                     GROUP_MA=('bottomring', ),
-                                    RELATION='ELAS')
-                                  ),''')
-    handel.write('''                                  
+                                    RELATION='ELAS')''')
+    handel.write('''               
+                                 ),                   
                     CONVERGENCE=_F(ITER_GLOB_MAXI=''' + str(maximum_iteration) + ''' ,
                                    RESI_GLOB_RELA=''' + str(residuals) + ''' ),
                     EXCIT=(loadr),
@@ -302,11 +334,11 @@ else:
                                     RELATION='CABLE'),''')
     if weight_type in ['sinkerTube', 'sinkerTube+centerweight', 'tube']:
         handel.write('''                              
-                                  _F(DEFORMATION='GROT_GDEP',
+                                  _F(DEFORMATION='PETIT',
                                     GROUP_MA=('bottomring', ),
-                                    RELATION='ELAS')
-                                  ),''')
-        handel.write('''                     
+                                    RELATION='ELAS')''')
+    handel.write('''              
+                                 ),       
                     CONVERGENCE=_F(ITER_GLOB_MAXI=''' + str(maximum_iteration) + ''' ,
                                    RESI_GLOB_RELA=''' + str(residuals) + ''' ),
                     EXCIT=(loadr),
@@ -327,8 +359,8 @@ else:
 
 
 #
-# # >>>>>>>>>>>>>>>    POST_RELEVE_T       >>>>>>>>>>>>
-def set_hydrodynamic_model(handel, hydroModel, Sn, dwh, dw0,velocities):
+# # >>>>>>>>>>>>>>>>>>>>>> Coupling >>>>>>>>>>>>>>>>>>>
+def set_coupling(handel, coupling_switcher):
     handel.write('''
 tblp = POST_RELEVE_T(ACTION=(_F(OPERATION='EXTRACTION',      # For Extraction of values
                           INTITULE='Nodal Displacements',    # Name of the table in .resu file
@@ -355,41 +387,24 @@ if k < itimes-1:
     del Fnh
 posi=hy.get_position(tblp)
 velo_nodes=hy.get_velocity(tblp2)
-
-if k==0:
-    Uinput=''' + str(velocities) + '''
-    con=meshInfo['netLines']
-    sur=meshInfo['netSurfaces']
-    hydroModel=hy.Hydro''' + hydroModel.split('-')[0] + '''("''' + hydroModel.split('-')[1] + '''",posi,sur,''' + str(
-        Sn) + ''',np.array([1,0,0]),''' + str(dwh) + ''',''' + str(dw0) + ''')
-    elementinwake=hydroModel.output_element_in_wake()
-    np.savetxt(cwd+'/positionOutput/elementinwake.txt', elementinwake)
-    hydro_element=hydroModel.output_hydro_element()
-    
     ''')
-
-#
-# # >>>>>>>>>>>>>>>>>>>>>> Coupling >>>>>>>>>>>>>>>>>>>
-def set_coupling(handel,coupling_switcher):
     if coupling_switcher in ["False"]:
         handel.write('''
-else:
-    U=np.array(Uinput[int(k*dt/10.0)])
-    force_on_element=hydroModel.force_on_element(posi,velo_nodes,U)
-    Fnh=hydroModel.distribute_force()
-    np.savetxt(cwd+'positionOutput/posi'+str((k)*dt)+'.txt', posi)
+U=np.array(Uinput[int(k*dt/10.0)])
+force_on_element=hydroModel.force_on_element(netWakeModel,posi,U)
+Fnh=hydroModel.distribute_force(meshinfo['numberOfNodes'])
+np.savetxt(cwd+'positionOutput/posi'+str((k)*dt)+'.txt', posi)
         ''')
 
     elif coupling_switcher in ["simiFSI"]:
         handel.write('''
     fsi.write_element(hydro_element,cwd)
-else:
-    timeFE=dt*k
-    U=np.array(Uinput[int(k*dt/10.0)])
-    force_on_element=hydroModel.force_on_element(posi,velo_nodes,U)
-    Fnh=hydroModel.distribute_force()
-    fsi.write_position(posi,cwd)
-    np.savetxt(cwd+'positionOutput/posi'+str((1+k)*dt)+'.txt', posi)
+timeFE=dt*k
+U=Uinput[int(k*dt/10.0)]
+force_on_element=hydroModel.force_on_element(netWakeModel,posi,velo_nodes,U)
+Fnh=hydroModel.distribute_force(meshinfo['numberOfNodes'])
+fsi.write_position(posi,cwd)
+np.savetxt(cwd+'positionOutput/posi'+str((1+k)*dt)+'.txt', posi)
         ''')
 
     elif coupling_switcher in ["FSI"]:
@@ -399,54 +414,55 @@ else:
     U=np.array(Uinput[0])
     fsi.write_fh(np.zeros((len(hydro_element),3)),0,cwd)
     force_on_element=hydroModel.screen_fsi(posi,U)
-    Fnh=hydroModel.distribute_force()
+    Fnh=hydroModel.distribute_force(meshinfo['numberOfNodes'])
 else:
     timeFE=dt*k
     U=fsi.get_velocity(cwd,len(hydro_element),timeFE)
     force_on_element=hydroModel.screen_fsi(posi,U,velo_nodes)
-    Fnh=hydroModel.distribute_force()
+    Fnh=hydroModel.distribute_force(meshinfo['numberOfNodes'])
     fsi.write_position(posi,cwd)
     fsi.write_fh(force_on_element,timeFE,cwd)
     np.savetxt(cwd+'positionOutput/posi'+str((k)*dt)+'.txt', posi)
         ''')
+
+
 # # >>>>>>>>>>>>>>> midOutput >>>>>>>>>>>>>>>>>>>>>>>>>
-def set_save_midresults(handel,saveMid_result):
+def set_save_midresults(handel, saveMid_result):
     if saveMid_result is not False:
         handel.write('''
-    if ((1+k)*dt)%'''+str(float(saveMid_result))+''''==0:
-        filename = "REPE_OUT/output-"+str((1+k)*dt)+".rmed"
-        DEFI_FICHIER(FICHIER=filename, UNITE=180+k,TYPE='BINARY')
-        IMPR_RESU(FORMAT='MED',
-              UNITE=180+k,
-              RESU=_F(CARA_ELEM=elemprop,
-                      NOM_CHAM=('DEPL' ,'SIEF_ELGA'),
-                      # LIST_INST=listr,
-                      INST=(1+k)*dt,
-                      RESULTAT=resn,
-                      TOUT_CMP='OUI'),
-              )
-        DEFI_FICHIER(ACTION='LIBERER', UNITE=180+k)
+if ((1+k)*dt)%''' + str(float(saveMid_result)) + '''==0:
+    filename = "REPE_OUT/output-"+str((1+k)*dt)+".rmed"
+    DEFI_FICHIER(FICHIER=filename, UNITE=180+k,TYPE='BINARY')
+    IMPR_RESU(FORMAT='MED',
+          UNITE=180+k,
+          RESU=_F(CARA_ELEM=elemprop,
+                  NOM_CHAM=('DEPL' ,'SIEF_ELGA'),
+                  # LIST_INST=listr,
+                  INST=(1+k)*dt,
+                  RESULTAT=resn,
+                  TOUT_CMP='OUI'),
+          )
+    DEFI_FICHIER(ACTION='LIBERER', UNITE=180+k)
 
 
-        stat = CALC_CHAMP(CONTRAINTE=('SIEF_ELNO', ),
-                          FORCE=('REAC_NODA', ),
-                          RESULTAT=resn)
-        reac = POST_RELEVE_T(ACTION=_F(GROUP_NO=('topnodes'),
-                                       INTITULE='sum reactions',
-                                       MOMENT=('DRX', 'DRY', 'DRZ'),
-                                       NOM_CHAM=('REAC_NODA'),
-                                       OPERATION=('EXTRACTION', ),
-                                       POINT=(0.0, 0.0, 0.0),
-                                       RESULTANTE=('DX', 'DY', 'DZ'),
-                                       RESULTAT=stat))
-        IMPR_TABLE(FORMAT_R='1PE12.3',
-                   TABLE=reac,
-                   UNITE=9)
-        DETRUIRE(CONCEPT=_F( NOM=(stat)))
-        DETRUIRE(CONCEPT=_F( NOM=(reac)))
-            ''')
-    else:
-        handel.write('''
+    stat = CALC_CHAMP(CONTRAINTE=('SIEF_ELNO', ),
+                      FORCE=('REAC_NODA', ),
+                      RESULTAT=resn)
+    reac = POST_RELEVE_T(ACTION=_F(GROUP_NO=('topnodes'),
+                                   INTITULE='sum reactions',
+                                   MOMENT=('DRX', 'DRY', 'DRZ'),
+                                   NOM_CHAM=('REAC_NODA'),
+                                   OPERATION=('EXTRACTION', ),
+                                   POINT=(0.0, 0.0, 0.0),
+                                   RESULTANTE=('DX', 'DY', 'DZ'),
+                                   RESULTAT=stat))
+    IMPR_TABLE(FORMAT_R='1PE12.3',
+               TABLE=reac,
+               UNITE=9)
+    DETRUIRE(CONCEPT=_F( NOM=(stat)))
+    DETRUIRE(CONCEPT=_F( NOM=(reac)))
+        ''')
+    handel.write('''
 DETRUIRE(CONCEPT=_F( NOM=(tblp)))
 DETRUIRE(CONCEPT=_F( NOM=(tblp2)))
 
@@ -455,8 +471,9 @@ if k < itimes-1:
         DETRUIRE(CONCEPT=_F( NOM=(l[i])))
         ''')
 
+
 # >>>>>>>>>>>>>>>    ASTERRUN.export       >>>>>>>>>>>>
-def set_export(handel,rdnumber,hostname,username,cwd,solver_version,mesh_name):
+def set_export(handel, rdnumber, hostname, username, cwd, solver_version, mesh_name):
     handel.write('''P actions make_etude
 P aster_root ''' + workPath.aster_path[:-25] + '''
 P consbtc oui
@@ -478,7 +495,7 @@ P noeud ''' + str(hostname) + '''
 P nomjob astk
 P origine ASTK 2019.0.final
 P platform LINUX64
-P profastk ''' + str(username)+ '''@''' + str(hostname) + ''':''' + cwd + '''/run.astk
+P profastk ''' + str(username) + '''@''' + str(hostname) + ''':''' + cwd + '''/run.astk
 P protocol_copyfrom asrun.plugins.server.SCPServer
 P protocol_copyto asrun.plugins.server.SCPServer
 P protocol_exec asrun.plugins.server.SSHServer
@@ -488,15 +505,15 @@ P serveur ''' + str(hostname) + '''
 P soumbtc oui
 P time_limit 9000060.0
 P tpsjob 1501
-P uclient ''' + str(username)+ '''
-P username ''' + str(username)+ '''
+P uclient ''' + str(username) + '''
+P username ''' + str(username) + '''
 P version ''' + str(solver_version) + '''
 A args
 A memjeveux 637.75
 A tpmax 9000000.0
 F mmed ''' + cwd + '''/asterinput/''' + str(mesh_name) + ''' D 20
-F comm ''' + cwd + '''/asterinput/ASTER1.comm D 1
-F libr ''' + cwd + '''/asterinput/ASTER2.comm D 91
+F comm ''' + cwd + '''/asterinput/ASTER1.py D 1
+F libr ''' + cwd + '''/asterinput/ASTER2.py D 91
 F libr ''' + cwd + '''/asterinput/meshinfomation.py D 90
 R repe ''' + cwd + '''/midOutput/REPE_OUT D  0
 R repe ''' + cwd + '''/midOutput/REPE_OUT R  0

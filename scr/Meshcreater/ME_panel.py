@@ -136,6 +136,4 @@ meshinfo = {
 with open(cwd + "/meshinfomation.py", 'w') as f:
     f.write("meshinfo=")
     f.write(str(meshinfo))
-# f = open(cwd + "/meshinfomation.txt", "w")
-# f.write(str(meshinfo))
 f.close()
