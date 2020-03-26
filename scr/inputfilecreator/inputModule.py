@@ -18,7 +18,6 @@ def head(handel, cwd):
 # Any questions about this code, 
 # please email: hui.cheng@uis.no
 import sys
-import numpy as np
 sys.path.append("''' + workPath.forceModel_path + '''")
 import hydro4c1 as hy
 import fsimapping as fsi
@@ -198,8 +197,8 @@ NODEnumber=meshinfo['numberOfNodes']
 def set_hydrodynamic_model(handel,hydroModel, wake_model, Sn, dwh, dw0, velocities):
     handel.write('''
 Uinput = ''' + str(velocities) + '''
-Fnh= np.zeros((NODEnumber,3)) # initial hydrodynamic forces=0
-l=['None']*((len(Fnh)+1))
+Fnh= []
+l=['None']*((NODEnumber+1))
 con = meshinfo['netLines']
 sur = meshinfo['netSurfaces']
     ''')
@@ -230,7 +229,6 @@ with open(cwd+'/positionOutput/hydro_elements.txt', "w") as file:
 file.close()
 
 for k in range(0,itimes):
-    Fnh=tuple(Fnh)
     INCLUDE(UNITE=91,INFO=0)
 
 IMPR_RESU(FORMAT='MED',
@@ -276,17 +274,8 @@ def apply_boundary(handel, loads):
     :return: write the fixed statement to the input fil
     """
     handel.write('''
-for i in range (1,len(Fnh)+1):
-    grpno = 'node%01g' %i
-    l[i]=AFFE_CHAR_MECA( FORCE_NODALE=_F(GROUP_NO= (grpno),
-                         FX= Fnh[i-1][0],
-                         FY= Fnh[i-1][1],
-                         FZ= Fnh[i-1][2],),
-                         MODELE=model)
 loadr=[]
-for i in range (1,len(Fnh)+1):
-    loadr.append( _F(CHARGE=l[i],), )
-''')
+                ''')
     for load in loads:
         handel.write('''
 loadr.append( _F(CHARGE=''' + str(load) + '''), )        
@@ -325,6 +314,17 @@ if k == 0:
                     INCREMENT=_F(LIST_INST=times,INST_FIN=(1+k)*dt),
                     MODELE=model)
 else:
+    Fnh=tuple(Fnh)
+    for i in range (1,NODEnumber+1):
+        grpno = 'node%01g' %i
+        l[i]=AFFE_CHAR_MECA( FORCE_NODALE=_F(GROUP_NO= (grpno),
+                         FX= Fnh[i-1][0],
+                         FY= Fnh[i-1][1],
+                         FZ= Fnh[i-1][2],),
+                         MODELE=model)
+    for i in range (1,NODEnumber+1):
+        loadr.append( _F(CHARGE=l[i],), ) 
+                                
     resn = DYNA_NON_LINE(CARA_ELEM=elemprop,
     				            CHAM_MATER=fieldmat,
     				            reuse=resn,
@@ -391,10 +391,13 @@ if k < itimes-1:
     ''')
     if coupling_switcher in ["False"]:
         handel.write('''
-U=np.array(Uinput[int(k*dt/10.0)])
+U=Uinput[int(k*dt/10.0)]
 force_on_element=hydroModel.force_on_element(netWakeModel,posi,U)
 Fnh=hydroModel.distribute_force(meshinfo['numberOfNodes'])
-np.savetxt(cwd+'positionOutput/posi'+str((k)*dt)+'.txt', posi)
+with open(cwd+'/positionOutput/posi'+str((k)*dt)+'.txt', "w") as file:
+    file.write(str(posi))
+file.close()
+
         ''')
 
     elif coupling_switcher in ["simiFSI"]:
@@ -407,19 +410,19 @@ U=Uinput[int(k*dt/10.0)]
 force_on_element=hydroModel.force_on_element(netWakeModel,posi,U)
 Fnh=hydroModel.distribute_force(meshinfo['numberOfNodes'])
 fsi.write_position(posi,cwd)
-np.savetxt(cwd+'positionOutput/posi'+str((1+k)*dt)+'.txt', posi)
+with open(cwd+'/positionOutput/posi'+str((k)*dt)+'.txt', "w") as file:
+    file.write(str(posi))
+file.close()
         ''')
 
     elif coupling_switcher in ["FSI"]:
         handel.write('''
 if k == 0:
     hydro_element=hydroModel.output_hydro_element()      
-    force_on_element=np.zeros((len(hydro_element),3))
     Fnh=hydroModel.distribute_force(meshinfo['numberOfNodes'])
     
     fsi.write_element(hydro_element,cwd)
     fsi.write_position(meshinfo['netNodes'],cwd)
-    fsi.write_fh(np.zeros((len(hydro_element),3)),0,cwd)
 else:
     timeFE=dt*k
     U=fsi.get_velocity(cwd,len(hydro_element),timeFE)
@@ -428,7 +431,9 @@ else:
     
     fsi.write_position(posi,cwd)
     fsi.write_fh(force_on_element,timeFE,cwd)
-    np.savetxt(cwd+'positionOutput/posi'+str((k)*dt)+'.txt', posi)
+    with open(cwd+'/positionOutput/posi'+str((k)*dt)+'.txt', "w") as file:
+        file.write(str(posi))
+    file.close()
         ''')
 
 
@@ -471,10 +476,10 @@ if ((1+k)*dt)%''' + str(float(saveMid_result)) + '''==0:
     handel.write('''
 DETRUIRE(CONCEPT=_F( NOM=(tblp)))
 DETRUIRE(CONCEPT=_F( NOM=(tblp2)))
-
-if k < itimes-1:
-    for i in range (1,len(Fnh)+1):
-        DETRUIRE(CONCEPT=_F( NOM=(l[i])))
+if k!=0:
+    if k < itimes-1:
+        for i in range (1,NODEnumber+1):
+            DETRUIRE(CONCEPT=_F( NOM=(l[i])))
         ''')
 
 

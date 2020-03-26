@@ -28,16 +28,20 @@ net_width = cageInfo['Net']['netWidth']
 net_height = cageInfo['Net']['netHeight']
 top_center = cageInfo['TopBar']['barCenter']
 nettingType = cageInfo['Net']['nettingType']
+normal_vector = cageInfo['Net']['normalVector']  # todo add the linear transformation matrix later
 
 # generate the point coordinates matrix for a net panel
 if nettingType == "square":
-    for net in range(len(top_center)):
+    for net in top_center:
         for j in range(0, NN + 1):
             for i in range(0, NT + 1):
                 point.append(
-                    [top_center[net][0],
-                     top_center[net][1] - net_width / 2 + (i / float(NT) * net_width),
-                     top_center[net][2] - j / float(NN) * net_height])
+                    [net[0],
+                     net[1] - net_width / 2 + (i / float(NT) * net_width),
+                     net[2] - j / float(NN) * net_height])
+    nodes_on_eachNet = (NN + 1) * (NT + 1)
+    elements_on_eachNet = (NN + 1) * NT + NN * (NT + 1)
+
 elif nettingType == "rhombus":
     print("Under construction")
     exit()  # todo add the rhombus nodes.
@@ -59,19 +63,27 @@ Mesh_1 = smesh.Mesh()
 for each_node in point:
     nodeID = Mesh_1.AddNode(float(each_node[0]), float(each_node[1]), float(each_node[2]))
 #
-for i in range(0, NT + 1):
-    for j in range(0, NN + 1):
-        if j != NN:
-            edge = Mesh_1.AddEdge(
-                [1 + i + j * (NT + 1), 1 + i + (j + 1) * (NT + 1)])  # add the vertical line into geometry
-            con.append([i + j * (NT + 1), i + (j + 1) * (NT + 1)])  # add the vertical line into con
-        if i != NT:
-            edge = Mesh_1.AddEdge(
-                [1 + i + j * (NT + 1), 1 + 1 + i + j * (NT + 1)])  # add the horizontal line into geometry
-            con.append([i + j * (NT + 1), 1 + i + j * (NT + 1)])  # add the horizontal line into con
-        if i != NT and j != NN:
-            sur.append([i + j * (NT + 1), 1 + i + j * (NT + 1),
-                        i + (j + 1) * (NT + 1), 1 + i + (j + 1) * (NT + 1)])
+
+for k in range(len(top_center)):
+    for i in range(0, NT + 1):
+        for j in range(0, NN + 1):
+            if j != NN:
+                edge = Mesh_1.AddEdge(
+                    [nodes_on_eachNet * k + 1 + i + j * (NT + 1),
+                     nodes_on_eachNet * k + 1 + i + (j + 1) * (NT + 1)])  # add the vertical line into geometry
+                con.append([nodes_on_eachNet * k + i + j * (NT + 1),
+                            nodes_on_eachNet * k + i + (j + 1) * (NT + 1)])  # add the vertical line into con
+            if i != NT:
+                edge = Mesh_1.AddEdge(
+                    [nodes_on_eachNet * k + 1 + i + j * (NT + 1),
+                     nodes_on_eachNet * k + 1 + 1 + i + j * (NT + 1)])  # add the horizontal line into geometry
+                con.append([nodes_on_eachNet * k + i + j * (NT + 1),
+                            nodes_on_eachNet * k + 1 + i + j * (NT + 1)])  # add the horizontal line into con
+            if i != NT and j != NN:
+                sur.append([nodes_on_eachNet * k + i + j * (NT + 1),
+                            nodes_on_eachNet * k + 1 + i + j * (NT + 1),
+                            nodes_on_eachNet * k + i + (j + 1) * (NT + 1),
+                            nodes_on_eachNet * k + 1 + i + (j + 1) * (NT + 1)])
 
 isDone = Mesh_1.Compute()
 # naming  the group
@@ -82,12 +94,15 @@ smesh.SetName(allnodes, 'allnodes')
 
 # define the top nodes
 topnodes = Mesh_1.CreateEmptyGroup(SMESH.NODE, 'topnodes')
-nbAdd = topnodes.Add([i for i in range(NT + 2)])
+for k in range(len(top_center)):
+    nbAdd = topnodes.Add([i for i in range(k * nodes_on_eachNet + 1, k * nodes_on_eachNet + NT + 2)])
 smesh.SetName(topnodes, 'topnodes')
 
 # define the nodes on bottom ring
 bottomnodes = Mesh_1.CreateEmptyGroup(SMESH.NODE, 'bottomnodes')
-nbAdd = bottomnodes.Add([i for i in range((NN) * (NT + 1) + 1, (NN + 1) * (NT + 1) + 1)])
+for k in range(len(top_center)):
+    nbAdd = bottomnodes.Add(
+        [i for i in range(k * nodes_on_eachNet + (NN) * (NT + 1) + 1, k * nodes_on_eachNet + (NN + 1) * (NT + 1) + 1)])
 smesh.SetName(bottomnodes, 'bottomnodes')
 
 # define the nodes for sinkers
@@ -110,12 +125,16 @@ smesh.SetName(twines, 'twines')
 #
 # # the top ring to keep ths shape of the fish cage.
 topring = Mesh_1.CreateEmptyGroup(SMESH.EDGE, 'topring')
-nbAdd = topring.Add([i for i in range(2, NT * (2 * NN + 1), 2 * NN + 1)])
+for k in range(len(top_center)):
+    nbAdd = topring.Add(
+        [i for i in range(k * elements_on_eachNet + 2, k * elements_on_eachNet + NT * (2 * NN + 1), 2 * NN + 1)])
 smesh.SetName(topring, 'topring')
 
 # bottom ring will keep the cage and add the sink forces
 bottomring = Mesh_1.CreateEmptyGroup(SMESH.EDGE, 'bottomring')
-nbAdd = bottomring.Add([i for i in range(2 * NN + 1, (NT + 1) * (2 * NN + 1), 2 * NN + 1)])
+for k in range(len(top_center)):
+    nbAdd = bottomring.Add([i for i in range(k * elements_on_eachNet + 2 * NN + 1,
+                                             k * elements_on_eachNet + (NT + 1) * (2 * NN + 1), 2 * NN + 1)])
 smesh.SetName(bottomring, 'bottomring')
 
 # # give a name to the mesh

@@ -1,9 +1,12 @@
 """
-/--------------------------------\
-|    University of Stavanger     |
-|           Hui Cheng            |
-\--------------------------------/
-Any questions about this code, please email: hui.cheng@uis.no
+----------------------------------------------
+--         University of Stavanger          --
+--         Hui Cheng (PhD student)          --
+--          Lin Li (Medveileder)            --
+--      Prof. Muk Chen Ong (Supervisor)     --
+----------------------------------------------
+Any questions about this code,
+please email: hui.cheng@uis.no
 A module can be used to calculate the hydrodynamic forces on nets in Code_Aster.
 To use this module, one should be import this into the input file for calculations.
 """
@@ -177,7 +180,7 @@ class HydroMorison:
                                 realtime_node_position[int(self.elements[i][1])])
 
             velocity = np.array(current_velocity) * net_wake.reduction_factor(i) + wave_velocity[i]
-            drag_n, drag_t = self.hydro_coefficients(current_velocity, knot=False)
+            drag_n, drag_t = self.hydro_coefficients(velocity, knot=False)
             ft = 0.5 * row * self.dwh * (b - self.dwh) * drag_t * np.dot(a, velocity) * a * np.linalg.norm(
                 np.dot(a, velocity))
             fn = 0.5 * row * self.dwh * (b - self.dwh) * drag_n * (velocity - np.dot(a, velocity) * a) * np.linalg.norm(
@@ -319,9 +322,9 @@ class HydroScreen:
             p1 = realtime_node_position[panel[0]]
             p2 = realtime_node_position[panel[1]]
             p3 = realtime_node_position[panel[2]]
-            alpha, lift_direction, surface_area = calculation_on_element(p1, p2, p3, current_velocity)
+            alpha, lift_direction, surface_area = calculation_on_element(p1, p2, p3, np.array(current_velocity))
             # calculate the inflow angel, normal vector, lift force factor, area of the hydrodynamic element
-            velocity = current_velocity * net_wake.reduction_factor(self.hydro_element.index(panel), alpha) + \
+            velocity = np.array(current_velocity) * net_wake.reduction_factor(self.hydro_element.index(panel), alpha) + \
                        wave_velocity[self.hydro_element.index(panel)]
             # * 0.8 ** int((self.hydro_element.index(panel) + 1) / 672)
             # if not in the wake region, the effective velocity is the undisturbed velocity
@@ -351,8 +354,8 @@ class HydroScreen:
         # print("The length of U vector is " + str(len(velocity_on_element)))
         hydro_force_on_element = []  # force on net panel, initial as zeros
         # print("velocity elementy is 1" + str(velocity_on_element))
-        print("velocity_of_nodes is " + str(velocity_of_nodes))
-        print("realtime_node_position is " + str(realtime_node_position))
+        # print("velocity_of_nodes is " + str(velocity_of_nodes))
+        # print("realtime_node_position is " + str(realtime_node_position))
         if len(velocity_of_nodes) < len(realtime_node_position):
             velocity_of_nodes = np.zeros((len(realtime_node_position), 3))
         if len(velocity_on_element) < len(self.hydro_element):

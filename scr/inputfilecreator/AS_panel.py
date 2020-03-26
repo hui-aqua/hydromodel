@@ -1,9 +1,12 @@
 """
-----------------------------------
---   University of Stavanger    --
---           Hui Cheng          --
-----------------------------------
-Any questions about this code, please email: hui.cheng@uis.no
+----------------------------------------------
+--         University of Stavanger          --
+--         Hui Cheng (PhD student)          --
+--          Lin Li (Medveileder)            --
+--     Prof. Muk Chen Ong (Supervisor)      --
+----------------------------------------------
+Any questions about this code,
+please email: hui.cheng@uis.no
 
 """
 import os
@@ -95,7 +98,7 @@ handle2.close()
 
 # input file 3
 handle3 = open(cwd + '/ASTERRUN.export', 'w')
-im.set_export(handle3, suffix, hostname, username, cwd, 'stable', meshinfomation.meshinfo['meshName'])
+im.set_export(handle3, suffix, hostname, username, cwd, netPanelInfo['Solver']['version'], meshinfomation.meshinfo['meshName'])
 
 handle3.close()
 

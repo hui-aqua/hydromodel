@@ -24,7 +24,7 @@ def finish_flag(cwd, flag):
 
 
 def write_position(position, cwd):
-    print("Here>>>>>>>>>>>>>posi")
+    # print("Here>>>>>>>>>>>>>posi")
     start_flag(cwd, "/position_flag")
     # step 1 the head
     output_file = open(cwd + 'posi', 'w')
@@ -98,7 +98,7 @@ numOfSurf   ''' + str(len(hydro_element)) + ''' ;''')
 
 
 def write_fh(hydro_force, timeFE, cwd):
-    print("Here>>>>>>>>>>>>>Fh")
+    print("Here>>>>>>>>>>>>>Fh>>>  "+str(timeFE))
     start_flag(cwd, "/fh_flag")
     # step 1 the head
     output_file = open(cwd + 'Fh', 'w+')
@@ -148,7 +148,7 @@ def get_velocity(cwd, length_velocity, time_aster):
     :param time_aster:
     :return: a numpy array of velocity on elements
     """
-    print("Here>>>>>>>>>>>>>velo")
+    print("Here>>>>>>>>>>>>>velo>>>  "+str(time_aster))
     cwd_foam_root = "/".join(cwd.split("/")[0:-2])
     velocity_dict, time_foam = read_velocity(cwd_foam_root, length_velocity)
     time_foam = velocity_dict['time_record'][-1]

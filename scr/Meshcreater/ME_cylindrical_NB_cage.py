@@ -29,10 +29,8 @@ with open(str(sys.argv[1]), 'r') as f:
 
 NT = cageInfo['CageShape']['elementOverCir']  # Number of the nodes in circumference
 NN = cageInfo['CageShape']['elementOverHeight']  # number of section in the height, thus, the nodes should be NN+1
-shapeKey = str(cageInfo['CageShape']['shape'])
-shape = shapeKey.split('-')[0]
-bottomSwitcher = shapeKey.split('-')[1]
-floater_center = cageInfo['FloatingCollar']['floaterCenter']
+bottomSwitcher = str(cageInfo['CageShape']['shape'])
+floater_center = cageInfo['FloatingCollar']['floaterCenter'][0]
 D = cageInfo['CageShape']['cageDiameter']
 H = cageInfo['CageShape']['cageHeight']
 
@@ -94,20 +92,6 @@ for i in range(1, NT + 1):
                             i + (j + 1) * NT - 1,
                             1 + i + (j + 1) * NT - 1])
 
-if bottomSwitcher in ['WithBottom']:
-    tipDepth = cageInfo['CageShape']['cageCenterTipDepth']
-    point.append([0, 0, floater_center[2] - tipDepth])
-    nodeID = Mesh_1.AddNode(float(point[-1][0]), float(point[-1][1]), float(point[-1][2]))
-    # line the node to the bottom tips
-    print("total number of node is " + str(len(point)))
-    for i in range(1, NT + 1):
-        edge = Mesh_1.AddEdge([NN * NT + i, len(point)])  # add the horizontal line into geometry
-        con.append([NN * NT + i - 1, len(point) - 1])  # add the horizontal line into con
-        if i == NT:
-            sur.append([NN * NT + i - 1, len(point) - NT, len(point) - 1])
-        else:
-            sur.append([NN * NT + i - 1, NN * NT + i, len(point) - 1])
-        # todo sur add here
 
 if "Tube" in cageInfo["Weight"]["weightType"] and float(cageInfo["Weight"]["bottomRingDepth"]) != float(H):
     # sinkerTube is added at the bottom.
@@ -211,6 +195,20 @@ meshinfo = {
     "NT": NT,
     "meshName": meshname
 }
+print("\n"
+      "  --------------------------------------\n"
+      "  --     University of Stavanger      --\n"
+      "  --         Hui Cheng (PhD student)  --\n"
+      "  --       Lin Li (Medveileder)       --\n "
+      "  --  Prof. Muk Chen Ong (supervisor) --\n"
+      "  --------------------------------------\n"
+      "  Any questions about this code,\n"
+      "  please email: hui.cheng@uis.no\n"
+      "  Net panel(s)")
+print("<<<<<<<<<< Mesh Information >>>>>>>>>>")
+print("Number of node is " + str(meshinfo["numberOfNodes"]) + ".")
+print("Number of line element is " + str(meshinfo["numberOfLines"]) + ".")
+print("Number of surface element is " + str(meshinfo["numberOfSurfaces"]) + ".\n")
 with open(cwd + "/meshinfomation.py", 'w') as f:
     f.write("meshinfo=")
     f.write(str(meshinfo))
