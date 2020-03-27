@@ -1,3 +1,4 @@
+""""""
 """
 ----------------------------------------------
 --         University of Stavanger          --
@@ -95,12 +96,11 @@ class Net2NetWake:
 
 class HydroMorison:
     """
-    For Morison hydrodynamic models, the code needs the nodes' potions \n
+    For Morison hydrodynamic models, the code needs the nodes' potions
     and the connections.  \n
-    Thus, the input variable is the matrix of nodes and the connections. \n
+    Thus, the input variable is the matrix of nodes \n
     In addition, the solidity and constant flow reduction are also needed.
     """
-
     def __init__(self, model_index, hydro_element, solidity, dwh=0.0, dw0=0.0):
         self.modelIndex = str(model_index)
         self.elements = hydro_element  # the connections of the twines[[p1,p2][p2,p3]]

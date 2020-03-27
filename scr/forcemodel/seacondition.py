@@ -1,9 +1,13 @@
-"""
-/--------------------------------\
-|    University of Stavanger     |
-|           Hui Cheng            |
-\--------------------------------/
-Any questions about this code, please email: hui.cheng@uis.no
+""""""
+""""
+----------------------------------------------
+--         University of Stavanger          --
+--         Hui Cheng (PhD student)          --
+--          Lin Li (Medveileder)            --
+--      Prof. Muk Chen Ong (Supervisor)     --
+----------------------------------------------
+Any questions about this code,
+please email: hui.cheng@uis.no
 A module can be used to calculate the hydrodynamic forces on nets in Code_Aster.
 To use this module, one should be import this into the input file for calculations.
 
@@ -105,17 +109,16 @@ class Airywave:
 
     def get_velocity_at_elements(self, position_nodes, elements, global_time):
         """
-        Get a list of velocity at a list of elements
-        :param position_nodes: a numpy list of position
-        :param elements: a python list of element
-        :param global_time: time [s]
-        :return: a numpy list of velocities on elements
+        :param position_nodes: a numpy list of position \n
+        :param elements: a python list of element \n
+        :param global_time: time [s] \n
+        :return: Get a numpy array of velocity at a list of elements \n
         """
         velocity_list = []
         for element in elements:
             element_center = np.array([0, 0, 0])
             for node in element:
-                element_center += self.positions[node] / len(element)
+                element_center += position_nodes[node] / len(element)
             velocity_on_element = self.get_velocity(element_center, global_time)
             velocity_list.append(velocity_on_element)
         return np.array(velocity_list)

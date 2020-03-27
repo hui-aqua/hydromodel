@@ -1,9 +1,15 @@
+""""""
 """
-/--------------------------------\
-|    University of Stavanger     |
-|           Hui Cheng            |
-\--------------------------------/
-Any questions about this code, please email: hui.cheng@uis.no
+----------------------------------------------
+--         University of Stavanger          --
+--         Hui Cheng (PhD student)          --
+--          Lin Li (Medveileder)            --
+--      Prof. Muk Chen Ong (Supervisor)     --
+----------------------------------------------
+Any questions about this code,
+please email: hui.cheng@uis.no
+A module can be used to calculate the hydrodynamic forces on nets in Code_Aster.
+To use this module, one should be import this into the input file for calculations.
 
 """
 import os

@@ -1,5 +1,5 @@
 # import seacondition as sea
-from scr.enviroments import seacondition as sea
+from scr.forcemodel import seacondition as sea
 import numpy as np
 import matplotlib.pyplot as plt
 # from matplotlib.animation import FuncAnimation

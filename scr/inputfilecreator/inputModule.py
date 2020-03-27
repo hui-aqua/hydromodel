@@ -19,8 +19,8 @@ def head(handel, cwd):
 # please email: hui.cheng@uis.no
 import sys
 sys.path.append("''' + workPath.forceModel_path + '''")
-import hydro4c1 as hy
-import fsimapping as fsi
+import hydroModels as hy
+import nettingFSI as fsi
 cwd="''' + cwd + '''/"
 DEBUT(PAR_LOT='NON',
 IGNORE_ALARM=("SUPERVIS_25","DISCRETE_26","UTILITAI8_56") 
