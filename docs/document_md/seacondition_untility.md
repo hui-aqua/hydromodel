@@ -1,3 +1,15 @@
+# Enviromental conditons
+This folder is to build the wave condition in the FE solver
+Working tree in this folder: 
+
+- secondition.py:
+1. airy wave theory
+2. stokes second order wave theory
+
+[Reference about the waves](./pdf/2000linearwavetheroy_NTNU.pdf)   
+
+You can use the following code to show the wave evaluation:
+```python
 # import seacondition as sea
 from scr.forcemodel import seacondition as sea
 import numpy as np
@@ -58,3 +70,6 @@ plt.ylabel("Z (m)")
 plt.xlim(0, 500)
 plt.ylim(-20, 6)
 plt.show()
+
+
+```

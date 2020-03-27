@@ -76,7 +76,7 @@ else:
 
 im.define_time_scheme(handle1, cageInfo['Solver']['timeStep'], cageInfo['Solver']['timeLength'], len(velocities))
 im.set_hydrodynamic_model(handle1, hydrodynamic_model, wake_model, cageInfo['Net']['Sn'], dwh, dw0,
-                          cageInfo['Environment']['current'])
+                          cageInfo['Environment']['current'],cageInfo['Environment']["fluidDensity"])
 im.reaction_force(handle1, 'topnodes')
 handle1.close()
 

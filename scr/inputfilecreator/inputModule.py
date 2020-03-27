@@ -194,13 +194,15 @@ times = DEFI_LIST_INST(DEFI_LIST=_F(LIST_INST=listr,PAS_MINI=1e-8),
 
 NODEnumber=meshinfo['numberOfNodes']
 ''')
-def set_hydrodynamic_model(handel,hydroModel, wake_model, Sn, dwh, dw0, velocities):
+def set_hydrodynamic_model(handel,hydroModel, wake_model, Sn, dwh, dw0, velocities,fluidDensity):
     handel.write('''
 Uinput = ''' + str(velocities) + '''
 Fnh= []
 l=['None']*((NODEnumber+1))
 con = meshinfo['netLines']
 sur = meshinfo['netSurfaces']
+hy.row = ''' + str(fluidDensity) + '''  # [kg/m3]   sea water density
+
     ''')
 
     if hydroModel.split('-')[0] in ["Screen"]:

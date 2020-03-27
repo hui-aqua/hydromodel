@@ -170,61 +170,54 @@
 <h2>Environment<a class="headerlink" href="#environment" title="Permalink to this headline">¶</a></h2>
 <p>The information about the environmental conditions.</p>
 <ol class="simple">
-<li><p><strong>current</strong>: a python list. Unit: [m/s].</p></li>
-</ol>
+<li><p><strong>current</strong>: a python list. Unit: [m/s].</p>
 <ul class="simple">
 <li><p>One velocity,  <code class="docutils literal notranslate"><span class="pre">[[u,v,w]]</span></code>.  Input the three components of the current velocity that you are indented to use.</p></li>
 <li><p>Multiple velocities,  <code class="docutils literal notranslate"><span class="pre">[[u1,v1,w1],[u2,v2,w2],[u3,v3,w3]...[un,vn,wn]]</span></code> . Input the current velocities as a list of velocity. The program will run each velocity within the given timeLength sequentially.</p></li>
 </ul>
-<ol class="simple">
+</li>
 <li><p><strong>waterDepth</strong>:  a floating point number. Unit: [m]. The depth of water.</p></li>
-<li><p><strong>waves</strong>:  a python list or “False”.</p></li>
-</ol>
+<li><p><strong>waves</strong>:  a python list or “False”.</p>
 <ul class="simple">
 <li><p>If there is no wave, please use <code class="docutils literal notranslate"><span class="pre">False</span></code> to disable it.</p></li>
 <li><p>If wave are applied to the environment, Please use <code class="docutils literal notranslate"><span class="pre">[wave</span> <span class="pre">height,</span> <span class="pre">wavelength]</span></code> to define a deep water airy wave. Unit: [m]</p></li>
 </ul>
-<ol class="simple">
+</li>
 <li><p><strong>fluidDensity</strong>: a floating point number. Unit: [kg/m^3]. The density of fluid, sea water: 1025, fresh water: 1000.</p></li>
 </ol>
 </div>
 <div class="section" id="meshlib">
 <h2>MeshLib<a class="headerlink" href="#meshlib" title="Permalink to this headline">¶</a></h2>
 <p><strong>MeshLib</strong> is used to tell the mesh generator which library will be used to generate mesh.
-The value is chosen from following string:</p>
-<ul class="simple">
-<li><p><code class="docutils literal notranslate"><span class="pre">multi_cage</span></code>: multi fish cage without mooring system.</p></li>
-<li><p><code class="docutils literal notranslate"><span class="pre">multi_moored_cages</span></code>:multi fish cages with mooring system.</p></li>
-<li><p><code class="docutils literal notranslate"><span class="pre">panel</span></code>: a single net panel or few net panels.</p></li>
-<li><p><code class="docutils literal notranslate"><span class="pre">single_cage</span></code>: a single fish cage.</p></li>
-<li><p><code class="docutils literal notranslate"><span class="pre">trawlNet</span></code>: under construction.</p></li>
-</ul>
+The value is chosen from following string:
+- <code class="docutils literal notranslate"><span class="pre">multi_cage</span></code>: multi fish cage without mooring system.
+- <code class="docutils literal notranslate"><span class="pre">multi_moored_cages</span></code>:multi fish cages with mooring system.
+- <code class="docutils literal notranslate"><span class="pre">panel</span></code>: a single net panel or few net panels.
+- <code class="docutils literal notranslate"><span class="pre">single_cage</span></code>: a single fish cage.
+- <code class="docutils literal notranslate"><span class="pre">trawlNet</span></code>: under construction.</p>
 </div>
 <div class="section" id="net">
 <h2>Net<a class="headerlink" href="#net" title="Permalink to this headline">¶</a></h2>
 <p>Define the netting of net panel(s)</p>
 <ol class="simple">
-<li><p><strong>HydroModel</strong>: a string to indicate the hydrodynamic model. A detailed explanation can be found later.</p></li>
-</ol>
+<li><p><strong>HydroModel</strong>: a string to indicate the hydrodynamic model. A detailed explanation can be found later.</p>
 <ul class="simple">
 <li><p>Screen model: <code class="docutils literal notranslate"><span class="pre">Screen-S1</span></code>,<code class="docutils literal notranslate"><span class="pre">Screen-S2</span></code>,<code class="docutils literal notranslate"><span class="pre">Screen-S3</span></code>…</p></li>
 <li><p>Morison model: <code class="docutils literal notranslate"><span class="pre">Morison-M1</span></code>,<code class="docutils literal notranslate"><span class="pre">Morison-M3</span></code>,<code class="docutils literal notranslate"><span class="pre">Morison-M3</span></code>…</p></li>
 </ul>
-<ol class="simple">
-<li><p><strong>nettingType</strong>: a string to indicate the netting type.</p></li>
-</ol>
+</li>
+<li><p><strong>nettingType</strong>: a string to indicate the netting type.</p>
 <ul class="simple">
 <li><p><code class="docutils literal notranslate"><span class="pre">square</span></code>: square netting that are commonly used in aquaculture cage</p></li>
 <li><p><code class="docutils literal notranslate"><span class="pre">rhombus</span></code>: rhombus netting that are commonly used in fishing gear, e.g., trawl net, purse seine.</p></li>
 </ul>
-<ol class="simple">
-<li><p><strong>normalVector</strong>: a python list. Unit: [-].</p></li>
-</ol>
+</li>
+<li><p><strong>normalVector</strong>: a python list. Unit: [-].</p>
 <ul class="simple">
 <li><p>Single net panel, <code class="docutils literal notranslate"><span class="pre">[[nx,ny,nz]]</span></code>. Input the three components of the normal vector. The norm of vector do not need to be one.</p></li>
 <li><p>multi net panels, <code class="docutils literal notranslate"><span class="pre">[[nx1,ny1,nz1],[nx2,ny2,nz2]...]</span></code>. Input the three components of the normal vectors. The sequence of the input file should be corresponding to the <strong>barCenter</strong></p></li>
 </ul>
-<ol class="simple">
+</li>
 <li><p><strong>netHeight</strong>:a floating point number. Unit: [m]. The height of net panels. Here, we assume that all the net panel have the same geometrical characterises.</p></li>
 <li><p><strong>netWidth</strong>:a floating point number. Unit: [m]. The width of net panels. Here, we assume that all the net panel have the same geometrical characterises.</p></li>
 <li><p><strong>elementOverHeight</strong>: a integer number. Unit: [-]. The element that along the height of net panel.</p></li>
@@ -240,13 +233,12 @@ The value is chosen from following string:</p>
 <h2>TopBar<a class="headerlink" href="#topbar" title="Permalink to this headline">¶</a></h2>
 <p>Define the top bar of net panels.</p>
 <ol class="simple">
-<li><p><strong>barCenter</strong>:a python list. Unit: [m].</p></li>
-</ol>
+<li><p><strong>barCenter</strong>:a python list. Unit: [m].</p>
 <ul class="simple">
 <li><p>One net panel,  <code class="docutils literal notranslate"><span class="pre">[x,y,z]</span> </code>.  Input the position of the top bar center.</p></li>
 <li><p>Multiple net panels,  <code class="docutils literal notranslate"><span class="pre">[[x1,y1,z1],[x2,y2,z2],[x3,y3,z3]...[xn,yn,zn]]</span></code> . If there are multiple net panels, input the position of each top bar center and make it a python list.</p></li>
 </ul>
-<ol class="simple">
+</li>
 <li><p><strong>barRadius</strong>: a floating point number. Unit [m]. The pipe diameter of the top bar.</p></li>
 <li><p><strong>topBarRho</strong>: a floating point number. Unit [kg/m^3-]. The effective density of top bar.</p></li>
 <li><p><strong>topBarYoungModule</strong>: a floating point number. Unit [Pa]. The Young’s modulus of top bar.</p></li>
@@ -256,14 +248,13 @@ The value is chosen from following string:</p>
 <h2>Weight<a class="headerlink" href="#weight" title="Permalink to this headline">¶</a></h2>
 <p>Define the weight system of cage.</p>
 <ol class="simple">
-<li><p><strong>weightType</strong>: a string to indicate the weight type.</p></li>
-</ol>
+<li><p><strong>weightType</strong>: a string to indicate the weight type.</p>
 <ul class="simple">
 <li><p><code class="docutils literal notranslate"><span class="pre">sinkers</span></code>: conventional type, numbers of sinkers are hung at the bottom of fish cage</p></li>
 <li><p><code class="docutils literal notranslate"><span class="pre">allfixed</span></code>: all the nodes are fixed. Thus, the fish cage have no deformation.</p></li>
 <li><p><code class="docutils literal notranslate"><span class="pre">tube</span></code>: Using sinker tube to keep stretch the net panel.</p></li>
 </ul>
-<ol class="simple">
+</li>
 <li><p><strong>bottomBarRadius</strong>: a floating point number. Unit [m]. The pipe diameter of the sinker tube.</p></li>
 <li><p><strong>bottomBarRho</strong>: a floating point number. Unit [kg/m^3-]. The effective density of floater collar.</p></li>
 <li><p><strong>bottomBarYoungModule</strong>: a floating point number. Unit [Pa]. The Young’s modulus of floater collar.</p></li>
@@ -277,14 +268,13 @@ The value is chosen from following string:</p>
 <ol class="simple">
 <li><p><strong>version</strong>: a string to indicate the version of code_Aster. You can use the following type:
 <code class="docutils literal notranslate"><span class="pre">stable</span></code>, <code class="docutils literal notranslate"><span class="pre">testing</span></code>.</p></li>
-<li><p><strong>coupling</strong>: a string to indicate the whether or not using coupling.</p></li>
-</ol>
+<li><p><strong>coupling</strong>: a string to indicate the whether or not using coupling.</p>
 <ul class="simple">
 <li><p><code class="docutils literal notranslate"><span class="pre">False</span></code>: No coupling. Calculated only with Code_Aster</p></li>
 <li><p><code class="docutils literal notranslate"><span class="pre">FSI</span></code>:  Fully couple with OpenFoam.</p></li>
 <li><p><code class="docutils literal notranslate"><span class="pre">simiFSI</span></code>: Semi coupled, only transfer the value from code_aster to OpenFOAM</p></li>
 </ul>
-<ol class="simple">
+</li>
 <li><p><strong>method</strong>: a string to indicate the method to solve the equation.
 <code class="docutils literal notranslate"><span class="pre">HHT</span></code>: hht-alpha method.</p></li>
 <li><p><strong>alpha</strong>:a floating point number for alpha in hht-alpha method.

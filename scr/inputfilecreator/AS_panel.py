@@ -82,7 +82,7 @@ else:
 im.define_time_scheme(handle1, netPanelInfo['Solver']['timeStep'], netPanelInfo['Solver']['timeLength'],
                       len(velocities))
 im.set_hydrodynamic_model(handle1, hydrodynamic_model, wake_model, netPanelInfo['Net']['Sn'], dwh, dw0,
-                          netPanelInfo['Environment']['current'])
+                          netPanelInfo['Environment']['current'],netPanelInfo['Environment']["fluidDensity"])
 im.reaction_force(handle1, 'topnodes')
 handle1.close()
 
