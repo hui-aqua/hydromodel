@@ -55,7 +55,7 @@ dwe = dws
 twineSection = 0.25 * np.pi * pow(dws, 2)
 dt = netPanelInfo['Solver']['timeStep']  # time step
 velocities = netPanelInfo['Environment']['current']
-
+print("dw0, dwh,dws,dwe are "+str(dw0)+"[m], "+str(dwh)+"[m], "+str(dws)+"[m], "+str(dwe)+"[m].")
 # input file 1
 handle1 = open(cwd + '/ASTER1.py', 'w')
 im.head(handle1, cwd)

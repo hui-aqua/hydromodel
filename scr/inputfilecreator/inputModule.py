@@ -15,15 +15,16 @@ def head(handel, cwd):
 # --   University of Stavanger    --
 # --           Hui Cheng          --
 # ----------------------------------
-# Any questions about this code, 
+# Any questions about this code,
 # please email: hui.cheng@uis.no
 import sys
 sys.path.append("''' + workPath.forceModel_path + '''")
-import hydroModels as hy
+import hydrodynamicModule as hdm
 import nettingFSI as fsi
+import seacondition as sc
 cwd="''' + cwd + '''/"
 DEBUT(PAR_LOT='NON',
-IGNORE_ALARM=("SUPERVIS_25","DISCRETE_26","UTILITAI8_56") 
+IGNORE_ALARM=("SUPERVIS_25","DISCRETE_26","UTILITAI8_56")
 )
 INCLUDE(UNITE=90)
 mesh = LIRE_MAILLAGE(UNITE=20)''')
@@ -42,13 +43,13 @@ model = AFFE_MODELE(AFFE=(_F(GROUP_MA=('twines'),
     ''')
     elif weight_type in ['sinkerTube', 'sinkerTube+centerweight', 'tube']:
         handel.write('''
-model = AFFE_MODELE(AFFE=(_F(GROUP_MA=('twines'), 
-                             MODELISATION=('CABLE'), 
-                             PHENOMENE='MECANIQUE'), 
-                          _F(GROUP_MA=('bottomring'), 
-                             MODELISATION=('POU_D_E'), 
+model = AFFE_MODELE(AFFE=(_F(GROUP_MA=('twines'),
+                             MODELISATION=('CABLE'),
+                             PHENOMENE='MECANIQUE'),
+                          _F(GROUP_MA=('bottomring'),
+                             MODELISATION=('POU_D_E'),
                              PHENOMENE='MECANIQUE')
-                          ), 
+                          ),
                     MAILLAGE=mesh)
     ''')
     else:
@@ -201,21 +202,21 @@ Fnh= []
 l=['None']*((NODEnumber+1))
 con = meshinfo['netLines']
 sur = meshinfo['netSurfaces']
-hy.row = ''' + str(fluidDensity) + '''  # [kg/m3]   sea water density
+hdm.row = ''' + str(fluidDensity) + '''  # [kg/m3]   sea water density
 
     ''')
 
     if hydroModel.split('-')[0] in ["Screen"]:
         handel.write('''
-hydroModel=hy.HydroScreen("''' + hydroModel.split('-')[1] + '''",sur,''' + str(Sn) + ''',''' + str(dwh) + ''',''' + str(dw0) + ''')     
-netWakeModel=hy.Net2NetWake("''' + str(wake_model) + '''",meshinfo['netNodes'],sur,Uinput[0],[0,0,0],''' + str(
+hydroModel=hdm.screenModel.forceModel("''' + hydroModel.split('-')[1] + '''",sur,''' + str(Sn) + ''',''' + str(dwh) + ''',''' + str(dw0) + ''')
+netWakeModel=hdm.wakeModel.net2net("''' + str(wake_model) + '''",meshinfo['netNodes'],sur,Uinput[0],[0,0,0],''' + str(
             dw0) + ''',''' + str(Sn) + ''')
-    
+
         ''')
     elif hydroModel.split('-')[0] in ["Morison"]:
         handel.write('''
-hydroModel=hy.HydroMorison("''' + hydroModel.split('-')[1] + '''",con,''' + str(Sn) + ''',''' + str(dwh) + ''',''' + str(dw0) + ''')   
-netWakeModel=hy.Net2NetWake("''' + str(wake_model) + '''",meshinfo['netNodes'],con,Uinput[0],[0,0,0],''' + str(
+hydroModel=hdm.morisonModel.forceModel("''' + hydroModel.split('-')[1] + '''",con,''' + str(Sn) + ''',''' + str(dwh) + ''',''' + str(dw0) + ''')
+netWakeModel=hdm.wakeModel.net2net("''' + str(wake_model) + '''",meshinfo['netNodes'],con,Uinput[0],[0,0,0],''' + str(
             dw0) + ''',''' + str(Sn) + ''')
        ''')
     else:
@@ -280,7 +281,7 @@ loadr=[]
                 ''')
     for load in loads:
         handel.write('''
-loadr.append( _F(CHARGE=''' + str(load) + '''), )        
+loadr.append( _F(CHARGE=''' + str(load) + '''), )
         ''')
 
 
@@ -294,12 +295,12 @@ if k == 0:
                                     GROUP_MA=('twines', ),
                                     RELATION='CABLE'),''')
     if weight_type in ['sinkerTube', 'sinkerTube+centerweight', 'tube']:
-        handel.write('''                             
+        handel.write('''
                                   _F(DEFORMATION='PETIT',
                                     GROUP_MA=('bottomring', ),
                                     RELATION='ELAS')''')
-    handel.write('''               
-                                 ),                   
+    handel.write('''
+                                 ),
                     CONVERGENCE=_F(ITER_GLOB_MAXI=''' + str(maximum_iteration) + ''' ,
                                    RESI_GLOB_RELA=''' + str(residuals) + ''' ),
                     EXCIT=(loadr),
@@ -325,8 +326,8 @@ else:
                          FZ= Fnh[i-1][2],),
                          MODELE=model)
     for i in range (1,NODEnumber+1):
-        loadr.append( _F(CHARGE=l[i],), ) 
-                                
+        loadr.append( _F(CHARGE=l[i],), )
+
     resn = DYNA_NON_LINE(CARA_ELEM=elemprop,
     				            CHAM_MATER=fieldmat,
     				            reuse=resn,
@@ -335,12 +336,12 @@ else:
                                     GROUP_MA=('twines', ),
                                     RELATION='CABLE'),''')
     if weight_type in ['sinkerTube', 'sinkerTube+centerweight', 'tube']:
-        handel.write('''                              
+        handel.write('''
                                   _F(DEFORMATION='PETIT',
                                     GROUP_MA=('bottomring', ),
                                     RELATION='ELAS')''')
-    handel.write('''              
-                                 ),       
+    handel.write('''
+                                 ),
                     CONVERGENCE=_F(ITER_GLOB_MAXI=''' + str(maximum_iteration) + ''' ,
                                    RESI_GLOB_RELA=''' + str(residuals) + ''' ),
                     EXCIT=(loadr),
@@ -384,8 +385,8 @@ tblp2 = POST_RELEVE_T(ACTION=(_F(OPERATION='EXTRACTION',      # For Extraction o
                           INST=(1+k)*dt,                     # STAT_NON_LINE calculates for 10 INST. I want only last INST
                            ),),
                   );
-posi=hy.get_position(tblp)
-velo_nodes=hy.get_velocity(tblp2)
+posi=fsi.get_position_aster(tblp)
+velo_nodes=fsi.get_velocity_aster(tblp2)
 
 if k < itimes-1:
     del Fnh
@@ -404,7 +405,7 @@ file.close()
 
     elif coupling_switcher in ["simiFSI"]:
         handel.write('''
-if k == 0:        
+if k == 0:
     fsi.write_element(hydroModel.output_hydro_element(),cwd)
 
 timeFE=dt*k
@@ -420,9 +421,9 @@ file.close()
     elif coupling_switcher in ["FSI"]:
         handel.write('''
 if k == 0:
-    hydro_element=hydroModel.output_hydro_element()      
+    hydro_element=hydroModel.output_hydro_element()
     Fnh=hydroModel.distribute_force(meshinfo['numberOfNodes'])
-    
+
     fsi.write_element(hydro_element,cwd)
     fsi.write_position(meshinfo['netNodes'],cwd)
 else:
@@ -430,7 +431,7 @@ else:
     U=fsi.get_velocity(cwd,len(hydro_element),timeFE)
     force_on_element=hydroModel.screen_fsi(posi,U,velo_nodes)
     Fnh=hydroModel.distribute_force(meshinfo['numberOfNodes'])
-    
+
     fsi.write_position(posi,cwd)
     fsi.write_fh(force_on_element,timeFE,cwd)
     with open(cwd+'/positionOutput/posi'+str((k)*dt)+'.txt', "w") as file:
