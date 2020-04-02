@@ -35,8 +35,8 @@ import meshinfomation
 
 dw0 = netPanelInfo['Net']['twineDiameter']
 coupling_switcher = netPanelInfo['Solver']['coupling']  #
-hydrodynamic_model = str(netPanelInfo['Net']['hydroModel'])
-wake_model = str(netPanelInfo['Net']['wakeModel'])
+hydrodynamic_model = str(netPanelInfo['Boundary']['hydroModel'])
+wake_model = str(netPanelInfo['Boundary']['wakeModel'])
 
 Fbuoy = netPanelInfo['Net']['netHeight'] * netPanelInfo['Net']['netWidth'] * \
         netPanelInfo['Net']['Sn'] * dw0 * 0.25 * np.pi * 9.81 * float(
@@ -67,17 +67,13 @@ im.define_material(handle1, netPanelInfo['Weight']['weightType'], netPanelInfo['
                    netPanelInfo['Weight']["bottomBarRho"])
 im.assign_material(handle1, netPanelInfo['Weight']['weightType'])
 
-im.assign_bc_gravity(handle1, 'gF', 9.81, 'twines')
+im.assign_bc_gravity(handle1, 'gF', netPanelInfo['Boundary']["gravity"], 'twines')
 im.assign_bc_force_on_nodes(handle1, 'buoyF', 'allnodes',
                             [0, 0, Fbuoy / float(meshinfomation.meshinfo['numberOfNodes'])])
 
+im.assign_bc_fixed(handle1, 'fixed', netPanelInfo['Boundary']["fixed"])
 if netPanelInfo['Weight']['weightType'] in ['sinkers']:
-    im.assign_bc_fixed(handle1, 'fixed', 'topnodes')
     im.assign_bc_force_on_nodes(handle1, 'sinkF', 'sinkers', [0, 0, netPanelInfo['Weight']["sinkerWeight"]])
-elif netPanelInfo['Weight']['weightType'] in ['allFixed']:
-    im.assign_bc_fixed(handle1, 'fixed', 'allnodes')
-else:
-    im.assign_bc_fixed(handle1, 'fixed', 'topnodes')
 
 im.define_time_scheme(handle1, netPanelInfo['Solver']['timeStep'], netPanelInfo['Solver']['timeLength'],
                       len(velocities))

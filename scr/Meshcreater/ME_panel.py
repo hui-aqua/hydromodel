@@ -28,23 +28,31 @@ net_width = cageInfo['Net']['netWidth']
 net_height = cageInfo['Net']['netHeight']
 top_center = cageInfo['TopBar']['barCenter']
 nettingType = cageInfo['Net']['nettingType']
-normal_vector = cageInfo['Net']['normalVector']  # todo add the linear transformation matrix later
+normal_vector = np.array(cageInfo['Net']['normalVector'])  # todo add the linear transformation matrix later
+
+nodes_on_eachNet = (NN + 1) * (NT + 1)
+elements_on_eachNet = (NN + 1) * NT + NN * (NT + 1)
 
 # generate the point coordinates matrix for a net panel
 if nettingType == "square":
     for net in top_center:
         for j in range(0, NN + 1):
             for i in range(0, NT + 1):
-                point.append(
-                    [net[0],
-                     net[1] - net_width / 2 + (i / float(NT) * net_width),
-                     net[2] - j / float(NN) * net_height])
-    nodes_on_eachNet = (NN + 1) * (NT + 1)
-    elements_on_eachNet = (NN + 1) * NT + NN * (NT + 1)
+                point.append([net[0],
+                              net[1] - net_width / 2 + (i / float(NT) * net_width),
+                              net[2] - j / float(NN) * net_height])
+
+
 
 elif nettingType == "rhombus":
     print("Under construction")
     exit()  # todo add the rhombus nodes.
+
+
+point_array = np.zeros((nodes_on_eachNet * len(top_center), 3))
+for i in range(len(point_array)):
+    point_array[i] = normal_vector.dot(np.array(point[i]))
+point=point_array.tolist()
 # >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>> salome
 # the below is the commond in the Mesh, Salome.
 # the mesh creater script

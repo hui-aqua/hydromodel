@@ -39,7 +39,7 @@ Define the netting of net panel(s)
     - ```rhombus```: rhombus netting that are commonly used in fishing gear, e.g., trawl net, purse seine.
   
 3. **normalVector**: a python list. Unit: [-].
-    - Single net panel, ```[[nx,ny,nz]]```. Input the three components of the normal vector. The norm of vector do not need to be one.
+    - Single net panel, ```[[nx,ny,nz]]```. Input the three components of the normal vector. The norm of vector **must** to be one.
     - multi net panels, ```[[nx1,ny1,nz1],[nx2,ny2,nz2]...]```. Input the three components of the normal vectors. The sequence of the input file should be corresponding to the **barCenter**
  
 4. **netHeight**:a floating point number. Unit: [m]. The height of net panels. Here, we assume that all the net panel have the same geometrical characterises.  

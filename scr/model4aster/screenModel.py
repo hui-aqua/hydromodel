@@ -56,7 +56,7 @@ class forceModel:
         :return: drag and lift force coefficients. [float] Unit: [-].
         """
         drag_coefficient, lift_coefficient = 0, 0
-        if self.modelIndex not in 'S1,S2,S3,S4,S5,S6':
+        if self.modelIndex not in 'S1,S2,S3,S4,S5,S6,UDF':
             print("The selected hydrodynamic model is not included in the present program")
             exit()
         elif self.modelIndex == 'S1':  # aarsnes 1990
@@ -128,6 +128,9 @@ class forceModel:
                                            0.12 - 0.74 * self.Sn + 8.03 * pow(self.Sn, 2)) * pow(inflow_angle, 3)
             else:
                 pass
+        elif self.modelIndex == 'UDF':  # Lee 2005 # polynomial fitting
+            drag_coefficient = 0.15737888873973324
+            lift_coefficient = 0.07542749110775393
         return drag_coefficient, lift_coefficient
 
     def force_on_element(self, net_wake, realtime_node_position, current_velocity, wave=False, fe_time=0):
@@ -190,6 +193,7 @@ class forceModel:
         # print("realtime_node_position is " + str(realtime_node_position))
         if len(velocity_of_nodes) < len(realtime_node_position):
             velocity_of_nodes = np.zeros((len(realtime_node_position), 3))
+
         if len(velocity_on_element) < len(self.hydro_element):
             print("position is " + str(realtime_node_position))
             print("Velocity is " + str(velocity_of_nodes))
