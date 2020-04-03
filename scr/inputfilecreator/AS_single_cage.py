@@ -28,7 +28,7 @@ with open(str(sys.argv[1]), 'r') as f:
     cageInfo = ast.literal_eval(content)
 
 sys.path.append(cwd)
-import meshinfomation
+import meshInformation
 
 dw0 = float(cageInfo['Net']['twineDiameter'])
 coupling_switcher = cageInfo['Solver']['coupling']  #

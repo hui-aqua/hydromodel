@@ -11,7 +11,7 @@ import os
 cwd = os.getcwd()
 print("\nThe working folder is ' " + str(cwd) + " ' \n")
 print("Please make sure the working path locates ./constant, if you want to do FSI simulation")
-file_names = ['ASTER2.py', 'ASTER1.py', 'meshinfomation.py']
+file_names = ['ASTER2.py', 'ASTER1.py', 'meshInformation.py']
 
 
 def run_simulation():

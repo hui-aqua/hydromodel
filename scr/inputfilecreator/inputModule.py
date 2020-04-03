@@ -184,6 +184,7 @@ def define_time_scheme(handel, time_step, time_length, number_of_velocity):
     handel.write('''
 dt=''' + str(time_step) + '''      # time step
 # itimes is the total iterations
+duration=''' + str(time_length) + '''      # time step
 itimes=''' + str(int(time_length / time_step * number_of_velocity)) + '''
 tend=itimes*dt
 
@@ -207,8 +208,8 @@ hdm.row = ''' + str(fluidDensity) + '''  # [kg/m3]   sea water density
     ''')
     if hydroModel.split("-")[1] in ["UDV"]:
         handel.write('''
-hdm.userDefinedValue_cd=''' + hydroModel.split('-')[2] + '''
-hdm.userDefinedValue_cl=''' + hydroModel.split('-')[3] + '''
+hdm.screenModel.CD_udv=''' + hydroModel.split('-')[2] + '''
+hdm.screenModel.CL_udv=''' + hydroModel.split('-')[3] + '''
 
         ''')
     if hydroModel.split('-')[0] in ["Screen"]:
@@ -398,7 +399,7 @@ if k < itimes-1:
     ''')
     if coupling_switcher in ["False"]:
         handel.write('''
-U=Uinput[int(k*dt/10.0)]
+U=Uinput[int(k*dt/duration)]
 force_on_element=hydroModel.force_on_element(netWakeModel,posi,U)
 Fnh=hydroModel.distribute_force(meshinfo['numberOfNodes'])
 with open(cwd+'/positionOutput/posi'+str((k)*dt)+'.txt', "w") as file:
@@ -413,10 +414,13 @@ if k == 0:
     fsi.write_element(hydroModel.output_hydro_element(),cwd)
 
 timeFE=dt*k
-U=Uinput[int(k*dt/10.0)]
+U=Uinput[int(k*dt/duration)]
 force_on_element=hydroModel.force_on_element(netWakeModel,posi,U)
 Fnh=hydroModel.distribute_force(meshinfo['numberOfNodes'])
+
 fsi.write_position(posi,cwd)
+fsi.write_fh(force_on_element,timeFE,cwd)
+
 with open(cwd+'/positionOutput/posi'+str((k)*dt)+'.txt', "w") as file:
     file.write(str(posi))
 file.close()

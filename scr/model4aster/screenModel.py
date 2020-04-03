@@ -57,7 +57,7 @@ class forceModel:
         :return: drag and lift force coefficients. [float] Unit: [-].
         """
         drag_coefficient, lift_coefficient = 0, 0
-        if self.modelIndex not in 'S1,S2,S3,S4,S5,S6,UDF':
+        if self.modelIndex not in 'S1,S2,S3,S4,S5,S6,UDV':
             print("The selected hydrodynamic model is not included in the present program")
             exit()
         elif self.modelIndex == 'S1':  # aarsnes 1990
@@ -129,7 +129,7 @@ class forceModel:
                                            0.12 - 0.74 * self.Sn + 8.03 * pow(self.Sn, 2)) * pow(inflow_angle, 3)
             else:
                 pass
-        elif self.modelIndex == 'UDF':  # Lee 2005 # polynomial fitting
+        elif self.modelIndex == 'UDV':  # Lee 2005 # polynomial fitting
             drag_coefficient = CD_udv
             lift_coefficient = CL_udv
         return drag_coefficient, lift_coefficient

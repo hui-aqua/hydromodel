@@ -31,7 +31,7 @@ with open(str(sys.argv[1]), 'r') as f:
     netPanelInfo = ast.literal_eval(content)
 
 sys.path.append(cwd)
-import meshinfomation
+import meshInformation as mi
 
 dw0 = netPanelInfo['Net']['twineDiameter']
 coupling_switcher = netPanelInfo['Solver']['coupling']  #
@@ -44,8 +44,8 @@ Fbuoy = netPanelInfo['Net']['netHeight'] * netPanelInfo['Net']['netWidth'] * \
 print("Fbuoy is " + str(Fbuoy))
 # Buoyancy force to assign on each nodes
 
-lam1 = meshinfomation.meshinfo['horizontalElementLength'] / netPanelInfo['Net']['meshLength']
-lam2 = meshinfomation.meshinfo['verticalElementLength'] / netPanelInfo['Net']['meshLength']
+lam1 = mi.meshinfo['horizontalElementLength'] / netPanelInfo['Net']['meshLength']
+lam2 = mi.meshinfo['verticalElementLength'] / netPanelInfo['Net']['meshLength']
 
 dwh = dw0 * 2 * lam1 * lam2 / (lam1 + lam2)
 
@@ -69,7 +69,7 @@ im.assign_material(handle1, netPanelInfo['Weight']['weightType'])
 
 im.assign_bc_gravity(handle1, 'gF', netPanelInfo['Boundary']["gravity"], 'twines')
 im.assign_bc_force_on_nodes(handle1, 'buoyF', 'allnodes',
-                            [0, 0, Fbuoy / float(meshinfomation.meshinfo['numberOfNodes'])])
+                            [0, 0, Fbuoy / float(mi.meshinfo['numberOfNodes'])])
 
 im.assign_bc_fixed(handle1, 'fixed', netPanelInfo['Boundary']["fixed"])
 if netPanelInfo['Weight']['weightType'] in ['sinkers']:
@@ -80,7 +80,7 @@ im.define_time_scheme(handle1, netPanelInfo['Solver']['timeStep'], netPanelInfo[
 
 im.set_hydrodynamic_model(handle1, hydrodynamic_model, wake_model, netPanelInfo['Net']['Sn'], dwh, dw0,
                           netPanelInfo['Environment']['current'],netPanelInfo['Environment']["fluidDensity"])
-im.reaction_force(handle1, 'topnodes')
+im.reaction_force(handle1, netPanelInfo['Boundary']["fixed"])
 handle1.close()
 
 # input file 2
@@ -95,7 +95,7 @@ handle2.close()
 
 # input file 3
 handle3 = open(cwd + '/ASTERRUN.export', 'w')
-im.set_export(handle3, suffix, hostname, username, cwd, netPanelInfo['Solver']['version'], meshinfomation.meshinfo['meshName'])
+im.set_export(handle3, suffix, hostname, username, cwd, netPanelInfo['Solver']['version'], mi.meshinfo['meshName'])
 
 handle3.close()
 
