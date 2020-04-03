@@ -174,7 +174,7 @@ print("<<<<<<<<<< Mesh Information >>>>>>>>>>")
 print("Number of node is " + str(meshinfo["numberOfNodes"]) + ".")
 print("Number of line element is " + str(meshinfo["numberOfLines"]) + ".")
 print("Number of surface element is " + str(meshinfo["numberOfSurfaces"]) + ".\n")
-with open(cwd + "/meshinfomation.py", 'w') as f:
+with open(cwd + "/meshInformation.py", 'w') as f:
     f.write("meshinfo=")
     f.write(str(meshinfo))
 f.close()

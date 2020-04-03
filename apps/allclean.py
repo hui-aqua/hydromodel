@@ -8,7 +8,7 @@ import shutil
 
 cwd = os.getcwd()
 print("\nPlease make sure you want to clean working tree, ALL the relevant files will be removed \n")
-files_need_clean = ['Fh', 'posi', 'surf','position_flag','fh_flag']
+files_need_clean = ['Fh', 'posi', 'surf','position_flag','fh_flag','meshInformation.py']
 folders_need_clean = ['asteroutput', 'asterinput','midOutput','positionOutput']
 for file in files_need_clean:
     if os.path.isfile(os.path.join(cwd, file)):

@@ -205,13 +205,17 @@ sur = meshinfo['netSurfaces']
 hdm.row = ''' + str(fluidDensity) + '''  # [kg/m3]   sea water density
 
     ''')
+    if hydroModel.split("-")[1] in ["UDV"]:
+        handel.write('''
+hdm.userDefinedValue_cd=''' + hydroModel.split('-')[2] + '''
+hdm.userDefinedValue_cl=''' + hydroModel.split('-')[3] + '''
 
+        ''')
     if hydroModel.split('-')[0] in ["Screen"]:
         handel.write('''
 hydroModel=hdm.screenModel.forceModel("''' + hydroModel.split('-')[1] + '''",sur,''' + str(Sn) + ''',''' + str(dwh) + ''',''' + str(dw0) + ''')
 netWakeModel=hdm.wakeModel.net2net("''' + str(wake_model) + '''",meshinfo['netNodes'],sur,Uinput[0],[0,0,0],''' + str(
             dw0) + ''',''' + str(Sn) + ''')
-
         ''')
     elif hydroModel.split('-')[0] in ["Morison"]:
         handel.write('''
@@ -528,7 +532,7 @@ A tpmax 9000000.0
 F mmed ''' + cwd + '''/asterinput/''' + str(mesh_name) + ''' D 20
 F comm ''' + cwd + '''/asterinput/ASTER1.py D 1
 F libr ''' + cwd + '''/asterinput/ASTER2.py D 91
-F libr ''' + cwd + '''/asterinput/meshinfomation.py D 90
+F libr ''' + cwd + '''/asterinput/meshInformation.py D 90
 R repe ''' + cwd + '''/midOutput/REPE_OUT D  0
 R repe ''' + cwd + '''/midOutput/REPE_OUT R  0
 F resu ''' + cwd + '''/midOutput/reactionforce.txt R 9

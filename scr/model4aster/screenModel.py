@@ -16,7 +16,8 @@ import numpy as np
 row = 1025  # [kg/m3]   sea water density
 kinematic_viscosity = 1.004e-6  # when the water temperature is 20 degree.
 dynamic_viscosity = 1.002e-3  # when the water temperature is 20 degree.
-
+CD_udv=0
+CL_udv=0
 
 class forceModel:
     """
@@ -129,8 +130,8 @@ class forceModel:
             else:
                 pass
         elif self.modelIndex == 'UDF':  # Lee 2005 # polynomial fitting
-            drag_coefficient = 0.15737888873973324
-            lift_coefficient = 0.07542749110775393
+            drag_coefficient = CD_udv
+            lift_coefficient = CL_udv
         return drag_coefficient, lift_coefficient
 
     def force_on_element(self, net_wake, realtime_node_position, current_velocity, wave=False, fe_time=0):

@@ -30,10 +30,6 @@ The information about the environmental conditions.
 ### Net
 Define the netting of net panel(s) 
 
-1. **HydroModel**: a string to indicate the hydrodynamic model. A detailed explanation can be found later.   
-    - Screen model: ```Screen-S1```,```Screen-S2```,```Screen-S3```...  
-    - Morison model: ```Morison-M1```,```Morison-M3```,```Morison-M3```...
-
 2. **nettingType**: a string to indicate the netting type. 
     - ```square```: square netting that are commonly used in aquaculture cage
     - ```rhombus```: rhombus netting that are commonly used in fishing gear, e.g., trawl net, purse seine.
@@ -90,6 +86,20 @@ Define the weight system of cage.
 5. **numOfSinkers**: a integer number. Unit: [-]. The number of sinker.
 
 6. **sinkerWeight**: a floating point number. Unit [N]. The submerged wight of each sinker.
+
+## Boundary
+1. **HydroModel**: a string to indicate the hydrodynamic model. A detailed explanation can be found later.   
+    - Screen model: ```Screen-S1```,```Screen-S2```,```Screen-S3```...  
+    - Screen model-udv: user defined values for CD and CL, e.g., ```Screen-udv-0.2-0.1```: 0.2 is drag coefficient, 0.1 is lift coefficient 
+    - Morison model: ```Morison-M1```,```Morison-M3```,```Morison-M3```...
+
+2. **wakeModel**: a string to indicate the wake model.
+    - fixed factor: flow reduction factor is given behind '-':  ```factor-0.9```
+    - loland model:drag coefficient is given behind '-': ```loland-0.5```
+    - new model by Hui: ``hui-1``
+3. **fixed**: The name of the nodes that is going to be fixed in the numerical simulations. e.g., ```topnodes```, ```allnodes```.
+
+4. **gravity**: gravity in the simulation, usually is ```9.81``` 
 
 ### Solver
 Define the solver of simulation
