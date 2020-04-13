@@ -109,9 +109,8 @@ numOfSurf   ''' + str(len(hydro_element)) + ''' ;''')
     output_file.close()
     # step 2 the surface
     with open(cwd + 'surf', 'a') as the_file:
-        for ele in hydro_element:
-            the_file.write('e' + str(hydro_element.index(ele)) + ' ( ' + str(ele[0]) + '\t' + str(ele[1]) + '\t' + str(
-                ele[2]) + ' );\n')
+        for index,ele in enumerate(hydro_element):
+            the_file.write('e' + str(index) + ' ( ' + str(ele[0]) + '\t' + str(ele[1]) + '\t' + str(ele[2]) + ' );\n')
     # step the tail
     output_file = open(cwd + 'surf', 'a')
     output_file.write('''

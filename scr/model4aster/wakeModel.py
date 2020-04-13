@@ -42,11 +42,11 @@ class net2net:
         self.Sn = net_solidity
         self.wake_type = str(model_index).split("-")[0]
         self.wake_value = str(model_index).split("-")[1]
-        self.wake_element_index = self.get_element_in_wake()
+        self.wake_element_indexes = self.get_element_in_wake()
 
     def __str__(self):
         s0 = "The selected wake model is " + str(self.wake_type) + "\n"
-        s1 = "The index of the element in the wake region is " + str(self.wake_element_index) + "\n"
+        s1 = "The index of the element in the wake region is " + str(self.wake_element_indexes) + "\n"
         S = s0 + s1
         return S
 
@@ -70,11 +70,11 @@ class net2net:
         A private function to go go through all the elements and find the elements in the wake region.\n
         :return: [List] Unit [-]. A list of "indexes of the elements" in the wake region.
         """
-        element_in_wake = []
-        for element in self.elements:
+        elements_in_wake = []
+        for index,element in enumerate(self.elements):
             if self.is_element_in_wake(element):
-                element_in_wake.append(self.elements.index(element))
-        return element_in_wake
+                elements_in_wake.append(index)
+        return elements_in_wake
 
     def reduction_factor(self, element_index, alpha=0):
         """
@@ -84,7 +84,7 @@ class net2net:
         :return: [float] Unit [-]. *Range [0,1]* Flow reduction factor. If value=1, the flow is no change. If value is 0, the flow is reduced to zero.
         """
         factor = 1.0
-        if element_index in self.wake_element_index:
+        if element_index in self.wake_element_indexes:
             if self.wake_type in ['factor']:
                 factor = float(self.wake_value)
             elif self.wake_type in ['loland']:

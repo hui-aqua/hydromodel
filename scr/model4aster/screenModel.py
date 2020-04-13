@@ -146,12 +146,12 @@ class forceModel:
         """
         wave_velocity = np.zeros((len(self.hydro_element), 3))
         if wave:
-            for panel in self.hydro_element:
+            for index, panel in enumerate(self.hydro_element):
                 element_center = (realtime_node_position[int(panel[0])] + realtime_node_position[int(panel[1])] +
                                   realtime_node_position[int(panel[2])]) / 3
-                wave_velocity[self.hydro_element.index(panel)] = wave.get_velocity(element_center, fe_time)
+                wave_velocity[index] = wave.get_velocity(element_center, fe_time)
         hydro_force_on_element = []  # force on net panel, initial as zeros
-        for panel in self.hydro_element:  # loop based on the hydrodynamic elements
+        for index, panel in enumerate(self.hydro_element):  # loop based on the hydrodynamic elements
             # velocity_structure = (velocity_nodes[panel[0]] + velocity_nodes[panel[1]] + velocity_nodes[panel[2]]) / (
             #     len(panel))
             velocity_structure = np.array([0.0, 0.0, 0.0])
@@ -160,9 +160,7 @@ class forceModel:
             p3 = realtime_node_position[panel[2]]
             alpha, lift_direction, surface_area = calculation_on_element(p1, p2, p3, np.array(current_velocity))
             # calculate the inflow angel, normal vector, lift force factor, area of the hydrodynamic element
-            velocity = np.array(current_velocity) * net_wake.reduction_factor(self.hydro_element.index(panel), alpha) + \
-                       wave_velocity[self.hydro_element.index(panel)]
-            # * 0.8 ** int((self.hydro_element.index(panel) + 1) / 672)
+            velocity = np.array(current_velocity) * net_wake.reduction_factor(index, alpha) + wave_velocity[index]
             # if not in the wake region, the effective velocity is the undisturbed velocity
             velocity_relative = velocity - velocity_structure
             drag_coefficient, lift_coefficient = self.hydro_coefficients(alpha, velocity_relative, knot=False)
@@ -200,8 +198,8 @@ class forceModel:
             print("Velocity is " + str(velocity_of_nodes))
             print("velocity elements is " + str(velocity_on_element))
             exit()
-        for panel in self.hydro_element:  # loop based on the hydrodynamic elements
-            velocity_fluid = velocity_on_element[self.hydro_element.index(panel)]
+        for index,panel in enumerate(self.hydro_element):  # loop based on the hydrodynamic elements
+            velocity_fluid = velocity_on_element[index]
             velocity_structure = (velocity_of_nodes[panel[0]] + velocity_of_nodes[panel[1]] + velocity_of_nodes[
                 panel[2]]) / (len(panel))
             velocity_relative = velocity_fluid - velocity_structure * 0
@@ -254,10 +252,10 @@ class forceModel:
         :return: [np.array].shape=(N,3) Unit [N]. The hydrodynamic forces on all N nodes.
         """
         forces_on_nodes = np.zeros((number_of_node, 3))  # force on nodes, initial as zeros
-        for panel in self.hydro_element:
-            forces_on_nodes[panel[0]] += (self.force_on_elements[self.hydro_element.index(panel)]) / 3
-            forces_on_nodes[panel[1]] += (self.force_on_elements[self.hydro_element.index(panel)]) / 3
-            forces_on_nodes[panel[2]] += (self.force_on_elements[self.hydro_element.index(panel)]) / 3
+        for index,panel in enumerate(self.hydro_element):
+            forces_on_nodes[panel[0]] += (self.force_on_elements[index]) / 3
+            forces_on_nodes[panel[1]] += (self.force_on_elements[index]) / 3
+            forces_on_nodes[panel[2]] += (self.force_on_elements[index]) / 3
         return forces_on_nodes
 
 

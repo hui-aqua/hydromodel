@@ -107,9 +107,9 @@ class forceModel:
         hydro_force_on_element = []  # force on line element, initial as zeros
         wave_velocity = np.zeros((num_line, 3))
         if wave:
-            for line in self.elements:
+            for index,line in enumerate(self.elements):
                 element_center = (realtime_node_position[int(line[0])] + realtime_node_position[int(line[1])]) / 2.0
-                wave_velocity[self.elements.index(line)] = wave.get_velocity(element_center, fe_time)
+                wave_velocity[index] = wave.get_velocity(element_center, fe_time)
 
         for i in range(num_line):
             b = get_distance(realtime_node_position[int(self.elements[i][0])],
@@ -133,9 +133,9 @@ class forceModel:
         :return: [np.array].shape=(N,3) Unit [N]. The hydrodynamic forces on all N nodes
         """
         force_on_nodes = np.zeros((number_of_node, 3))  # force on nodes, initial as zeros
-        for line in self.elements:
-            force_on_nodes[line[0]] += (self.hydroForces_Element[self.elements.index(line)]) / 2
-            force_on_nodes[line[1]] += (self.hydroForces_Element[self.elements.index(line)]) / 2
+        for index, line in enumerate(self.elements):
+            force_on_nodes[line[0]] += (self.hydroForces_Element[index]) / 2
+            force_on_nodes[line[1]] += (self.hydroForces_Element[index]) / 2
         return force_on_nodes
 
 def get_distance(p1, p2):
