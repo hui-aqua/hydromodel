@@ -1,0 +1,319 @@
+<!DOCTYPE html>
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+    <meta charset="utf-8"/>
+    <title>morisonModel module &#8212; aqua 0.3 documentation</title>
+    <link rel="stylesheet" href="../_static/nature.css" type="text/css"/>
+    <link rel="stylesheet" href="../_static/pygments.css" type="text/css"/>
+    <script type="text/javascript" id="documentation_options" data-url_root="../"
+            src="../_static/documentation_options.js"></script>
+    <script type="text/javascript" src="../_static/jquery.js"></script>
+    <script type="text/javascript" src="../_static/underscore.js"></script>
+    <script type="text/javascript" src="../_static/doctools.js"></script>
+    <script type="text/javascript" src="../_static/language_data.js"></script>
+    <link rel="index" title="Index" href="../genindex.html"/>
+    <link rel="search" title="Search" href="../search.html"/>
+    <link rel="next" title="nettingFSI module" href="nettingFSI.html"/>
+    <link rel="prev" title="hydrodynamicModule module" href="hydrodynamicModule.html"/>
+</head>
+<body>
+<div class="related" role="navigation" aria-label="related navigation">
+    <h3>Navigation</h3>
+    <ul>
+        <li class="right" style="margin-right: 10px">
+            <a href="../genindex.html" title="General Index"
+               accesskey="I">index</a></li>
+        <li class="right">
+            <a href="../py-modindex.html" title="Python Module Index"
+            >modules</a> |
+        </li>
+        <li class="right">
+            <a href="nettingFSI.html" title="nettingFSI module"
+               accesskey="N">next</a> |
+        </li>
+        <li class="right">
+            <a href="hydrodynamicModule.html" title="hydrodynamicModule module"
+               accesskey="P">previous</a> |
+        </li>
+        <li class="nav-item nav-item-0"><a href="../index.html">aqua 0.3 documentation</a> &#187;</li>
+        <li class="nav-item nav-item-1"><a href="modules.html" accesskey="U">model4aster</a> &#187;</li>
+    </ul>
+</div>
+
+<div class="document">
+    <div class="documentwrapper">
+        <div class="bodywrapper">
+            <div class="body" role="main">
+
+                <div class="section" id="module-morisonModel">
+                    <span id="morisonmodel-module"></span>
+                    <h1>morisonModel module<a class="headerlink" href="#module-morisonModel"
+                                              title="Permalink to this headline">¶</a></h1>
+                    <hr class="docutils"/>
+                    <ul class="simple">
+                        <li><p>University of Stavanger</p></li>
+                        <li><p>Hui Cheng (PhD student)</p></li>
+                        <li><p>Lin Li (Medveileder)</p></li>
+                        <li><p>Prof. Muk Chen Ong (Supervisor)</p></li>
+                    </ul>
+                    <hr class="docutils"/>
+                    <p>Any questions about this code,
+                        please email: <a class="reference external"
+                                         href="mailto:hui&#46;cheng&#37;&#52;&#48;uis&#46;no">hui<span>&#46;</span>cheng<span>&#64;</span>uis<span>&#46;</span>no</a>
+                    </p>
+                    <p>Modules can be used to calculate the hydrodynamic forces on nets.
+                        In order to use this module, we recommend <code class="docutils literal notranslate"><span
+                                class="pre">import</span> <span class="pre">hydroModels</span> <span
+                                class="pre">as</span> <span class="pre">hm</span></code> in the beginning of your code.
+                        Please refer to Cheng et al. (2020) [<a class="reference external"
+                                                                href="https://doi.org/10.1016/j.aquaeng.2020.102070">https://doi.org/10.1016/j.aquaeng.2020.102070</a>]
+                        for details.</p>
+                    <dl class="class">
+                        <dt id="morisonModel.forceModel">
+                            <em class="property">class </em><code class="sig-prename descclassname">morisonModel.</code><code
+                                class="sig-name descname">forceModel</code><span class="sig-paren">(</span><em
+                                class="sig-param">model_index</em>, <em class="sig-param">hydro_element</em>, <em
+                                class="sig-param">solidity</em>, <em class="sig-param">dwh=0.0</em>, <em
+                                class="sig-param">dw0=0.0</em><span class="sig-paren">)</span><a class="headerlink"
+                                                                                                 href="#morisonModel.forceModel"
+                                                                                                 title="Permalink to this definition">¶</a>
+                        </dt>
+                        <dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code>
+                        </p>
+                            <p>For Morison hydrodynamic models, the forces on netting are calculated based on individual
+                                twines.
+                                The twines are taken as cylindrical elements. In practice, the force is usually
+                                decomposed into two componnets:
+                                normal drag force F_n and tangential drag force F_t (Cheng et al., 2020)</p>
+                            <dl class="field-list simple">
+                                <dt class="field-odd">Parameters</dt>
+                                <dd class="field-odd">
+                                    <ul class="simple">
+                                        <li><p><strong>model_index</strong> – [string] Unit: [-]. To indicate the model
+                                            function, e.g.: ‘M1’, ‘M2’, ‘M3’.</p></li>
+                                        <li><p><strong>hydro_element</strong> – [list] Unit: [-]. A python list to
+                                            indicate how the lines are connected.</p></li>
+                                        <li><p><strong>solidity</strong> – [float] Unit: [-]. The solidity of netting.
+                                        </p></li>
+                                        <li><p><strong>dwh</strong> – [float] Unit: [m]. The hydrodynamic diameter of
+                                            the numerical net twines. It is used for the force calculation (reference
+                                            area)</p></li>
+                                        <li><p><strong>dw0</strong> – [float] Unit: [m]. The diameter of the physical
+                                            net twines. It is used for the hydrodynamic coefficients.</p></li>
+                                    </ul>
+                                </dd>
+                            </dl>
+                            <dl class="method">
+                                <dt id="morisonModel.forceModel.distribute_force">
+                                    <code class="sig-name descname">distribute_force</code><span
+                                        class="sig-paren">(</span><em class="sig-param">number_of_node</em><span
+                                        class="sig-paren">)</span><a class="headerlink"
+                                                                     href="#morisonModel.forceModel.distribute_force"
+                                                                     title="Permalink to this definition">¶</a></dt>
+                                <dd><p>Transfer the forces on line element to their corresponding nodes.</p>
+                                    <dl class="field-list simple">
+                                        <dt class="field-odd">Returns</dt>
+                                        <dd class="field-odd"><p>[np.array].shape=(N,3) Unit [N]. The hydrodynamic
+                                            forces on all N nodes</p>
+                                        </dd>
+                                    </dl>
+                                </dd>
+                            </dl>
+
+                            <dl class="method">
+                                <dt id="morisonModel.forceModel.force_on_element">
+                                    <code class="sig-name descname">force_on_element</code><span
+                                        class="sig-paren">(</span><em class="sig-param">net_wake</em>, <em
+                                        class="sig-param">realtime_node_position</em>, <em class="sig-param">current_velocity</em>,
+                                    <em class="sig-param">wave=False</em>, <em class="sig-param">fe_time=0</em><span
+                                        class="sig-paren">)</span><a class="headerlink"
+                                                                     href="#morisonModel.forceModel.force_on_element"
+                                                                     title="Permalink to this definition">¶</a></dt>
+                                <dd>
+                                    <dl class="field-list simple">
+                                        <dt class="field-odd">Parameters</dt>
+                                        <dd class="field-odd">
+                                            <ul class="simple">
+                                                <li><p><strong>net_wake</strong> – A object wake model, net2net wake
+                                                    model. Must create first.</p></li>
+                                                <li><p><strong>realtime_node_position</strong> – [np.array].shape=(N,3)
+                                                    Unit: [m]. The coordinates of N nodes in cartesian coordinate
+                                                    system.</p></li>
+                                                <li><p><strong>current_velocity</strong> – [np.array].shape=(1,3) Unit
+                                                    [m/s]. The current velocity [ux,uy,uz] in cartesian coordinate
+                                                    system.</p></li>
+                                                <li><p><strong>wave</strong> – A wake model object. <em>Default
+                                                    value=False</em> Must create first.</p></li>
+                                                <li><p><strong>fe_time</strong> – [float] Unit [s]. The time in
+                                                    Code_Aster. <em>Default value=0</em> Must give if wave is added.</p>
+                                                </li>
+                                                <li><p><strong>current_velocity</strong> – numpy array ([ux,uy,uz]),
+                                                    Unit [m/s]</p></li>
+                                            </ul>
+                                        </dd>
+                                        <dt class="field-even">Returns</dt>
+                                        <dd class="field-even"><p>[np.array].shape=(M,3) Unit [N]. The hydrodynamic
+                                            forces on all M elements. Meanwhile, update the self.hydroForces_Element</p>
+                                        </dd>
+                                    </dl>
+                                </dd>
+                            </dl>
+
+                            <dl class="method">
+                                <dt id="morisonModel.forceModel.hydro_coefficients">
+                                    <code class="sig-name descname">hydro_coefficients</code><span
+                                        class="sig-paren">(</span><em class="sig-param">current_velocity</em><span
+                                        class="sig-paren">)</span><a class="headerlink"
+                                                                     href="#morisonModel.forceModel.hydro_coefficients"
+                                                                     title="Permalink to this definition">¶</a></dt>
+                                <dd>
+                                    <dl class="field-list simple">
+                                        <dt class="field-odd">Parameters</dt>
+                                        <dd class="field-odd"><p><strong>current_velocity</strong> –
+                                            [np.array].shape=(1,3) Unit: [m/s]. The current velocity [ux,uy,uz] in
+                                            cartesian coordinate system.</p>
+                                        </dd>
+                                        <dt class="field-even">Returns</dt>
+                                        <dd class="field-even"><p>normal and tangential drag force coefficients. [float]
+                                            Unit: [-].</p>
+                                        </dd>
+                                    </dl>
+                                </dd>
+                            </dl>
+
+                            <dl class="method">
+                                <dt id="morisonModel.forceModel.output_hydro_element">
+                                    <code class="sig-name descname">output_hydro_element</code><span
+                                        class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink"
+                                                                                                     href="#morisonModel.forceModel.output_hydro_element"
+                                                                                                     title="Permalink to this definition">¶</a>
+                                </dt>
+                                <dd>
+                                    <dl class="field-list simple">
+                                        <dt class="field-odd">Returns</dt>
+                                        <dd class="field-odd"><p>[list] Unit: [-]. A list of indexes of the elements in
+                                            the wake region.</p>
+                                        </dd>
+                                    </dl>
+                                </dd>
+                            </dl>
+
+                        </dd>
+                    </dl>
+
+                    <dl class="function">
+                        <dt id="morisonModel.get_distance">
+                            <code class="sig-prename descclassname">morisonModel.</code><code class="sig-name descname">get_distance</code><span
+                                class="sig-paren">(</span><em class="sig-param">p1</em>, <em
+                                class="sig-param">p2</em><span class="sig-paren">)</span><a class="headerlink"
+                                                                                            href="#morisonModel.get_distance"
+                                                                                            title="Permalink to this definition">¶</a>
+                        </dt>
+                        <dd><p>Module private function.</p>
+                            <dl class="field-list simple">
+                                <dt class="field-odd">Parameters</dt>
+                                <dd class="field-odd">
+                                    <ul class="simple">
+                                        <li><p><strong>p1</strong> – point1 [np.array].shape=(1,3) or a [list] of
+                                            coordinates Unit: [m].</p></li>
+                                        <li><p><strong>p2</strong> – point2 [np.array].shape=(1,3) or a [list] of
+                                            coordinates Unit: [m].</p></li>
+                                    </ul>
+                                </dd>
+                                <dt class="field-even">Returns</dt>
+                                <dd class="field-even"><p>The distance between two points. [float] Unit [m].</p>
+                                </dd>
+                            </dl>
+                        </dd>
+                    </dl>
+
+                    <dl class="function">
+                        <dt id="morisonModel.get_orientation">
+                            <code class="sig-prename descclassname">morisonModel.</code><code class="sig-name descname">get_orientation</code><span
+                                class="sig-paren">(</span><em class="sig-param">p1</em>, <em
+                                class="sig-param">p2</em><span class="sig-paren">)</span><a class="headerlink"
+                                                                                            href="#morisonModel.get_orientation"
+                                                                                            title="Permalink to this definition">¶</a>
+                        </dt>
+                        <dd><p>Module private function.</p>
+                            <dl class="field-list simple">
+                                <dt class="field-odd">Parameters</dt>
+                                <dd class="field-odd">
+                                    <ul class="simple">
+                                        <li><p><strong>p1</strong> – point1 [np.array].shape=(1,3) or a [list] of
+                                            coordinates Unit: [m].</p></li>
+                                        <li><p><strong>p2</strong> – point2 [np.array].shape=(1,3) or a [list] of
+                                            coordinates Unit: [m].</p></li>
+                                    </ul>
+                                </dd>
+                                <dt class="field-even">Returns</dt>
+                                <dd class="field-even"><p>The unit vector from p1 to p2.</p>
+                                </dd>
+                            </dl>
+                        </dd>
+                    </dl>
+
+                </div>
+
+
+            </div>
+        </div>
+    </div>
+    <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+            <h4>Previous topic</h4>
+            <p class="topless"><a href="hydrodynamicModule.html"
+                                  title="previous chapter">hydrodynamicModule module</a></p>
+            <h4>Next topic</h4>
+            <p class="topless"><a href="nettingFSI.html"
+                                  title="next chapter">nettingFSI module</a></p>
+            <div role="note" aria-label="source link">
+                <h3>This Page</h3>
+                <ul class="this-page-menu">
+                    <li><a href="../_sources/documents/morisonModel.rst.txt"
+                           rel="nofollow">Show Source</a></li>
+                </ul>
+            </div>
+            <div id="searchbox" style="display: none" role="search">
+                <h3 id="searchlabel">Quick search</h3>
+                <div class="searchformwrapper">
+                    <form class="search" action="../search.html" method="get">
+                        <input type="text" name="q" aria-labelledby="searchlabel"/>
+                        <input type="submit" value="Go"/>
+                    </form>
+                </div>
+            </div>
+            <script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+    </div>
+    <div class="clearer"></div>
+</div>
+<div class="related" role="navigation" aria-label="related navigation">
+    <h3>Navigation</h3>
+    <ul>
+        <li class="right" style="margin-right: 10px">
+            <a href="../genindex.html" title="General Index"
+            >index</a></li>
+        <li class="right">
+            <a href="../py-modindex.html" title="Python Module Index"
+            >modules</a> |
+        </li>
+        <li class="right">
+            <a href="nettingFSI.html" title="nettingFSI module"
+            >next</a> |
+        </li>
+        <li class="right">
+            <a href="hydrodynamicModule.html" title="hydrodynamicModule module"
+            >previous</a> |
+        </li>
+        <li class="nav-item nav-item-0"><a href="../index.html">aqua 0.3 documentation</a> &#187;</li>
+        <li class="nav-item nav-item-1"><a href="modules.html">model4aster</a> &#187;</li>
+    </ul>
+</div>
+<div class="footer" role="contentinfo">
+    &#169; Copyright 2020, Hui Cheng.
+    Created using <a href="http://sphinx-doc.org/">Sphinx</a> 2.2.0.
+</div>
+</body>
+</html>

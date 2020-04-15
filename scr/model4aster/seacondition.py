@@ -103,7 +103,7 @@ class Airywave:
 
     def get_surface(self, positions, time):
         """
-        A class private function
+        A class private function. \n
         :param positions: [np.array].shape=(1,3) or a [list] of coordinates Unit: [m]. The position of the point which you want to know the wave velocity or acceleration.
         :param time: [float] Unit: [s].
         :return: [float] Unit: [m]. The sea surface level in Z direction. At the targeted position.
@@ -114,7 +114,10 @@ class Airywave:
 
     def get_velocity_at_nodes(self, list_of_point, global_time):
         """
-        Get a list of velocity at a list of point
+        Public function.\n
+        :param list_of_point:  [np.array].shape=(n,3) Unit: [m]. A list of points's positions
+        :param global_time: [float] Unit: [s]. Physical time.
+        :return: Get a list of velocity at a list of point\n
         """
         list_of_velocity = []
         for point in list_of_point:

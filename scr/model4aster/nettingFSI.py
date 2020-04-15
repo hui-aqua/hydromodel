@@ -42,7 +42,7 @@ def write_position(position, cwd):
     """
     :param position: A numpy array of all the nodes' position
     :param cwd: work path,
-    :return: write the nodes' position to disk
+    :return: write the nodes' positions to "constant" folder as a file named "posi"
     """
     # print("Here>>>>>>>>>>>>>posi")
     start_flag(cwd, "/position_flag")
@@ -86,7 +86,7 @@ def write_element(hydro_element, cwd):
     """
     :param position: A numpy array of all the net panel element
     :param cwd: work path,
-    :return: write the net panels to disk
+    :return: write the net panels to "constant" folder as a file named "surf"
     """
     # step 1 the head
     output_file = open(cwd + 'surf', 'w')
@@ -125,7 +125,7 @@ def write_fh(hydro_force, timeFE, cwd):
     """
     :param position: A numpy array of all the hydrodynamic forces on net panel
     :param cwd: work path,
-    :return: write the hydrodynamic forces to disk
+    :return: write the hydrodynamic forces to "constant" folder as a file named "Fh" and save the total hydrodynamic forces on netting to "forceOnNetting.txt"
     """
     print("Here>>>>>>>>>>>>>Fh>>>  " + str(timeFE))
     start_flag(cwd, "/fh_flag")
@@ -165,6 +165,11 @@ numOfFh   ''' + str(len(hydro_force)) + ''' ;''')
     output_file.write('\n')
     output_file.close()
     finish_flag(cwd, "/fh_flag")
+
+    totalforce = [timeFE, hydro_force[:, 0].mean(), hydro_force[:, 1].mean(), hydro_force[:, 2].mean()]
+    output_file = open(cwd + 'forceOnNetting.txt', 'a+')
+    output_file.write(str(totalforce) + '\n')
+    output_file.close()
 
 
 velocity_dict = {'time_record': ['0']}
@@ -232,7 +237,7 @@ def read_velocity(cwd_foam_root, length_velocity):
 # two function used by code_aster
 def get_position_aster(table_aster):
     """
-    Module public function.
+    Module public function.\n
     :param table_aster: A table from Code_Aster by ``POST_RELEVE_T`` command with NOM_CHAM=('DEPL')
     :return:  [np.array].shape=(N,3) Unit: [m]. A numpy array of all the nodes positions.
     """
@@ -249,7 +254,7 @@ def get_position_aster(table_aster):
 
 def get_velocity_aster(table_aster):  # to get the velocity
     """
-    Module public function.
+    Module public function.\n
     :param table_aster: A table from Code_Aster by ``POST_RELEVE_T`` command with NOM_CHAM=('VITE')
     :return:  [np.array].shape=(N,3) Unit: [m/s]. A numpy array of all the nodes velocities.
     """

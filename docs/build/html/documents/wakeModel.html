@@ -1,0 +1,284 @@
+<!DOCTYPE html>
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+    <meta charset="utf-8"/>
+    <title>wakeModel module &#8212; aqua 0.3 documentation</title>
+    <link rel="stylesheet" href="../_static/nature.css" type="text/css"/>
+    <link rel="stylesheet" href="../_static/pygments.css" type="text/css"/>
+    <script type="text/javascript" id="documentation_options" data-url_root="../"
+            src="../_static/documentation_options.js"></script>
+    <script type="text/javascript" src="../_static/jquery.js"></script>
+    <script type="text/javascript" src="../_static/underscore.js"></script>
+    <script type="text/javascript" src="../_static/doctools.js"></script>
+    <script type="text/javascript" src="../_static/language_data.js"></script>
+    <link rel="index" title="Index" href="../genindex.html"/>
+    <link rel="search" title="Search" href="../search.html"/>
+    <link rel="next" title="Guide for Input File" href="../document_md/input.html"/>
+    <link rel="prev" title="seacondition module" href="seacondition.html"/>
+</head>
+<body>
+<div class="related" role="navigation" aria-label="related navigation">
+    <h3>Navigation</h3>
+    <ul>
+        <li class="right" style="margin-right: 10px">
+            <a href="../genindex.html" title="General Index"
+               accesskey="I">index</a></li>
+        <li class="right">
+            <a href="../py-modindex.html" title="Python Module Index"
+            >modules</a> |
+        </li>
+        <li class="right">
+            <a href="../document_md/input.html" title="Guide for Input File"
+               accesskey="N">next</a> |
+        </li>
+        <li class="right">
+            <a href="seacondition.html" title="seacondition module"
+               accesskey="P">previous</a> |
+        </li>
+        <li class="nav-item nav-item-0"><a href="../index.html">aqua 0.3 documentation</a> &#187;</li>
+        <li class="nav-item nav-item-1"><a href="modules.html" accesskey="U">model4aster</a> &#187;</li>
+    </ul>
+</div>
+
+<div class="document">
+    <div class="documentwrapper">
+        <div class="bodywrapper">
+            <div class="body" role="main">
+
+                <div class="section" id="module-wakeModel">
+                    <span id="wakemodel-module"></span>
+                    <h1>wakeModel module<a class="headerlink" href="#module-wakeModel"
+                                           title="Permalink to this headline">¶</a></h1>
+                    <hr class="docutils"/>
+                    <ul class="simple">
+                        <li><p>University of Stavanger</p></li>
+                        <li><p>Hui Cheng (PhD student)</p></li>
+                        <li><p>Lin Li (Medveileder)</p></li>
+                        <li><p>Prof. Muk Chen Ong (Supervisor)</p></li>
+                    </ul>
+                    <hr class="docutils"/>
+                    <p>Any questions about this code,
+                        please email: <a class="reference external"
+                                         href="mailto:hui&#46;cheng&#37;&#52;&#48;uis&#46;no">hui<span>&#46;</span>cheng<span>&#64;</span>uis<span>&#46;</span>no</a>
+                    </p>
+                    <p>A module that can be use to deal with net to net wake effect.</p>
+                    <p>In order to use this module, we recommend <code class="docutils literal notranslate"><span
+                            class="pre">import</span> <span class="pre">net2netwake</span> <span class="pre">as</span>
+                        <span class="pre">wake</span></code> in the beginning of your code.
+                        Please refer to Cheng et al. (2020) [<a class="reference external"
+                                                                href="https://doi.org/10.1016/j.aquaeng.2020.102070">https://doi.org/10.1016/j.aquaeng.2020.102070</a>]
+                        for details.</p>
+                    <dl class="class">
+                        <dt id="wakeModel.net2net">
+                            <em class="property">class </em><code
+                                class="sig-prename descclassname">wakeModel.</code><code class="sig-name descname">net2net</code><span
+                                class="sig-paren">(</span><em class="sig-param">model_index</em>, <em class="sig-param">node_initial_position</em>,
+                            <em class="sig-param">hydro_element</em>, <em class="sig-param">current_velocity</em>, <em
+                                class="sig-param">origin</em>, <em class="sig-param">dw0</em>, <em class="sig-param">net_solidity</em><span
+                                class="sig-paren">)</span><a class="headerlink" href="#wakeModel.net2net"
+                                                             title="Permalink to this definition">¶</a></dt>
+                        <dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code>
+                        </p>
+                            <p>A module that can be use to deal with net to net wake effect.</p>
+                            <div class="admonition note">
+                                <p class="admonition-title">Note</p>
+                                <p>Can only apply to a single fish cage or two net panel.</p>
+                            </div>
+                            <dl class="field-list simple">
+                                <dt class="field-odd">Parameters</dt>
+                                <dd class="field-odd">
+                                    <ul class="simple">
+                                        <li><p><strong>model_index</strong> – [string] Unit: [-]. To indicate the model
+                                            function, e.g.: ‘factor-0.9’, ‘loland-0.5’, ‘hui-1’.</p></li>
+                                        <li><p><strong>node_initial_position</strong> – [np.array].shape=(N,3) Unit:
+                                            [m]. The initial coordinates of N nodes in cartesian coordinate system.</p>
+                                        </li>
+                                        <li><p><strong>hydro_element</strong> – [list] Unit: [-]. A python list to
+                                            indicate how the lines are connected.</p></li>
+                                        <li><p><strong>current_velocity</strong> – [np.array].shape=(1,3) or a [list] of
+                                            three values Unit: [m/s]. The current velocity [ux,uy,uz] in cartesian
+                                            coordinate system.</p></li>
+                                        <li><p><strong>origin</strong> – [np.array].shape=(1,3) or a [list] of three
+                                            values Unit: [m]. The origin [x,y,z] for detecting the elements in the wake
+                                            region. For a fish cage, the origin is usually sit in the floating collar.
+                                        </p></li>
+                                        <li><p><strong>dw0</strong> – [float] Unit: [m]. The diameter of the physical
+                                            net twines.</p></li>
+                                        <li><p><strong>net_solidity</strong> – [float] Unit: [-]. The solidity of
+                                            netting.</p></li>
+                                    </ul>
+                                </dd>
+                            </dl>
+                            <dl class="method">
+                                <dt id="wakeModel.net2net.cal_factor1">
+                                    <code class="sig-name descname">cal_factor1</code><span
+                                        class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink"
+                                                                                                     href="#wakeModel.net2net.cal_factor1"
+                                                                                                     title="Permalink to this definition">¶</a>
+                                </dt>
+                                <dd><p>A private function calculate the flow reduction factor according to Loland
+                                    (1991). r=1-0.14*CD (CD is the input value in the <code
+                                            class="docutils literal notranslate"><span
+                                            class="pre">`wakeModel`</span></code>)</p>
+                                    <dl class="field-list simple">
+                                        <dt class="field-odd">Returns</dt>
+                                        <dd class="field-odd"><p>Flow reduction factor: [float] Unit [-].</p>
+                                        </dd>
+                                    </dl>
+                                </dd>
+                            </dl>
+
+                            <dl class="method">
+                                <dt id="wakeModel.net2net.cal_factor2">
+                                    <code class="sig-name descname">cal_factor2</code><span
+                                        class="sig-paren">(</span><em class="sig-param">alf</em><span class="sig-paren">)</span><a
+                                        class="headerlink" href="#wakeModel.net2net.cal_factor2"
+                                        title="Permalink to this definition">¶</a></dt>
+                                <dd><p>A private function calculate the flow reduction factor according to Hui et al.,
+                                    (2020).</p>
+                                    <dl class="field-list simple">
+                                        <dt class="field-odd">Parameters</dt>
+                                        <dd class="field-odd"><p><strong>alf</strong> – [float] Unit [rad]. Definition:
+                                            the angle between normal vector of a net panel and the flow direction.</p>
+                                        </dd>
+                                        <dt class="field-even">Returns</dt>
+                                        <dd class="field-even"><p>Flow reduction factor: [float] Unit [-].</p>
+                                        </dd>
+                                    </dl>
+                                </dd>
+                            </dl>
+
+                            <dl class="method">
+                                <dt id="wakeModel.net2net.get_element_in_wake">
+                                    <code class="sig-name descname">get_element_in_wake</code><span
+                                        class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink"
+                                                                                                     href="#wakeModel.net2net.get_element_in_wake"
+                                                                                                     title="Permalink to this definition">¶</a>
+                                </dt>
+                                <dd><p>A private function to go go through all the elements and find the elements in the
+                                    wake region.</p>
+                                    <dl class="field-list simple">
+                                        <dt class="field-odd">Returns</dt>
+                                        <dd class="field-odd"><p>[List] Unit [-]. A list of “indexes of the elements” in
+                                            the wake region.</p>
+                                        </dd>
+                                    </dl>
+                                </dd>
+                            </dl>
+
+                            <dl class="method">
+                                <dt id="wakeModel.net2net.is_element_in_wake">
+                                    <code class="sig-name descname">is_element_in_wake</code><span
+                                        class="sig-paren">(</span><em class="sig-param">one_element</em><span
+                                        class="sig-paren">)</span><a class="headerlink"
+                                                                     href="#wakeModel.net2net.is_element_in_wake"
+                                                                     title="Permalink to this definition">¶</a></dt>
+                                <dd><p>A private function to tell if an element is in wake region or not.</p>
+                                    <dl class="field-list simple">
+                                        <dt class="field-odd">Parameters</dt>
+                                        <dd class="field-odd"><p><strong>one_element</strong> – [List] of three values
+                                            Unit [-]. A list to contain the index of nodes in one element. The list
+                                            should contain at least two values.</p>
+                                        </dd>
+                                        <dt class="field-even">Returns</dt>
+                                        <dd class="field-even"><p>True if the element in the wave region.</p>
+                                        </dd>
+                                    </dl>
+                                </dd>
+                            </dl>
+
+                            <dl class="method">
+                                <dt id="wakeModel.net2net.reduction_factor">
+                                    <code class="sig-name descname">reduction_factor</code><span
+                                        class="sig-paren">(</span><em class="sig-param">element_index</em>, <em
+                                        class="sig-param">alpha=0</em><span class="sig-paren">)</span><a
+                                        class="headerlink" href="#wakeModel.net2net.reduction_factor"
+                                        title="Permalink to this definition">¶</a></dt>
+                                <dd><p>A public function to return the flow reduction factor according to the index of
+                                    element (and inflow angle).</p>
+                                    <dl class="field-list simple">
+                                        <dt class="field-odd">Parameters</dt>
+                                        <dd class="field-odd">
+                                            <ul class="simple">
+                                                <li><p><strong>element_index</strong> – [integer] Unit [-]. A index of
+                                                    element</p></li>
+                                                <li><p><strong>alpha</strong> – [float] Unit [rad]. <em>Default
+                                                    value=0</em>; The inflow angle of the net panel.</p></li>
+                                            </ul>
+                                        </dd>
+                                        <dt class="field-even">Returns</dt>
+                                        <dd class="field-even"><p>[float] Unit [-]. <em>Range [0,1]</em> Flow reduction
+                                            factor. If value=1, the flow is no change. If value is 0, the flow is
+                                            reduced to zero.</p>
+                                        </dd>
+                                    </dl>
+                                </dd>
+                            </dl>
+
+                        </dd>
+                    </dl>
+
+                </div>
+
+
+            </div>
+        </div>
+    </div>
+    <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+            <h4>Previous topic</h4>
+            <p class="topless"><a href="seacondition.html"
+                                  title="previous chapter">seacondition module</a></p>
+            <h4>Next topic</h4>
+            <p class="topless"><a href="../document_md/input.html"
+                                  title="next chapter">Guide for Input File</a></p>
+            <div role="note" aria-label="source link">
+                <h3>This Page</h3>
+                <ul class="this-page-menu">
+                    <li><a href="../_sources/documents/wakeModel.rst.txt"
+                           rel="nofollow">Show Source</a></li>
+                </ul>
+            </div>
+            <div id="searchbox" style="display: none" role="search">
+                <h3 id="searchlabel">Quick search</h3>
+                <div class="searchformwrapper">
+                    <form class="search" action="../search.html" method="get">
+                        <input type="text" name="q" aria-labelledby="searchlabel"/>
+                        <input type="submit" value="Go"/>
+                    </form>
+                </div>
+            </div>
+            <script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+    </div>
+    <div class="clearer"></div>
+</div>
+<div class="related" role="navigation" aria-label="related navigation">
+    <h3>Navigation</h3>
+    <ul>
+        <li class="right" style="margin-right: 10px">
+            <a href="../genindex.html" title="General Index"
+            >index</a></li>
+        <li class="right">
+            <a href="../py-modindex.html" title="Python Module Index"
+            >modules</a> |
+        </li>
+        <li class="right">
+            <a href="../document_md/input.html" title="Guide for Input File"
+            >next</a> |
+        </li>
+        <li class="right">
+            <a href="seacondition.html" title="seacondition module"
+            >previous</a> |
+        </li>
+        <li class="nav-item nav-item-0"><a href="../index.html">aqua 0.3 documentation</a> &#187;</li>
+        <li class="nav-item nav-item-1"><a href="modules.html">model4aster</a> &#187;</li>
+    </ul>
+</div>
+<div class="footer" role="contentinfo">
+    &#169; Copyright 2020, Hui Cheng.
+    Created using <a href="http://sphinx-doc.org/">Sphinx</a> 2.2.0.
+</div>
+</body>
+</html>

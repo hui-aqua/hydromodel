@@ -1,0 +1,352 @@
+<!DOCTYPE html>
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+    <meta charset="utf-8"/>
+    <title>nettingFSI module &#8212; aqua 0.3 documentation</title>
+    <link rel="stylesheet" href="../_static/nature.css" type="text/css"/>
+    <link rel="stylesheet" href="../_static/pygments.css" type="text/css"/>
+    <script type="text/javascript" id="documentation_options" data-url_root="../"
+            src="../_static/documentation_options.js"></script>
+    <script type="text/javascript" src="../_static/jquery.js"></script>
+    <script type="text/javascript" src="../_static/underscore.js"></script>
+    <script type="text/javascript" src="../_static/doctools.js"></script>
+    <script type="text/javascript" src="../_static/language_data.js"></script>
+    <link rel="index" title="Index" href="../genindex.html"/>
+    <link rel="search" title="Search" href="../search.html"/>
+    <link rel="next" title="screenModel module" href="screenModel.html"/>
+    <link rel="prev" title="morisonModel module" href="morisonModel.html"/>
+</head>
+<body>
+<div class="related" role="navigation" aria-label="related navigation">
+    <h3>Navigation</h3>
+    <ul>
+        <li class="right" style="margin-right: 10px">
+            <a href="../genindex.html" title="General Index"
+               accesskey="I">index</a></li>
+        <li class="right">
+            <a href="../py-modindex.html" title="Python Module Index"
+            >modules</a> |
+        </li>
+        <li class="right">
+            <a href="screenModel.html" title="screenModel module"
+               accesskey="N">next</a> |
+        </li>
+        <li class="right">
+            <a href="morisonModel.html" title="morisonModel module"
+               accesskey="P">previous</a> |
+        </li>
+        <li class="nav-item nav-item-0"><a href="../index.html">aqua 0.3 documentation</a> &#187;</li>
+        <li class="nav-item nav-item-1"><a href="modules.html" accesskey="U">hydrodynamicModule</a> &#187;</li>
+    </ul>
+</div>
+
+<div class="document">
+    <div class="documentwrapper">
+        <div class="bodywrapper">
+            <div class="body" role="main">
+
+                <div class="section" id="module-nettingFSI">
+                    <span id="nettingfsi-module"></span>
+                    <h1>nettingFSI module<a class="headerlink" href="#module-nettingFSI"
+                                            title="Permalink to this headline">¶</a></h1>
+                    <hr class="docutils"/>
+                    <ul class="simple">
+                        <li><p>University of Stavanger</p></li>
+                        <li><p>Hui Cheng (PhD student)</p></li>
+                        <li><p>Lin Li (Medveileder)</p></li>
+                        <li><p>Prof. Muk Chen Ong (Supervisor)</p></li>
+                    </ul>
+                    <hr class="docutils"/>
+                    <p>Any questions about this code,
+                        please email: <a class="reference external"
+                                         href="mailto:hui&#46;cheng&#37;&#52;&#48;uis&#46;no">hui<span>&#46;</span>cheng<span>&#64;</span>uis<span>&#46;</span>no</a>
+                    </p>
+                    <p>In order to use this module, we recommend <code class="docutils literal notranslate"><span
+                            class="pre">import</span> <span class="pre">nettingFSI</span> <span class="pre">as</span>
+                        <span class="pre">fsi</span></code> in the beginning of your code.
+                        To use this module, one should be import this into the input file for calculations.</p>
+                    <dl class="function">
+                        <dt id="nettingFSI.finish_flag">
+                            <code class="sig-prename descclassname">nettingFSI.</code><code class="sig-name descname">finish_flag</code><span
+                                class="sig-paren">(</span><em class="sig-param">cwd</em>, <em
+                                class="sig-param">flag</em><span class="sig-paren">)</span><a class="headerlink"
+                                                                                              href="#nettingFSI.finish_flag"
+                                                                                              title="Permalink to this definition">¶</a>
+                        </dt>
+                        <dd>
+                            <dl class="field-list simple">
+                                <dt class="field-odd">Parameters</dt>
+                                <dd class="field-odd">
+                                    <ul class="simple">
+                                        <li><p><strong>cwd</strong> – work path</p></li>
+                                        <li><p><strong>flag</strong> – file name [string]</p></li>
+                                    </ul>
+                                </dd>
+                                <dt class="field-even">Returns</dt>
+                                <dd class="field-even"><p>create a empty file to tell openfoam the file finishes
+                                    writing</p>
+                                </dd>
+                            </dl>
+                        </dd>
+                    </dl>
+
+                    <dl class="function">
+                        <dt id="nettingFSI.get_position_aster">
+                            <code class="sig-prename descclassname">nettingFSI.</code><code class="sig-name descname">get_position_aster</code><span
+                                class="sig-paren">(</span><em class="sig-param">table_aster</em><span class="sig-paren">)</span><a
+                                class="headerlink" href="#nettingFSI.get_position_aster"
+                                title="Permalink to this definition">¶</a></dt>
+                        <dd><p>Module public function.</p>
+                            <dl class="field-list simple">
+                                <dt class="field-odd">Parameters</dt>
+                                <dd class="field-odd"><p><strong>table_aster</strong> – A table from Code_Aster by <code
+                                        class="docutils literal notranslate"><span
+                                        class="pre">POST_RELEVE_T</span></code> command with NOM_CHAM=(‘DEPL’)</p>
+                                </dd>
+                                <dt class="field-even">Returns</dt>
+                                <dd class="field-even"><p>[np.array].shape=(N,3) Unit: [m]. A numpy array of all the
+                                    nodes positions.</p>
+                                </dd>
+                            </dl>
+                        </dd>
+                    </dl>
+
+                    <dl class="function">
+                        <dt id="nettingFSI.get_velocity">
+                            <code class="sig-prename descclassname">nettingFSI.</code><code class="sig-name descname">get_velocity</code><span
+                                class="sig-paren">(</span><em class="sig-param">cwd</em>, <em class="sig-param">length_velocity</em>,
+                            <em class="sig-param">time_aster</em><span class="sig-paren">)</span><a class="headerlink"
+                                                                                                    href="#nettingFSI.get_velocity"
+                                                                                                    title="Permalink to this definition">¶</a>
+                        </dt>
+                        <dd>
+                            <dl class="field-list simple">
+                                <dt class="field-odd">Parameters</dt>
+                                <dd class="field-odd">
+                                    <ul class="simple">
+                                        <li><p><strong>cwd</strong> – working path for code aster</p></li>
+                                        <li><p><strong>length_velocity</strong> – the length of the list of element(or
+                                            vlocity)</p></li>
+                                        <li><p><strong>time_aster</strong> – the time in Code_Aster</p></li>
+                                    </ul>
+                                </dd>
+                                <dt class="field-even">Returns</dt>
+                                <dd class="field-even"><p>a numpy array of velocity on elements</p>
+                                </dd>
+                            </dl>
+                        </dd>
+                    </dl>
+
+                    <dl class="function">
+                        <dt id="nettingFSI.get_velocity_aster">
+                            <code class="sig-prename descclassname">nettingFSI.</code><code class="sig-name descname">get_velocity_aster</code><span
+                                class="sig-paren">(</span><em class="sig-param">table_aster</em><span class="sig-paren">)</span><a
+                                class="headerlink" href="#nettingFSI.get_velocity_aster"
+                                title="Permalink to this definition">¶</a></dt>
+                        <dd><p>Module public function.</p>
+                            <dl class="field-list simple">
+                                <dt class="field-odd">Parameters</dt>
+                                <dd class="field-odd"><p><strong>table_aster</strong> – A table from Code_Aster by <code
+                                        class="docutils literal notranslate"><span
+                                        class="pre">POST_RELEVE_T</span></code> command with NOM_CHAM=(‘VITE’)</p>
+                                </dd>
+                                <dt class="field-even">Returns</dt>
+                                <dd class="field-even"><p>[np.array].shape=(N,3) Unit: [m/s]. A numpy array of all the
+                                    nodes velocities.</p>
+                                </dd>
+                            </dl>
+                        </dd>
+                    </dl>
+
+                    <dl class="function">
+                        <dt id="nettingFSI.read_velocity">
+                            <code class="sig-prename descclassname">nettingFSI.</code><code class="sig-name descname">read_velocity</code><span
+                                class="sig-paren">(</span><em class="sig-param">cwd_foam_root</em>, <em
+                                class="sig-param">length_velocity</em><span class="sig-paren">)</span><a
+                                class="headerlink" href="#nettingFSI.read_velocity"
+                                title="Permalink to this definition">¶</a></dt>
+                        <dd>
+                            <dl class="field-list simple">
+                                <dt class="field-odd">Parameters</dt>
+                                <dd class="field-odd">
+                                    <ul class="simple">
+                                        <li><p><strong>cwd_foam_root</strong> – work path</p></li>
+                                        <li><p><strong>length_velocity</strong> – The length of velocity file, normally
+                                            equal to the length of elements</p></li>
+                                    </ul>
+                                </dd>
+                                <dt class="field-even">Returns</dt>
+                                <dd class="field-even"><p>return the velocity dictionary and time in openfoam</p>
+                                </dd>
+                            </dl>
+                        </dd>
+                    </dl>
+
+                    <dl class="function">
+                        <dt id="nettingFSI.start_flag">
+                            <code class="sig-prename descclassname">nettingFSI.</code><code class="sig-name descname">start_flag</code><span
+                                class="sig-paren">(</span><em class="sig-param">cwd</em>, <em
+                                class="sig-param">flag</em><span class="sig-paren">)</span><a class="headerlink"
+                                                                                              href="#nettingFSI.start_flag"
+                                                                                              title="Permalink to this definition">¶</a>
+                        </dt>
+                        <dd>
+                            <dl class="field-list simple">
+                                <dt class="field-odd">Parameters</dt>
+                                <dd class="field-odd">
+                                    <ul class="simple">
+                                        <li><p><strong>cwd</strong> – work path</p></li>
+                                        <li><p><strong>flag</strong> – file name [string]</p></li>
+                                    </ul>
+                                </dd>
+                                <dt class="field-even">Returns</dt>
+                                <dd class="field-even"><p>create a empty file to tell openfoam the file starts
+                                    writing</p>
+                                </dd>
+                            </dl>
+                        </dd>
+                    </dl>
+
+                    <dl class="function">
+                        <dt id="nettingFSI.write_element">
+                            <code class="sig-prename descclassname">nettingFSI.</code><code class="sig-name descname">write_element</code><span
+                                class="sig-paren">(</span><em class="sig-param">hydro_element</em>, <em
+                                class="sig-param">cwd</em><span class="sig-paren">)</span><a class="headerlink"
+                                                                                             href="#nettingFSI.write_element"
+                                                                                             title="Permalink to this definition">¶</a>
+                        </dt>
+                        <dd>
+                            <dl class="field-list simple">
+                                <dt class="field-odd">Parameters</dt>
+                                <dd class="field-odd">
+                                    <ul class="simple">
+                                        <li><p><strong>position</strong> – A numpy array of all the net panel element
+                                        </p></li>
+                                        <li><p><strong>cwd</strong> – work path,</p></li>
+                                    </ul>
+                                </dd>
+                                <dt class="field-even">Returns</dt>
+                                <dd class="field-even"><p>write the net panels to “constant” folder as a file named
+                                    “surf”</p>
+                                </dd>
+                            </dl>
+                        </dd>
+                    </dl>
+
+                    <dl class="function">
+                        <dt id="nettingFSI.write_fh">
+                            <code class="sig-prename descclassname">nettingFSI.</code><code class="sig-name descname">write_fh</code><span
+                                class="sig-paren">(</span><em class="sig-param">hydro_force</em>, <em class="sig-param">timeFE</em>,
+                            <em class="sig-param">cwd</em><span class="sig-paren">)</span><a class="headerlink"
+                                                                                             href="#nettingFSI.write_fh"
+                                                                                             title="Permalink to this definition">¶</a>
+                        </dt>
+                        <dd>
+                            <dl class="field-list simple">
+                                <dt class="field-odd">Parameters</dt>
+                                <dd class="field-odd">
+                                    <ul class="simple">
+                                        <li><p><strong>position</strong> – A numpy array of all the hydrodynamic forces
+                                            on net panel</p></li>
+                                        <li><p><strong>cwd</strong> – work path,</p></li>
+                                    </ul>
+                                </dd>
+                                <dt class="field-even">Returns</dt>
+                                <dd class="field-even"><p>write the hydrodynamic forces to “constant” folder as a file
+                                    named “Fh” and save the total hydrodynamic forces on netting to
+                                    “forceOnNetting.txt”</p>
+                                </dd>
+                            </dl>
+                        </dd>
+                    </dl>
+
+                    <dl class="function">
+                        <dt id="nettingFSI.write_position">
+                            <code class="sig-prename descclassname">nettingFSI.</code><code class="sig-name descname">write_position</code><span
+                                class="sig-paren">(</span><em class="sig-param">position</em>, <em
+                                class="sig-param">cwd</em><span class="sig-paren">)</span><a class="headerlink"
+                                                                                             href="#nettingFSI.write_position"
+                                                                                             title="Permalink to this definition">¶</a>
+                        </dt>
+                        <dd>
+                            <dl class="field-list simple">
+                                <dt class="field-odd">Parameters</dt>
+                                <dd class="field-odd">
+                                    <ul class="simple">
+                                        <li><p><strong>position</strong> – A numpy array of all the nodes’ position</p>
+                                        </li>
+                                        <li><p><strong>cwd</strong> – work path,</p></li>
+                                    </ul>
+                                </dd>
+                                <dt class="field-even">Returns</dt>
+                                <dd class="field-even"><p>write the nodes’ positions to “constant” folder as a file
+                                    named “posi”</p>
+                                </dd>
+                            </dl>
+                        </dd>
+                    </dl>
+
+                </div>
+
+
+            </div>
+        </div>
+    </div>
+    <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+            <h4>Previous topic</h4>
+            <p class="topless"><a href="morisonModel.html"
+                                  title="previous chapter">morisonModel module</a></p>
+            <h4>Next topic</h4>
+            <p class="topless"><a href="screenModel.html"
+                                  title="next chapter">screenModel module</a></p>
+            <div role="note" aria-label="source link">
+                <h3>This Page</h3>
+                <ul class="this-page-menu">
+                    <li><a href="../_sources/documents/nettingFSI.rst.txt"
+                           rel="nofollow">Show Source</a></li>
+                </ul>
+            </div>
+            <div id="searchbox" style="display: none" role="search">
+                <h3 id="searchlabel">Quick search</h3>
+                <div class="searchformwrapper">
+                    <form class="search" action="../search.html" method="get">
+                        <input type="text" name="q" aria-labelledby="searchlabel"/>
+                        <input type="submit" value="Go"/>
+                    </form>
+                </div>
+            </div>
+            <script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+    </div>
+    <div class="clearer"></div>
+</div>
+<div class="related" role="navigation" aria-label="related navigation">
+    <h3>Navigation</h3>
+    <ul>
+        <li class="right" style="margin-right: 10px">
+            <a href="../genindex.html" title="General Index"
+            >index</a></li>
+        <li class="right">
+            <a href="../py-modindex.html" title="Python Module Index"
+            >modules</a> |
+        </li>
+        <li class="right">
+            <a href="screenModel.html" title="screenModel module"
+            >next</a> |
+        </li>
+        <li class="right">
+            <a href="morisonModel.html" title="morisonModel module"
+            >previous</a> |
+        </li>
+        <li class="nav-item nav-item-0"><a href="../index.html">aqua 0.3 documentation</a> &#187;</li>
+        <li class="nav-item nav-item-1"><a href="modules.html">hydrodynamicModule</a> &#187;</li>
+    </ul>
+</div>
+<div class="footer" role="contentinfo">
+    &#169; Copyright 2020, Hui Cheng.
+    Created using <a href="http://sphinx-doc.org/">Sphinx</a> 2.2.0.
+</div>
+</body>
+</html>
