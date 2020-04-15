@@ -1,3 +1,4 @@
+
 <!DOCTYPE html>
 
 <html xmlns="http://www.w3.org/1999/xhtml">
@@ -48,6 +49,7 @@
     <span class="n">twineDiameter</span>	           <span class="mf">2.8e-3</span><span class="p">;</span> 
     <span class="n">fluidDensity</span>                   <span class="mf">1000.0</span><span class="p">;</span>
     <span class="n">velocityUpdateInterval</span>         <span class="mi">0</span><span class="p">;</span> 
+    <span class="n">velocityCorrector</span>              <span class="mi">1</span><span class="p">;</span>
     <span class="n">velocityProbeCorrection</span>        <span class="p">(</span><span class="mi">1</span> <span
                                     class="mi">0</span> <span class="mi">0</span><span class="p">);</span>
     <span class="n">ropeEnhance</span>                    <span class="mi">0</span><span class="p">;</span>
@@ -58,15 +60,43 @@
                     <p>The name of the variable in the net information (NetInfo1) is quite straight forwards.</p>
                     <ul class="simple">
                         <li><p><strong>Sn</strong> is the solidity of net panel, which is usually between 0-1.</p></li>
-                        <li><p><strong>PorousMediaThickness</strong> is the thickness of porous media.</p></li>
-                        <li><p><strong>halfMeshSize</strong> is the minimum knot-to-knot distance.</p></li>
-                        <li><p><strong>twineDiameter</strong> is the diameter of the net twine.</p></li>
+                        <li><p><strong>PorousMediaThickness</strong> is the thickness of porous media in OpenFOAM.</p>
+                        </li>
+                        <li><p><strong>halfMeshSize</strong> is defined as the minimum knot-to-knot distance. It is
+                            called half mesh size in fishing and aquaculture community.</p></li>
+                        <li><p><strong>twineDiameter</strong> is the physical diameter of the net twine.</p></li>
                         <li><p><strong>fluidDensity</strong> is the density of the fluid.</p></li>
-                        <li><p><strong>velocityUpdateInterval</strong> is the velocity update time step, when the value
-                            is 0, the velocity will update at each time step.</p></li>
+                        <li><p><strong>velocityUpdateInterval</strong> is the velocity update time step.</p>
+                            <ul>
+                                <li><p><code class="docutils literal notranslate"><span class="pre">0</span></code>: The
+                                    velocities on points will update at each time step.</p></li>
+                                <li><p><code class="docutils literal notranslate"><span class="pre">1</span></code>: The
+                                    velocities on points will update every 1 second.</p></li>
+                            </ul>
+                        </li>
+                        <li><p><strong>velocityCorrector</strong> is a scalar factor to correct the velocity.</p>
+                            <ul>
+                                <li><p><code class="docutils literal notranslate"><span class="pre">0</span></code>: All
+                                    the output velocity from OpenFOAMon nodes are zeros.</p></li>
+                                <li><p><code class="docutils literal notranslate"><span class="pre">1</span></code>: All
+                                    the output velocity from OpenFOAMon nodes are identical to the velocity in the
+                                    corresponding cells.</p></li>
+                                <li><p><code class="docutils literal notranslate"><span class="pre">1.5</span></code>:
+                                    The output velocity is amplified by 1.5 times.</p></li>
+                            </ul>
+                        </li>
                         <li><p><strong>velocityProbeCorrection</strong> is the correction vector for velocity probe.
                             during the FSI, the velocity on each net element is corrected by moving the reference probe
-                            a certain distance along the input vector.</p></li>
+                            a certain distance along the input vector.</p>
+                            <ul>
+                                <li><p><code class="docutils literal notranslate"><span
+                                        class="pre">(0,0,0)</span></code> The probe position will not be corrected,
+                                    meaning the output velocities is extract from exact position.</p></li>
+                                <li><p><code class="docutils literal notranslate"><span
+                                        class="pre">(1,0,0)</span></code> The probe position will move 1 unit length,
+                                    usually 1 meter, along X+ direction.</p></li>
+                            </ul>
+                        </li>
                         <li><p><strong>ropeEnhance</strong> is used to show the velocity field of netting with stitching
                             rope.</p>
                             <ul>

@@ -1,3 +1,4 @@
+
 <!DOCTYPE html>
 
 <html xmlns="http://www.w3.org/1999/xhtml">
@@ -41,14 +42,14 @@
                     <p><img alt="alt text" src="../../_images/Picture2.png"/></p>
                     <p>There are some assumptions when we generate mesh for simulations:</p>
                     <ul class="simple">
-                        <li><p>Although the flow direction can be change in the <strong>Environment</strong>, we assume
-                            the X+ is the flow direction when we generate the mesh.</p></li>
+                        <li><p>Although the flow direction can be change in the <strong>Environment</strong>, we prefer
+                            to assume the X+ is the flow direction when we generate the mesh.</p></li>
                     </ul>
                     <div class="section" id="meshlib">
                         <h2>MeshLib<a class="headerlink" href="#meshlib" title="Permalink to this headline">¶</a></h2>
                         <p><strong>MeshLib</strong> is used to tell the mesh generator which library will be used to
                             generate mesh.
-                            The value is used in the net panel(s) is <code class="docutils literal notranslate"><span
+                            Here, for net panel(s) is <code class="docutils literal notranslate"><span
                                     class="pre">panel</span></code>.</p>
                     </div>
                     <div class="section" id="environment">
@@ -98,17 +99,24 @@
                                         fishing gear, e.g., trawl net, purse seine.</p></li>
                                 </ul>
                             </li>
-                            <li><p><strong>normalVector</strong>: a python list. Unit: [-].</p>
-                                <ul class="simple">
-                                    <li><p>Single net panel, <code class="docutils literal notranslate"><span
-                                            class="pre">[[nx,ny,nz]]</span></code>. Input the three components of the
-                                        normal vector. The norm of vector <strong>must</strong> to be one.</p></li>
-                                    <li><p>multi net panels, <code class="docutils literal notranslate"><span
-                                            class="pre">[[nx1,ny1,nz1],[nx2,ny2,nz2]...]</span></code>. Input the three
-                                        components of the normal vectors. The sequence of the input file should be
-                                        corresponding to the <strong>barCenter</strong></p></li>
-                                </ul>
-                            </li>
+                            <li><p><strong>normalVector</strong>: a python list. Unit: [-]. A transformation matrix to
+                                convert the position.</p></li>
+                        </ol>
+                        <ul class="simple">
+                            <li><p>The below matrix is define a cartesian coordinate system.</p></li>
+                        </ul>
+                        <div class="highlight-default notranslate">
+                            <div class="highlight"><pre><span></span> <span class="p">[[</span><span class="mi">1</span><span
+                                    class="p">,</span><span class="mi">0</span><span class="p">,</span><span class="mi">0</span><span
+                                    class="p">],</span>
+  <span class="p">[</span><span class="mi">0</span><span class="p">,</span><span class="mi">1</span><span
+                                        class="p">,</span><span class="mi">0</span><span class="p">],</span>
+  <span class="p">[</span><span class="mi">0</span><span class="p">,</span><span class="mi">0</span><span
+                                        class="p">,</span><span class="mi">1</span><span class="p">]]</span>
+</pre>
+                            </div>
+                        </div>
+                        <ol class="simple">
                             <li><p><strong>netHeight</strong>:a floating point number. Unit: [m]. The height of net
                                 panels. Here, we assume that all the net panel have the same geometrical characterises.
                             </p></li>
@@ -185,7 +193,7 @@
                 <div class="section" id="boundary">
                     <h1>Boundary<a class="headerlink" href="#boundary" title="Permalink to this headline">¶</a></h1>
                     <ol class="simple">
-                        <li><p><strong>HydroModel</strong>: a string to indicate the hydrodynamic model. A detailed
+                        <li><p><strong>hydroModel</strong>: a string to indicate the hydrodynamic model. A detailed
                             explanation can be found later.</p>
                             <ul class="simple">
                                 <li><p>Screen model: <code class="docutils literal notranslate"><span class="pre">Screen-S1</span></code>,<code

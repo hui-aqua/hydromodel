@@ -14,7 +14,6 @@ import os
 import sys
 
 sys.path.insert(0, os.path.abspath('..//..//scr//model4aster'))
-import caktus_theme
 
 # -- Project information -----------------------------------------------------
 
@@ -51,9 +50,6 @@ source_suffix = {
 # The theme to use for HTML and HTML Help pages.  See the documentation for
 # a list of builtin themes.
 #
-# html_theme_path = [caktus_theme.get_theme_dir()]
-# html_sidebars = caktus_theme.default_sidebars()
-# html_theme = 'caktus'
 html_theme = 'nature'
 # Add any paths that contain custom static files (such as style sheets) here,
 # relative to this directory. They are copied after the builtin static files,

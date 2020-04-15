@@ -4,15 +4,17 @@
 
 There are some assumptions when we generate mesh for simulations:
 
-* Although the flow direction can be change in the **Environment**, we assume the X+ is the flow direction when we generate the mesh.
+* Although the flow direction can be change in the **Environment**, we prefer to assume the X+ is the flow direction when we generate the mesh.
+
 ### MeshLib
 
 **MeshLib** is used to tell the mesh generator which library will be used to generate mesh.
-The value is used in the net panel(s) is ```panel```.
+Here, for net panel(s) is ```panel```.
     
 ### Environment 
 
 The information about the environmental conditions.  
+
 1. **current**: a python list. Unit: [m/s]. 
     
     -  One velocity,  ```[[u,v,w]]```.  Input the three components of the current velocity that you are indented to use.     
@@ -34,10 +36,15 @@ Define the netting of net panel(s)
     - ```square```: square netting that are commonly used in aquaculture cage
     - ```rhombus```: rhombus netting that are commonly used in fishing gear, e.g., trawl net, purse seine.
   
-3. **normalVector**: a python list. Unit: [-].
-    - Single net panel, ```[[nx,ny,nz]]```. Input the three components of the normal vector. The norm of vector **must** to be one.
-    - multi net panels, ```[[nx1,ny1,nz1],[nx2,ny2,nz2]...]```. Input the three components of the normal vectors. The sequence of the input file should be corresponding to the **barCenter**
- 
+3. **normalVector**: a python list. Unit: [-]. A transformation matrix to convert the position. 
+  
+  -  The below matrix is define a cartesian coordinate system. 
+  ```
+   [[1,0,0],
+    [0,1,0],
+    [0,0,1]]
+  ```
+                     
 4. **netHeight**:a floating point number. Unit: [m]. The height of net panels. Here, we assume that all the net panel have the same geometrical characterises.  
 
 5. **netWidth**:a floating point number. Unit: [m]. The width of net panels. Here, we assume that all the net panel have the same geometrical characterises.
@@ -88,7 +95,7 @@ Define the weight system of cage.
 6. **sinkerWeight**: a floating point number. Unit [N]. The submerged wight of each sinker.
 
 ## Boundary
-1. **HydroModel**: a string to indicate the hydrodynamic model. A detailed explanation can be found later.   
+1. **hydroModel**: a string to indicate the hydrodynamic model. A detailed explanation can be found later.   
     - Screen model: ```Screen-S1```,```Screen-S2```,```Screen-S3```...  
     - Screen model-udv: user defined values for CD and CL, e.g., ```Screen-udv-0.2-0.1```: 0.2 is drag coefficient, 0.1 is lift coefficient 
     - Morison model: ```Morison-M1```,```Morison-M3```,```Morison-M3```...
@@ -97,6 +104,7 @@ Define the weight system of cage.
     - fixed factor: flow reduction factor is given behind '-':  ```factor-0.9```
     - loland model:drag coefficient is given behind '-': ```loland-0.5```
     - new model by Hui: ``hui-1``
+    
 3. **fixed**: The name of the nodes that is going to be fixed in the numerical simulations. e.g., ```topnodes```, ```allnodes```.
 
 4. **gravity**: gravity in the simulation, usually is ```9.81``` 

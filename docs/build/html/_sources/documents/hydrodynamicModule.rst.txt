@@ -5,4 +5,3 @@ hydrodynamicModule module
    :members:
    :undoc-members:
    :show-inheritance:
-   morisonModel
