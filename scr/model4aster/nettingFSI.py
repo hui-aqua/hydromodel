@@ -145,7 +145,7 @@ FoamFile
 }
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 {
-timeInFE  ''' + str(timeFE) + ''' ;
+timeInFE  ''' + str(round(timeFE, 3)) + ''' ;
 numOfFh   ''' + str(len(hydro_force)) + ''' ;''')
     output_file.write('\n')
     output_file.close()
@@ -166,7 +166,7 @@ numOfFh   ''' + str(len(hydro_force)) + ''' ;''')
     output_file.close()
     finish_flag(cwd, "/fh_flag")
 
-    totalforce = [timeFE, hydro_force[:, 0].mean(), hydro_force[:, 1].mean(), hydro_force[:, 2].mean()]
+    totalforce = [round(timeFE, 3), hydro_force[:, 0].sum(), hydro_force[:, 1].sum(), hydro_force[:, 2].sum()]
     output_file = open(cwd + 'forceOnNetting.txt', 'a+')
     output_file.write(str(totalforce) + '\n')
     output_file.close()

@@ -158,15 +158,14 @@ class forceModel:
             p1 = realtime_node_position[panel[0]]
             p2 = realtime_node_position[panel[1]]
             p3 = realtime_node_position[panel[2]]
-            alpha, lift_direction, surface_area = calculation_on_element(p1, p2, p3, np.array(current_velocity))
+            alpha, lift_direction, net_area = calculation_on_element(p1, p2, p3, np.array(current_velocity))
             # calculate the inflow angel, normal vector, lift force factor, area of the hydrodynamic element
             velocity = np.array(current_velocity) * net_wake.reduction_factor(index, alpha) + wave_velocity[index]
             # if not in the wake region, the effective velocity is the undisturbed velocity
             velocity_relative = velocity - velocity_structure
             drag_coefficient, lift_coefficient = self.hydro_coefficients(alpha, velocity_relative, knot=False)
-            fd = 0.5 * row * surface_area * drag_coefficient * np.linalg.norm(velocity_relative) * velocity_relative
-            fl = 0.5 * row * surface_area * lift_coefficient * pow(np.linalg.norm(velocity_relative),
-                                                                   2) * lift_direction
+            fd = 0.5 * row * net_area * drag_coefficient * np.linalg.norm(velocity_relative) * velocity_relative
+            fl = 0.5 * row * net_area * lift_coefficient * pow(np.linalg.norm(velocity_relative), 2) * lift_direction
             hydro_force_on_element.append((fd + fl) / 2.0)
         if np.size(np.array(hydro_force_on_element)) == np.size(self.hydro_element):
             self.force_on_elements = np.array(hydro_force_on_element)

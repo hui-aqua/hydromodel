@@ -402,7 +402,7 @@ if k < itimes-1:
 U=Uinput[int(k*dt/duration)]
 force_on_element=hydroModel.force_on_element(netWakeModel,posi,U)
 Fnh=hydroModel.distribute_force(meshinfo['numberOfNodes'])
-with open(cwd+'/positionOutput/posi'+str((k)*dt)+'.txt', "w") as file:
+with open(cwd+'/positionOutput/posi'+str(round((k)*dt,3))+'.txt', "w") as file:
     file.write(str(posi))
 file.close()
 
@@ -421,7 +421,7 @@ Fnh=hydroModel.distribute_force(meshinfo['numberOfNodes'])
 fsi.write_position(posi,cwd)
 fsi.write_fh(force_on_element,timeFE,cwd)
 
-with open(cwd+'/positionOutput/posi'+str((k)*dt)+'.txt', "w") as file:
+with open(cwd+'/positionOutput/posi'+str(round((k)*dt,3))+'.txt', "w") as file:
     file.write(str(posi))
 file.close()
         ''')
@@ -442,7 +442,7 @@ else:
 
     fsi.write_position(posi,cwd)
     fsi.write_fh(force_on_element,timeFE,cwd)
-    with open(cwd+'/positionOutput/posi'+str((k)*dt)+'.txt', "w") as file:
+    with open(cwd+'/positionOutput/posi'+str(round((k)*dt,3))+'.txt', "w") as file:
         file.write(str(posi))
     file.close()
         ''')

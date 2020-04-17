@@ -9,66 +9,59 @@ Any questions about this code,
 please email: hui.cheng@uis.no
 """
 import numpy as np
-from matplotlib import animation
+import matplotlib.cm as cm
+import matplotlib
 import matplotlib.pyplot as plt
 import matplotlib.gridspec as gc
-import sys
+from mpl_toolkits.mplot3d import Axes3D  # noqa: F401 unused import
+from utilityScritp import post_subFunctions as ps
+import os
 import ast
 
-def getData(time):
-    Ux = []
-    Uy = []
-    Uz = []
-    for item in velocity_dict["velocities_at_" + str(time)]:
-        Ux.append(item[0])
-        Uy.append(item[1])
-        Uz.append(item[2])
-    U = [Ux, Uy, Uz]
-    Umean = [sum(Ux) / len(Ux), sum(Uy) / len(Uy), sum(Uz) / len(Uz)]
-    return U, Umean
+plt.rcParams["font.family"] = "Times New Roman"
+plt.rcParams['font.weight'] = 'regular'
+plt.rcParams['font.size'] = '10'
+plt.rcParams["mathtext.default"] = "it"
+plt.rcParams["mathtext.fontset"] = "stix"
+font = {'family': 'Times New Roman', 'style': 'italic', 'weight': 'regular', 'size': 10}
 
-
-def oneFigure(time):
-    points = [i for i in range(len(velocity_dict["velocities_at_" +  str(time)]))]
-    U,Umean=getData(time)
-    titles=['U_x','U_y','U_z']
-    colors=['r','g','b']
-    gs = gc.GridSpec(1, 3)
-    for i in range(3):
-        ax = plt.subplot(gs[i])
-        plt.title(titles[i]+" at " + str(time) + "s")
-        ax.scatter(points, U[i], color=colors[i], marker='.')
-        ax.plot([0, len(points)], [Umean[i], Umean[i]], color='k')
-        plt.ylabel("velocity (m/s)")
-        plt.xlabel("mean velocity =" + str(Umean[i]) + "(m/s)")
-
-    plt.tight_layout()
-    plt.show()
-
-
-def ani(velocity_dict):
-    for record in velocity_dict['time_record'][1:]:
-        print("record is " +str(record))
-        plt.figure(figsize=(16, 5))
-        oneFigure(record)
-# main()
-
-with open(sys.argv[1], 'r') as f:
+# >>>>>>>>>>>>>>  read file
+file_name = "../../../FSItest/test1/constant/velocity_on_element.txt"
+with open(file_name, 'r') as f:
     content = f.read()
     velocity_dict = ast.literal_eval(content)
 
-print("The recorded velocities are" + str(velocity_dict["time_record"]) + "\n")
+time_selected = 7.96
+U, u_mean = ps.read_velocity_dict(time_selected, velocity_dict)
 
-time_selected = str(input("Please choose a time slice: \n"))
+# >>>>>>>>>>>>> plotting (1) velocity histogram
+plt.figure(figsize=(4.3, 3.2))
+titles = ['U_mag', 'U_x', 'U_y', 'U_z']
+gs = gc.GridSpec(1, 1)
+for i in range(1):
+    ax = plt.subplot(gs[i])
+    plt.title(titles[i] + " at " + str(time_selected) + "s")
+    ax.hist(U[i], 20)
+    ax.plot([u_mean[i], u_mean[i]], [0, len(U[0]) / 4], linestyle='--', color='r')
+    plt.ylabel("Number")
+    plt.xlabel("velocity (m/s)")
+plt.tight_layout()
+plt.show()
 
-print("Plotting the velocity statistics at " + str(time_selected) + " s \n")
-plt.figure(figsize=(16, 5))
-oneFigure(time_selected)
+# >>>>>>>>>>>>>> plotting (2) special averaged velocity magnitude historical result
 
-# playAni = str(input("Do you want to play a animation? \n"))
-#
-# if playAni == "yes":
-#
-#     fig = plt.figure(figsize=(16, 5))
-#     anim = animation.FuncAnimation(fig, ani(velocity_dict),
-#                                    frames=200, interval=20, blit=True)
+
+time_list = np.array([float(i) for i in velocity_dict["time_record"][1:]])
+velocities_list = np.zeros((len(time_list), 4))
+for index, t in enumerate(velocity_dict["time_record"][1:]):
+    U, u_mean = ps.read_velocity_dict(t, velocity_dict)
+    velocities_list[index] = np.array([u_mean])
+
+plt.figure(figsize=(6.3, 4.2))
+plt.plot(time_list, velocities_list[:, 0])
+plt.xlim(0, 25)
+plt.ylim(0.4, 0.6)
+plt.xlabel("Time (s)")
+plt.ylabel("Velocity (m/s)")
+plt.tight_layout()
+plt.show()
