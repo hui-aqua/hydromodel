@@ -20,7 +20,7 @@ plt.rcParams["mathtext.fontset"] = "stix"
 font = {'family': 'Times New Roman', 'style': 'italic', 'weight': 'regular', 'size': 10}
 
 # >>>>>>>>>>>>>>  read file
-file = "../../../FSItest/test1/constant/forceOnNetting.txt"
+file = "../../../FSItest/test1_3_1.03/constant/forceOnNetting.txt"
 force = ps.read_force(file)
 
 # >>>>>>>>>>>>>> plotting
@@ -29,7 +29,7 @@ plt.plot(force[:, 0], force[:, 1], color='r', label="Fx")
 # plt.plot(force[:,0],force[:,2],color='g',label="Fy")
 # plt.plot(force[:,0],force[:,3],color='b',label="Fz")
 plt.legend()
-plt.xlim([0, 10])
+plt.xlim(0, 50)
 plt.ylim([15, 35])
 plt.xlabel("Drag Force (N)")
 plt.ylabel("Time (s)")

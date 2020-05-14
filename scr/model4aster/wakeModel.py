@@ -86,7 +86,7 @@ class net2net:
         factor = 1.0
         if element_index in self.wake_element_indexes:
             if self.wake_type in ['factor']:
-                factor = float(self.wake_value)
+                factor = min(1.0, float(self.wake_value))
             elif self.wake_type in ['loland']:
                 factor = float(self.cal_factor1())
             elif self.wake_type in ['hui']:

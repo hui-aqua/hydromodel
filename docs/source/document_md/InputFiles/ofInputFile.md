@@ -19,7 +19,7 @@ The name of the variable in the net information (NetInfo1) is quite straight for
 
 - **Sn** is the solidity of net panel, which is usually between 0-1.
 
-- **PorousMediaThickness** is the thickness of porous media in OpenFOAM. 
+- **PorousMediaThickness** is the thickness of porous media in OpenFOAM. Usually, the thickness of porous media should be 3-5 times of the mesh length.
 
 - **halfMeshSize** is defined as the minimum knot-to-knot distance. It is called half mesh size in fishing and aquaculture community. 
 

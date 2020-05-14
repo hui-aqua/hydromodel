@@ -90,3 +90,16 @@ def read_surf(file_name):
                               int(one.split(",")[1]),
                               int(one.split(",")[2][:-2])])
     return list_elem
+
+
+def read_pressureXY(file_name):
+    return np.loadtxt(file_name)
+
+
+def read_velocityXY(file_name):
+    resu = np.loadtxt(file_name)
+    u_mean = np.zeros((len(resu), 1))
+    for i in range(len(resu)):
+        u_mean[i] = np.linalg.norm(np.array(resu[i, 1:]))
+    resu = np.hstack((resu, u_mean))
+    return resu

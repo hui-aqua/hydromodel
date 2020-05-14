@@ -32,7 +32,7 @@ with open(str(sys.argv[1]), 'r') as f:
 
 NT = cageInfo['CageShape']['elementOverCir']  # Number of the nodes in circumference
 NN = cageInfo['CageShape']['elementOverHeight']  # number of section in the height, thus, the nodes should be NN+1
-floater_center = cageInfo['FloatingCollar']['floaterCenter'][0]
+floater_center = cageInfo['FloatingCollar']['floaterCenter']
 D = cageInfo['CageShape']['cageDiameter']
 H = cageInfo['CageShape']['cageHeight']
 
@@ -183,6 +183,10 @@ smesh.SetName(bottomring, 'bottomring')
 meshname = "single_cage_" + str(sys.argv[1]).split('.')[0] + ".med"
 Mesh_1.ExportMED(cwd + "/" + meshname)
 
+lineinfo = {
+
+}
+
 meshinfo = {
     "horizontalElementLength": float(pi * D / float(NT)),
     "verticalElementLength": float(H / float(NN)),
@@ -202,7 +206,7 @@ print("\n"
       "  --------------------------------------\n"
       "  --     University of Stavanger      --\n"
       "  --         Hui Cheng (PhD student)  --\n"
-      "  --       Lin Li (Medveileder)       --\n "
+      "  --       Lin Li (Medveileder)       --\n"
       "  --  Prof. Muk Chen Ong (supervisor) --\n"
       "  --------------------------------------\n"
       "  Any questions about this code,\n"
@@ -212,6 +216,7 @@ print("<<<<<<<<<< Mesh Information >>>>>>>>>>")
 print("Number of node is " + str(meshinfo["numberOfNodes"]) + ".")
 print("Number of line element is " + str(meshinfo["numberOfLines"]) + ".")
 print("Number of surface element is " + str(meshinfo["numberOfSurfaces"]) + ".\n")
+
 with open(cwd + "/meshInformation.py", 'w') as f:
     f.write("meshinfo=")
     f.write(str(meshinfo))
