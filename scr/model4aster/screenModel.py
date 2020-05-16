@@ -201,8 +201,8 @@ class forceModel:
             p1 = realtime_node_position[panel[0]]
             p2 = realtime_node_position[panel[1]]
             p3 = realtime_node_position[panel[2]]
-            alpha, lift_direction, surface_area = calculation_on_element(p1, p2, p3, velocity_relative)
-            drag_coefficient, lift_coefficient = self.hydro_coefficients(alpha, velocity_relative, knot=False)
+            alpha, lift_direction, surface_area = calculation_on_element(p1, p2, p3, velocity_on_element[index])
+            drag_coefficient, lift_coefficient = self.hydro_coefficients(alpha, velocity_on_element[index], knot=False)
 
             velocity_fluid = velocity_on_element[index] * np.sqrt(2.0 / (2.0 - drag_coefficient - lift_coefficient))
             velocity_structure = (velocity_of_nodes[panel[0]] + velocity_of_nodes[panel[1]] + velocity_of_nodes[
