@@ -57,7 +57,7 @@ model = AFFE_MODELE(AFFE=(_F(GROUP_MA=('twines'),
 
 
 # >>>>>>>>>>>>>>>    AFFE_CARA_ELEM       >>>>>>>>>>>>
-def define_element(handel, weight_type, twine_section, bottom_radius):
+def define_element(handel, weight_type, twine_section, bottom_radius=0):
     if weight_type in ['sinkers', 'allfixed']:
         handel.write('''
 elemprop = AFFE_CARA_ELEM(CABLE=_F(GROUP_MA=('twines'),
@@ -81,7 +81,7 @@ elemprop = AFFE_CARA_ELEM(CABLE=_F(GROUP_MA=('twines'),
 
 
 # >>>>>>>>>>>>>>>    DEFI_MATERIAU       >>>>>>>>>>>>
-def define_material(handel, weight_type, net_module, net_rho, bottom_module, bottom_rho):
+def define_material(handel, weight_type, net_module, net_rho, bottom_module=0, bottom_rho=0):
     if weight_type in ['sinkers', 'allfixed']:
         handel.write('''
 net = DEFI_MATERIAU(CABLE=_F(EC_SUR_E=0.0001),

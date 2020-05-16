@@ -12,6 +12,7 @@ Documents of what should be contain in the input file are categorized by ```Mesh
 
 - [cylindrical_NB_cage](InputFiles/singleFishCage.md)
 - [panel](InputFiles/netPanel.md)
+- [ENCSW](./InputFiles/ENCSW.md)
 
 ## OpenFoam Input dictionary
 Documents of what should be contain in the input file are here:

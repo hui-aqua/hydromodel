@@ -197,16 +197,17 @@ class forceModel:
             print("Velocity is " + str(velocity_of_nodes))
             print("velocity elements is " + str(velocity_on_element))
             exit()
-        for index,panel in enumerate(self.hydro_element):  # loop based on the hydrodynamic elements
-            velocity_fluid = velocity_on_element[index]
-            velocity_structure = (velocity_of_nodes[panel[0]] + velocity_of_nodes[panel[1]] + velocity_of_nodes[
-                panel[2]]) / (len(panel))
-            velocity_relative = velocity_fluid - velocity_structure * 0
+        for index, panel in enumerate(self.hydro_element):  # loop based on the hydrodynamic elements
             p1 = realtime_node_position[panel[0]]
             p2 = realtime_node_position[panel[1]]
             p3 = realtime_node_position[panel[2]]
             alpha, lift_direction, surface_area = calculation_on_element(p1, p2, p3, velocity_relative)
             drag_coefficient, lift_coefficient = self.hydro_coefficients(alpha, velocity_relative, knot=False)
+
+            velocity_fluid = velocity_on_element[index] * np.sqrt(2.0 / (2.0 - drag_coefficient - lift_coefficient))
+            velocity_structure = (velocity_of_nodes[panel[0]] + velocity_of_nodes[panel[1]] + velocity_of_nodes[
+                panel[2]]) / (len(panel))
+            velocity_relative = velocity_fluid - velocity_structure * 0
 
             fd = 0.5 * row * surface_area * drag_coefficient * np.linalg.norm(np.array(velocity_relative)) * np.array(
                 velocity_relative)
@@ -320,7 +321,7 @@ def convert_hydro_element(elements):
     """
     hydro_elements = []
     for panel in elements:  # loop based on the hydrodynamic elements
-        if len([int(k) for k in set(panel)]) < 3:  # the hydrodynamic element is a triangle
+        if len([int(k) for k in set(panel)]) <= 3:  # the hydrodynamic element is a triangle
             hydro_elements.append([k for k in set([int(k) for k in set(panel)])])  # a list of the node sequence
         else:
             for i in range(len(panel)):
