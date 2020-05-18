@@ -254,16 +254,16 @@ class forceModel:
     #         print("\nThe size of hydrodynamic force is " + str(len(velocity_on_element)))
     #         exit()
 
-    def distribute_force(self, number_of_node):
+    def distribute_force(self, number_of_node, force_increasing_factor=1):
         """
         Transfer the forces on line element to their corresponding nodes.\n
         :return: [np.array].shape=(N,3) Unit [N]. The hydrodynamic forces on all N nodes.
         """
         forces_on_nodes = np.zeros((number_of_node, 3))  # force on nodes, initial as zeros
-        for index,panel in enumerate(self.hydro_element):
-            forces_on_nodes[panel[0]] += (self.force_on_elements[index]) / 3
-            forces_on_nodes[panel[1]] += (self.force_on_elements[index]) / 3
-            forces_on_nodes[panel[2]] += (self.force_on_elements[index]) / 3
+        for index, panel in enumerate(self.hydro_element):
+            forces_on_nodes[panel[0]] += force_increasing_factor * (self.force_on_elements[index]) / 3
+            forces_on_nodes[panel[1]] += force_increasing_factor * (self.force_on_elements[index]) / 3
+            forces_on_nodes[panel[2]] += force_increasing_factor * (self.force_on_elements[index]) / 3
         return forces_on_nodes
 
 

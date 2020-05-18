@@ -39,8 +39,10 @@ coupling_switcher = cageInfo['Solver']['coupling']  #
 hydrodynamic_model = str(cageInfo['Boundary']['hydroModel'])
 hydrodynamic_model_rope = "Morison-M4"
 wake_model = str(cageInfo['Boundary']['wakeModel'])
+time_thread = cageInfo['Boundary']['currentForceIncreasing']
 
-Fbuoy = np.pi * cageInfo['CageShape']['cageDiameter'] * cageInfo['CageShape']['cageHeight'] * \
+Fbuoy = (np.pi * cageInfo['CageShape']['cageDiameter'] * cageInfo['CageShape']['cageHeight'] + 0.25 * np.pi *
+         pow(cageInfo['CageShape']['cageDiameter'], 2)) * \
         cageInfo['Net']['Sn'] * dw0 * 0.25 * np.pi * 9.81 * float(cageInfo['Environment']['fluidDensity'])
 print("Fbuoy is " + str(Fbuoy))
 # Buoyancy force to assign on each nodes
@@ -92,7 +94,7 @@ else:
     im.apply_boundary(handle2, ['gF', 'fixed', 'buoyF'])
 im.set_dyna_solver(handle2, cageInfo['Weight']['weightType'], cageInfo['Solver']['MaximumIteration'],
                    cageInfo['Solver']['Residuals'], cageInfo['Solver']['method'], cageInfo['Solver']['alpha'])
-im.set_coupling(handle2, coupling_switcher)
+im.set_coupling(handle2, coupling_switcher, time_thread)
 im.set_save_midresults(handle2, cageInfo['Solver']['saveMid_result'])
 handle2.close()
 
