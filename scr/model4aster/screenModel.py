@@ -134,8 +134,10 @@ class forceModel:
             lift_coefficient = CL_udv
         return drag_coefficient, lift_coefficient
 
-    def force_on_element(self, net_wake, realtime_node_position, current_velocity, wave=False, fe_time=0):
+    def force_on_element(self, net_wake, realtime_node_position, current_velocity, velocity_nodes=np.zeros((99999, 3)),
+                         wave=False, fe_time=0):
         """
+        :param velocity_nodes: [np.array].shape=(1,3) Unit [m/s]. The structural velocity of nodes [ux,uy,uz] in cartesian coordinate system.
         :param net_wake: A object wake model, net2net wake model. Must create first.
         :param realtime_node_position: [np.array].shape=(N,3) Unit: [m]. The coordinates of N nodes in cartesian coordinate system.
         :param current_velocity: [np.array].shape=(1,3) Unit [m/s]. The current velocity [ux,uy,uz] in cartesian coordinate system.
@@ -152,17 +154,21 @@ class forceModel:
                 wave_velocity[index] = wave.get_velocity(element_center, fe_time)
         hydro_force_on_element = []  # force on net panel, initial as zeros
         for index, panel in enumerate(self.hydro_element):  # loop based on the hydrodynamic elements
-            # velocity_structure = (velocity_nodes[panel[0]] + velocity_nodes[panel[1]] + velocity_nodes[panel[2]]) / (
-            #     len(panel))
-            velocity_structure = np.array([0.0, 0.0, 0.0])
             p1 = realtime_node_position[panel[0]]
             p2 = realtime_node_position[panel[1]]
             p3 = realtime_node_position[panel[2]]
+            velocity_structure = (velocity_nodes[panel[0]] + velocity_nodes[panel[1]] + velocity_nodes[panel[2]]) / (
+                len(panel))
             alpha, lift_direction, net_area = calculation_on_element(p1, p2, p3, np.array(current_velocity))
             # calculate the inflow angel, normal vector, lift force factor, area of the hydrodynamic element
             velocity = np.array(current_velocity) * net_wake.reduction_factor(index, alpha) + wave_velocity[index]
             # if not in the wake region, the effective velocity is the undisturbed velocity
-            velocity_relative = velocity - velocity_structure
+            while np.linalg.norm(velocity_structure) > np.linalg.norm(velocity):
+                velocity_structure *= 0.1
+            if np.dot(velocity_structure, velocity) > 0:
+                velocity_relative = velocity - velocity_structure
+            else:
+                velocity_relative = velocity - velocity_structure * 0
             drag_coefficient, lift_coefficient = self.hydro_coefficients(alpha, velocity_relative, knot=False)
             fd = 0.5 * row * net_area * drag_coefficient * np.linalg.norm(velocity_relative) * velocity_relative
             fl = 0.5 * row * net_area * lift_coefficient * pow(np.linalg.norm(velocity_relative), 2) * lift_direction
@@ -177,7 +183,7 @@ class forceModel:
             print("\nThe size of hydrodynamic force is " + str(len(np.array(hydro_force_on_element))))
             exit()
 
-    def screen_fsi(self, realtime_node_position, velocity_on_element, velocity_of_nodes=np.array([0, 0, 0])):
+    def screen_fsi(self, realtime_node_position, velocity_on_element, velocity_of_nodes=np.zeros((9999, 3))):
         """
         :param realtime_node_position: [np.array].shape=(N,3) Unit: [m]. The coordinates of N nodes in cartesian coordinate system.
         :param velocity_on_element: [np.array].shape=(M,3) Unit [m/s]. The current velocity [ux,uy,uz] on all net panels in cartesian coordinate system.
@@ -189,9 +195,6 @@ class forceModel:
         # print("velocity elementy is 1" + str(velocity_on_element))
         # print("velocity_of_nodes is " + str(velocity_of_nodes))
         # print("realtime_node_position is " + str(realtime_node_position))
-        if len(velocity_of_nodes) < len(realtime_node_position):
-            velocity_of_nodes = np.zeros((len(realtime_node_position), 3))
-
         if len(velocity_on_element) < len(self.hydro_element):
             print("position is " + str(realtime_node_position))
             print("Velocity is " + str(velocity_of_nodes))
@@ -207,7 +210,12 @@ class forceModel:
             velocity_fluid = velocity_on_element[index] * np.sqrt(2.0 / (2.0 - drag_coefficient - lift_coefficient))
             velocity_structure = (velocity_of_nodes[panel[0]] + velocity_of_nodes[panel[1]] + velocity_of_nodes[
                 panel[2]]) / (len(panel))
-            velocity_relative = velocity_fluid - velocity_structure * 0
+            while np.linalg.norm(velocity_structure) > np.linalg.norm(velocity_fluid):
+                velocity_structure *= 0.1
+            if np.dot(velocity_structure, velocity_fluid) > 0:
+                velocity_relative = velocity_fluid - velocity_structure
+            else:
+                velocity_relative = velocity_fluid - velocity_structure * 0
 
             fd = 0.5 * row * surface_area * drag_coefficient * np.linalg.norm(np.array(velocity_relative)) * np.array(
                 velocity_relative)

@@ -13,8 +13,10 @@ To use this module, one should be import this into the input file for calculatio
 """
 import os
 import time
+import sys
 import numpy as np
 
+np.set_printoptions(threshold=sys.maxsize)
 
 # here we assume Code_aster is much faster than OpenFoam, thus OpenFOAM do not need to wait .
 

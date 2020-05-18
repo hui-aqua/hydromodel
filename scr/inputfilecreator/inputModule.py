@@ -380,6 +380,7 @@ tblp = POST_RELEVE_T(ACTION=(_F(OPERATION='EXTRACTION',      # For Extraction of
                           INST=(1+k)*dt,                     # STAT_NON_LINE calculates for 10 INST. I want only last INST
                            ),),
                   );
+         
 tblp2 = POST_RELEVE_T(ACTION=(_F(OPERATION='EXTRACTION',      # For Extraction of values
                           INTITULE='Nodal Displacements',    # Name of the table in .resu file
                           RESULTAT=resn,                     # The result from which values will be extracted(STAT_NON_LINE)
@@ -390,9 +391,13 @@ tblp2 = POST_RELEVE_T(ACTION=(_F(OPERATION='EXTRACTION',      # For Extraction o
                           INST=(1+k)*dt,                     # STAT_NON_LINE calculates for 10 INST. I want only last INST
                            ),),
                   );
+                  
 posi=fsi.get_position_aster(tblp)
 velo_nodes=fsi.get_velocity_aster(tblp2)
-
+with open(cwd+'/positionOutput/velo'+str(round((k)*dt,3))+'.txt', "w") as file:
+    file.write(str(velo_nodes))
+file.close()
+    
 if k < itimes-1:
     del Fnh
 
@@ -415,7 +420,7 @@ if k == 0:
 
 timeFE=dt*k
 U=Uinput[int(k*dt/duration)]
-force_on_element=hydroModel.force_on_element(netWakeModel,posi,U)
+force_on_element=hydroModel.force_on_element(netWakeModel,posi,U,velo_nodes)
 Fnh=hydroModel.distribute_force(meshinfo['numberOfNodes'])
 
 fsi.write_position(posi,cwd)
