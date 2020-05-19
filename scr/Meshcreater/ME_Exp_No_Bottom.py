@@ -29,7 +29,7 @@ with open(str(sys.argv[1]), 'r') as f:
 
 NT = cageInfo['CageShape']['elementOverCir']  # Number of the nodes in circumference
 NN = cageInfo['CageShape']['elementOverHeight']  # number of section in the height, thus, the nodes should be NN+1
-bottomSwitcher = str(cageInfo['CageShape']['shape'])
+# bottomSwitcher = str(cageInfo['CageShape']['shape'])
 floater_center = cageInfo['FloatingCollar']['floaterCenter'][0]
 D = cageInfo['CageShape']['cageDiameter']
 H = cageInfo['CageShape']['cageHeight']
@@ -92,31 +92,30 @@ for i in range(1, NT + 1):
                             i + (j + 1) * NT - 1,
                             1 + i + (j + 1) * NT - 1])
 
-
-if "Tube" in cageInfo["Weight"]["weightType"] and float(cageInfo["Weight"]["bottomRingDepth"]) != float(H):
-    # sinkerTube is added at the bottom.
-    bottomRingDepth = float(cageInfo["Weight"]["bottomRingDepth"])
-    for i in range(NT):
-        point.append(
-            [floater_center[0] + D / 2 * np.cos(i * 2 * pi / float(NT)),
-             floater_center[1] + D / 2 * np.sin(i * 2 * pi / float(NT)),
-             floater_center[2] - bottomRingDepth])
-        nodeID = Mesh_1.AddNode(float(floater_center[0] + D / 2 * np.cos(i * 2 * pi / float(NT))),
-                                float(floater_center[1] + D / 2 * np.sin(i * 2 * pi / float(NT))),
-                                float(floater_center[2] - bottomRingDepth))
-    for i in range(1, NT + 1):
-        if bottomSwitcher in ['WithBottom']:
-            edge = Mesh_1.AddEdge([len(point) - i + 1, len(point) - i - NT])  # add the vertical line into geometry
-            con.append([len(point) - i, len(point) - i - NT - 1])  # add the vertical line into con
-        else:
-            edge = Mesh_1.AddEdge([len(point) - i + 1, len(point) - i - NT + 1])  # add the vertical line into geometry
-            con.append([len(point) - i, len(point) - i - NT])  # add the vertical line into con
-        if i == NT:
-            edge = Mesh_1.AddEdge([len(point), len(point) - NT + 1])  # add the horizontal line into geometry
-            con.append([len(point) - 1, len(point) - NT])  # add the horizontal line into con
-        else:
-            edge = Mesh_1.AddEdge([len(point) - i + 1, len(point) - i])  # add the horizontal line into geometry
-            con.append([len(point) - i, len(point) - i - 1])  # add the horizontal line into con
+# if "Tube" in cageInfo["Weight"]["weightType"] and float(cageInfo["Weight"]["bottomRingDepth"]) != float(H):
+#     # sinkerTube is added at the bottom.
+#     bottomRingDepth = float(cageInfo["Weight"]["bottomRingDepth"])
+#     for i in range(NT):
+#         point.append(
+#             [floater_center[0] + D / 2 * np.cos(i * 2 * pi / float(NT)),
+#              floater_center[1] + D / 2 * np.sin(i * 2 * pi / float(NT)),
+#              floater_center[2] - bottomRingDepth])
+#         nodeID = Mesh_1.AddNode(float(floater_center[0] + D / 2 * np.cos(i * 2 * pi / float(NT))),
+#                                 float(floater_center[1] + D / 2 * np.sin(i * 2 * pi / float(NT))),
+#                                 float(floater_center[2] - bottomRingDepth))
+#     for i in range(1, NT + 1):
+#         if bottomSwitcher in ['WithBottom']:
+#             edge = Mesh_1.AddEdge([len(point) - i + 1, len(point) - i - NT])  # add the vertical line into geometry
+#             con.append([len(point) - i, len(point) - i - NT - 1])  # add the vertical line into con
+#         else:
+#             edge = Mesh_1.AddEdge([len(point) - i + 1, len(point) - i - NT + 1])  # add the vertical line into geometry
+#             con.append([len(point) - i, len(point) - i - NT])  # add the vertical line into con
+#         if i == NT:
+#             edge = Mesh_1.AddEdge([len(point), len(point) - NT + 1])  # add the horizontal line into geometry
+#             con.append([len(point) - 1, len(point) - NT])  # add the horizontal line into con
+#         else:
+#             edge = Mesh_1.AddEdge([len(point) - i + 1, len(point) - i])  # add the horizontal line into geometry
+#             con.append([len(point) - i, len(point) - i - 1])  # add the horizontal line into con
 
 isDone = Mesh_1.Compute()
 # naming  the group
@@ -157,10 +156,10 @@ for i in range(1, len(point) + 1):
     nbAdd = node1.Add([i])
     smesh.SetName(node1, 'node%s' % i)
 
-if "centerweight" in cageInfo['Weight']['weightType']:
-    node1 = Mesh_1.CreateEmptyGroup(SMESH.NODE, 'bottom_tit')
-    nbAdd = node1.Add([len(point) - NT])
-    smesh.SetName(node1, 'bottom_tit')
+# if "centerweight" in cageInfo['Weight']['weightType']:
+#     node1 = Mesh_1.CreateEmptyGroup(SMESH.NODE, 'bottom_tit')
+#     nbAdd = node1.Add([len(point) - NT])
+#     smesh.SetName(node1, 'bottom_tit')
 
 # GROUP_MA
 # defaults names for all the twines and nodes.
@@ -173,10 +172,10 @@ topring = Mesh_1.CreateEmptyGroup(SMESH.EDGE, 'topring')
 nbAdd = topring.Add([i for i in range(2, NT * (2 * NN + 1), 2 * NN + 1)])
 smesh.SetName(topring, 'topring')
 
-# bottom ring will keep the cage and add the sink forces
-bottomring = Mesh_1.CreateEmptyGroup(SMESH.EDGE, 'bottomring')
-nbAdd = bottomring.Add([i for i in range(2 * NN + 1, (NT + 1) * (2 * NN + 1), 2 * NN + 1)])
-smesh.SetName(bottomring, 'bottomring')
+# # bottom ring will keep the cage and add the sink forces
+# bottomring = Mesh_1.CreateEmptyGroup(SMESH.EDGE, 'bottomring')
+# nbAdd = bottomring.Add([i for i in range(2 * NN + 1, (NT + 1) * (2 * NN + 1), 2 * NN + 1)])
+# smesh.SetName(bottomring, 'bottomring')
 
 # give a name to the mesh
 meshname = "single_cage_" + str(sys.argv[1]).split('.')[0] + ".med"
