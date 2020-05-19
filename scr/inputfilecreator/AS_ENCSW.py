@@ -41,9 +41,10 @@ hydrodynamic_model_rope = "Morison-M4"
 wake_model = str(cageInfo['Boundary']['wakeModel'])
 time_thread = cageInfo['Boundary']['currentForceIncreasing']
 
-Fbuoy = (np.pi * cageInfo['CageShape']['cageDiameter'] * cageInfo['CageShape']['cageHeight'] + 0.25 * np.pi *
-         pow(cageInfo['CageShape']['cageDiameter'], 2)) * \
-        cageInfo['Net']['Sn'] * dw0 * 0.25 * np.pi * 9.81 * float(cageInfo['Environment']['fluidDensity'])
+Fbuoy = (np.pi * cageInfo['CageShape']['cageDiameter'] * cageInfo['CageShape']['cageHeight'] + 0.5 * np.pi *
+         cageInfo['CageShape']['cageDiameter'] * np.sqrt(pow(cageInfo['CageShape']['cageDiameter'] / 2, 2) + pow(
+            cageInfo['CageShape']['cageConeHeight'] - cageInfo['CageShape']['cageHeight'], 2))) * cageInfo['Net'][
+            'Sn'] * dw0 * 0.25 * np.pi * 9.81 * float(cageInfo['Environment']['fluidDensity'])
 print("Fbuoy is " + str(Fbuoy))
 # Buoyancy force to assign on each nodes
 lam1 = float(meshInformation.meshinfo['horizontalElementLength'] / cageInfo['Net']['meshLength'])
