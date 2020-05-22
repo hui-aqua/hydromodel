@@ -233,7 +233,7 @@ def read_velocity(cwd_foam_root, length_velocity):
                                     [float(lines[start_line].split()[0][1:]),
                                      float(lines[start_line].split()[1]),
                                      float(lines[start_line].split()[2][:-1])])
-    return velocity_dict, time_foam
+    return velocity_dict, velocity_dict['time_record'][-1]
 
 
 # two function used by code_aster
