@@ -46,133 +46,106 @@ def write_position(position, cwd):
     :param cwd: work path,
     :return: write the nodes' positions to "constant" folder as a file named "posi"
     """
-    # print("Here>>>>>>>>>>>>>posi")
     start_flag(cwd, "/position_flag")
-    # step 1 the head
-    output_file = open(cwd + 'posi', 'w')
-    output_file.write('''
-// Input for the nets in openfoam. 
-// Author: Hui Cheng
-// Email: hui.cheng@uis.no 
-FoamFile
-{
-    version     2.0;
-    format      ascii;
-    class       dictionary;
-    location    "constant";
-    object      posi;
-}
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-{
-numOfPoint   ''' + str(len(position)) + ''' ;''')
-    output_file.write('\n')
+    head_file = ["// Input for the nets in openfoam.",
+                 "// Author: Hui Cheng",
+                 "// Email: hui.cheng@uis.no",
+                 "FoamFile",
+                 "{",
+                 "    version     2.0;",
+                 "    format      ascii;",
+                 "    class       dictionary;",
+                 "    location    \"constant\";",
+                 "    object      posi;",
+                 "}",
+                 "// >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>> //",
+                 "{",
+                 "numOfPoint   " + str(len(position)) + ";"]
+    with open(cwd + '/posi.tmp', 'w') as output_file:
+        for item in head_file:
+            output_file.write(item + "\n")
+        for index, item in enumerate(position):
+            output_file.write(
+                "p" + str(index) + "\t( " + str(item[0]) + "\t" + str(item[1]) + "\t" + str(item[2]) + " );\n")
+        output_file.write("}\n")
+        output_file.write("// <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<< //\n")
     output_file.close()
-    # step 2 the nodes
-    with open(cwd + 'posi', 'a') as the_file:
-        for i in range(len(position)):
-            the_file.write('p' + str(i) + ' ( ' + str(position[i][0]) + '\t' + str(
-                position[i][1]) + '\t' + str(position[i][2]) + ' );\n')
-
-    # step the tail
-    output_file = open(cwd + 'posi', 'a')
-    output_file.write('''
-}
-// ************************************************************************* //
-\n''')
-    output_file.write('\n')
-    output_file.close()
+    os.rename(cwd + '/posi.tmp', cwd + '/posi')
     finish_flag(cwd, "/position_flag")
 
 
 def write_element(hydro_element, cwd):
     """
-    :param position: A numpy array of all the net panel element
+    :param hydro_element: A numpy array of all the net panel element
     :param cwd: work path,
     :return: write the net panels to "constant" folder as a file named "surf"
     """
-    # step 1 the head
-    output_file = open(cwd + 'surf', 'w')
-    output_file.write('''
-// Input for the nets in openfoam. 
-// Author: Hui Cheng
-// Email: hui.cheng@uis.no 
-FoamFile
-{
-    version     2.0;
-    format      ascii;
-    class       dictionary;
-    location    "constant";
-    object      surc;
-}
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-{
-numOfSurf   ''' + str(len(hydro_element)) + ''' ;''')
-    output_file.write('\n')
-    output_file.close()
-    # step 2 the surface
-    with open(cwd + 'surf', 'a') as the_file:
-        for index,ele in enumerate(hydro_element):
-            the_file.write('e' + str(index) + ' ( ' + str(ele[0]) + '\t' + str(ele[1]) + '\t' + str(ele[2]) + ' );\n')
-    # step the tail
-    output_file = open(cwd + 'surf', 'a')
-    output_file.write('''
-}
-// ************************************************************************* //
-\n''')
-    output_file.write('\n')
+    head_file = ["// Input for the nets in openfoam.",
+                 "// Author: Hui Cheng",
+                 "// Email: hui.cheng@uis.no",
+                 "FoamFile",
+                 "{",
+                 "    version     2.0;",
+                 "    format      ascii;",
+                 "    class       dictionary;",
+                 "    location    \"constant\";",
+                 "    object      surc;",
+                 "}",
+                 "// >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>> //",
+                 "{",
+                 "numOfSurf   " + str(len(hydro_element)) + ";"]
+    with open(cwd + '/surf', 'w') as output_file:
+        for item in head_file:
+            output_file.write(item + "\n")
+        for index, item in enumerate(hydro_element):
+            output_file.write(
+                "e" + str(index) + "\t( " + str(item[0]) + "\t" + str(item[1]) + "\t" + str(item[2]) + " );\n")
+        output_file.write("}\n")
+        output_file.write("// <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<< //\n")
     output_file.close()
 
 
-def write_fh(hydro_force, timeFE, cwd):
+def write_fh(hydro_force, time_fe, cwd):
     """
-    :param position: A numpy array of all the hydrodynamic forces on net panel
+    :param time_fe: simulation in FEM
+    :param hydro_force: A numpy array of all the hydrodynamic forces on net panel
     :param cwd: work path,
     :return: write the hydrodynamic forces to "constant" folder as a file named "Fh" and save the total hydrodynamic forces on netting to "forceOnNetting.txt"
     """
-    print("Here>>>>>>>>>>>>>Fh>>>  " + str(timeFE))
+    print("Here>>>>>>>>>>>>>Fh>>>  " + str(time_fe))
     start_flag(cwd, "/fh_flag")
-    # step 1 the head
-    output_file = open(cwd + 'Fh', 'w+')
-    output_file.write('''
-// Input for the nets in openfoam. 
-// Author: Hui Cheng
-// Email: hui.cheng@uis.no 
-FoamFile
-{
-    version     2.0;
-    format      ascii;
-    class       dictionary;
-    location    "constant";
-    object      Fh;
-}
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-{
-timeInFE  ''' + str(round(timeFE, 3)) + ''' ;
-numOfFh   ''' + str(len(hydro_force)) + ''' ;''')
-    output_file.write('\n')
-    output_file.close()
-    # step 2 the nodes
+    head_file = ["// Input for the nets in openfoam.",
+                 "// Author: Hui Cheng",
+                 "// Email: hui.cheng@uis.no",
+                 "FoamFile",
+                 "{",
+                 "    version     2.0;",
+                 "    format      ascii;",
+                 "    class       dictionary;",
+                 "    location    \"constant\";",
+                 "    object      Fh;",
+                 "}",
+                 "// >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>> //",
+                 "{",
+                 "timeInFE   " + str(round(time_fe, 3)) + ";",
+                 "numOfFh    " + str(len(hydro_force)) + ";"]
 
-    with open(cwd + '/Fh', 'a') as the_file:
-        for i in range(len(hydro_force)):
-            the_file.write('fh' + str(i) + ' ( ' + str(hydro_force[i][0]) + '\t' + str(
-                hydro_force[i][1]) + '\t' + str(hydro_force[i][2]) + ' );\n')
-
-    # step the tail
-    output_file = open(cwd + 'Fh', 'a')
-    output_file.write('''
-}
-// ************************************************************************* //
-\n''')
-    output_file.write('\n')
+    with open(cwd + '/Fh.tmp', 'w') as output_file:
+        for item in head_file:
+            output_file.write(item + "\n")
+        for index, item in enumerate(hydro_force):
+            output_file.write(
+                "fh" + str(index) + "\t( " + str(item[0]) + "\t" + str(item[1]) + "\t" + str(item[2]) + " );\n")
+        output_file.write("}\n")
+        output_file.write("// <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<< //\n")
     output_file.close()
+    os.rename(cwd + '/Fh.tmp', cwd + '/Fh')
+    total_force = [round(time_fe, 3), hydro_force[:, 0].sum(), hydro_force[:, 1].sum(), hydro_force[:, 2].sum()]
+    with open(cwd + '/forceOnNetting.txt', 'a+') as output_file:
+        output_file.write(str(total_force) + '\n')
+    output_file.close()
+
     finish_flag(cwd, "/fh_flag")
-
-    totalforce = [round(timeFE, 3), hydro_force[:, 0].sum(), hydro_force[:, 1].sum(), hydro_force[:, 2].sum()]
-    output_file = open(cwd + 'forceOnNetting.txt', 'a+')
-    output_file.write(str(totalforce) + '\n')
-    output_file.close()
-
 
 velocity_dict = {'time_record': ['0']}
 

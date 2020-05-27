@@ -178,3 +178,6 @@ with open(cwd + "/meshInformation.py", 'w') as f:
     f.write("meshinfo=")
     f.write(str(meshinfo))
 f.close()
+from killSalomeWithPort import killMyPort
+
+killMyPort(os.getenv('NSPORT'))

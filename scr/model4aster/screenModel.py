@@ -16,8 +16,9 @@ import numpy as np
 row = 1025  # [kg/m3]   sea water density
 kinematic_viscosity = 1.004e-6  # when the water temperature is 20 degree.
 dynamic_viscosity = 1.002e-3  # when the water temperature is 20 degree.
-CD_udv=0
-CL_udv=0
+CD_udv = 0
+CL_udv = 0
+
 
 class forceModel:
     """
@@ -57,7 +58,7 @@ class forceModel:
         :return: drag and lift force coefficients. [float] Unit: [-].
         """
         drag_coefficient, lift_coefficient = 0, 0
-        if self.modelIndex not in 'S1,S2,S3,S4,S5,S6,UDV':
+        if self.modelIndex not in 'S1,S2,S3,S4,S5,S6,UDV,bi2014':
             print("The selected hydrodynamic model is not included in the present program")
             exit()
         elif self.modelIndex == 'S1':  # aarsnes 1990
@@ -75,23 +76,21 @@ class forceModel:
 
         elif self.modelIndex == 'S3':  # Kristiansen 2012
             a1 = 0.9
-            a3 = 0.15
-            b2 = 0.8
-            b4 = 0.2
+            a3 = 0.1
+            b2 = 1.0
+            b4 = 0.1
             reynolds_number = row * self.dw0 * np.linalg.norm(current_velocity) / dynamic_viscosity / (
                     1 - self.Sn)  # Re
             cd_cylinder = -78.46675 + 254.73873 * np.log10(reynolds_number) - 327.8864 * pow(np.log10(reynolds_number),
                                                                                              2) + 223.64577 * pow(
-                np.log10(reynolds_number),
-                3) - 87.92234 * pow(
+                np.log10(reynolds_number), 3) - 87.92234 * pow(
                 np.log10(reynolds_number), 4) + 20.00769 * pow(np.log10(reynolds_number), 5) - 2.44894 * pow(
-                np.log10(reynolds_number), 6) + 0.12479 * pow(
-                np.log10(reynolds_number), 7)
+                np.log10(reynolds_number), 6) + 0.12479 * pow(np.log10(reynolds_number), 7)
             cd_zero = cd_cylinder * (self.Sn * (2 - self.Sn)) / (2.0 * pow((1 - self.Sn), 2))
-            cl_zero = np.pi * cd_cylinder * self.Sn / pow(1 - self.Sn, 2) / (
-                    8 + cd_cylinder * self.Sn / pow(1 - self.Sn, 2))
+            cn_pi_4 = 0.5 * cd_cylinder * self.Sn / pow(1 - self.Sn, 2)
+            cl_pi_4 = (0.5 * cd_zero - np.pi * cn_pi_4 / (8 + cn_pi_4)) / np.sqrt(2)
             drag_coefficient = cd_zero * (a1 * np.cos(inflow_angle) + a3 * np.cos(3 * inflow_angle))
-            lift_coefficient = cl_zero * (b2 * np.sin(2 * inflow_angle) + b4 * np.sin(4 * inflow_angle))
+            lift_coefficient = cl_pi_4 * (b2 * np.sin(2 * inflow_angle) + b4 * np.sin(4 * inflow_angle))
 
         elif self.modelIndex == 'S4':  # Fridman 1973
             reynolds_number = np.linalg.norm(current_velocity) * self.dw0 * row / dynamic_viscosity
@@ -132,6 +131,17 @@ class forceModel:
         elif self.modelIndex == 'UDV':  # Lee 2005 # polynomial fitting
             drag_coefficient = CD_udv
             lift_coefficient = CL_udv
+
+        elif self.modelIndex == 'bi2014':  # from Table 1 in Bi et al., 2014, JFS
+            p1 = 0.1873
+            p2 = 0.4921
+            p3 = 0.04
+            drag_coefficient = p3 + p2 * np.cos(inflow_angle) + p1 * pow(np.cos(inflow_angle), 2)
+            p1 = -0.169
+            p2 = 0.4159
+            p3 = 0
+            lift_coefficient = p3 + p2 * np.sin(2 * inflow_angle) + p1 * pow(np.sin(2 * inflow_angle), 2)
+
         return drag_coefficient, lift_coefficient
 
     def force_on_element(self, net_wake, realtime_node_position, current_velocity, velocity_nodes=np.zeros((99999, 3)),

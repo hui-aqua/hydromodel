@@ -394,7 +394,7 @@ tblp2 = POST_RELEVE_T(ACTION=(_F(OPERATION='EXTRACTION',      # For Extraction o
                   
 posi=fsi.get_position_aster(tblp)
 velo_nodes=fsi.get_velocity_aster(tblp2)
-with open(cwd+'/positionOutput/velo'+str(round((k)*dt,3))+'.txt', "w") as file:
+with open(cwd+'/positionOutput/velo_'+str(round((k)*dt,3))+'.txt', "w") as file:
     file.write(str(velo_nodes))
 file.close()
 
@@ -419,7 +419,7 @@ else:
 U=Uinput[int(k*dt/duration)]
 force_on_element=hydroModel.force_on_element(netWakeModel,posi,U)
 Fnh=hydroModel.distribute_force(meshinfo['numberOfNodes'],force_increasing_factor)
-with open(cwd+'/positionOutput/posi'+str(round((k)*dt,3))+'.txt', "w") as file:
+with open(cwd+'/positionOutput/posi_'+str(round((k)*dt,3))+'.txt', "w") as file:
     file.write(str(posi))
 file.close()
 
@@ -438,28 +438,32 @@ Fnh=hydroModel.distribute_force(meshinfo['numberOfNodes'],force_increasing_facto
 fsi.write_position(posi,cwd)
 fsi.write_fh(force_on_element,timeFE,cwd)
 
-with open(cwd+'/positionOutput/posi'+str(round((k)*dt,3))+'.txt', "w") as file:
+with open(cwd+'/positionOutput/posi_'+str(round((k)*dt,3))+'.txt', "w") as file:
     file.write(str(posi))
 file.close()
         ''')
 
     elif coupling_switcher in ["FSI"]:
         handel.write('''
+timeFE=dt*k
+
 if k == 0:
     hydro_element=hydroModel.output_hydro_element()
     Fnh=hydroModel.distribute_force(meshinfo['numberOfNodes'],force_increasing_factor)
-
+    force_on_element=hydroModel.force_on_elements
+    
+    fsi.write_fh(force_on_element,timeFE,cwd)
     fsi.write_element(hydro_element,cwd)
     fsi.write_position(meshinfo['netNodes'],cwd)
 else:
-    timeFE=dt*k
+
     U=fsi.get_velocity(cwd,len(hydro_element),timeFE)
     force_on_element=hydroModel.screen_fsi(posi,U,velo_nodes)
     Fnh=hydroModel.distribute_force(meshinfo['numberOfNodes'],force_increasing_factor)
 
     fsi.write_position(posi,cwd)
     fsi.write_fh(force_on_element,timeFE,cwd)
-    with open(cwd+'/positionOutput/posi'+str(round((k)*dt,3))+'.txt', "w") as file:
+    with open(cwd+'/positionOutput/posi_'+str(round((k)*dt,3))+'.txt', "w") as file:
         file.write(str(posi))
     file.close()
         ''')

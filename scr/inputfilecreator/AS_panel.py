@@ -39,8 +39,8 @@ hydrodynamic_model = str(netPanelInfo['Boundary']['hydroModel'])
 wake_model = str(netPanelInfo['Boundary']['wakeModel'])
 
 Fbuoy = netPanelInfo['Net']['netHeight'] * netPanelInfo['Net']['netWidth'] * \
-        netPanelInfo['Net']['Sn'] * dw0 * 0.25 * np.pi * 9.81 * float(
-    netPanelInfo['Environment']['fluidDensity'])
+        netPanelInfo['Net']['Sn'] * dw0 * 0.25 * np.pi * netPanelInfo['Boundary']["gravity"] * float(
+    netPanelInfo['Environment']['fluidDensity']) * len(netPanelInfo['TopBar']['barCenter'])
 print("Fbuoy is " + str(Fbuoy))
 # Buoyancy force to assign on each nodes
 
