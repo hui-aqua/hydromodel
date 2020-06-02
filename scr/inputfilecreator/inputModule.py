@@ -18,6 +18,8 @@ def head(handel, cwd):
 # Any questions about this code,
 # please email: hui.cheng@uis.no
 import sys
+import os
+import time
 sys.path.append("''' + workPath.forceModel_path + '''")
 import hydrodynamicModule as hdm
 import nettingFSI as fsi
@@ -237,7 +239,16 @@ with open(cwd+'/positionOutput/hydro_elements.txt', "w") as file:
 file.close()
 
 for k in range(0,itimes):
+    time_start=time.time()
+
     INCLUDE(UNITE=91,INFO=0)
+
+    time_end3=time.time()
+    time_str = [k, time_end1-time_start,time_end2-time_start,time_end3-time_start]
+    
+    with open(cwd + '/timing.txt', 'a+') as output_file:
+        output_file.write(str(time_str) + os.linesep)
+    output_file.close()
 
 IMPR_RESU(FORMAT='MED',
           RESU=_F(CARA_ELEM=elemprop,
@@ -391,7 +402,7 @@ tblp2 = POST_RELEVE_T(ACTION=(_F(OPERATION='EXTRACTION',      # For Extraction o
                           INST=(1+k)*dt,                     # STAT_NON_LINE calculates for 10 INST. I want only last INST
                            ),),
                   );
-                  
+time_end1=time.time()                  
 posi=fsi.get_position_aster(tblp)
 velo_nodes=fsi.get_velocity_aster(tblp2)
 with open(cwd+'/positionOutput/velo_'+str(round((k)*dt,3))+'.txt', "w") as file:
@@ -506,6 +517,7 @@ if ((1+k)*dt)%''' + str(float(saveMid_result)) + '''==0:
     DETRUIRE(CONCEPT=_F( NOM=(reac)))
         ''')
     handel.write('''
+time_end2=time.time()    
 DETRUIRE(CONCEPT=_F( NOM=(tblp)))
 DETRUIRE(CONCEPT=_F( NOM=(tblp2)))
 if k!=0:

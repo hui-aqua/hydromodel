@@ -181,7 +181,7 @@ def read_velocity(cwd_foam_root, length_velocity):
     """
     while not os.path.isfile(cwd_foam_root + "/velocity_on_elements.txt"):
         print("Wait for velocity from OpenFoam......")
-        time.sleep(10)
+        time.sleep(2)
     else:
         f = open(cwd_foam_root + "/velocity_on_elements.txt", "r")
         lines = f.readlines()

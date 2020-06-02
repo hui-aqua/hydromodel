@@ -53,6 +53,29 @@ for x in range(number_of_cage_X + 1):
         point_on_fram[x][y] = [-length_of_frame_line / 2 * number_of_cage_X + x * length_of_frame_line,
                                -length_of_frame_line / 2 * number_of_cage_Y + y * length_of_frame_line, -water_depth]
 
+
+
+
+
+# >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>> salome
+# the below is the commond in the Mesh, Salome.
+# the mesh creater script
+import salome
+
+salome.salome_init()
+theStudy = salome.myStudy
+import SMESH
+from salome.smesh import smeshBuilder
+
+smesh = smeshBuilder.New(theStudy)
+Mesh_1 = smesh.Mesh()
+
+# add the pints into geometry
+for each_node in point:
+    nodeID = Mesh_1.AddNode(float(each_node[0]), float(each_node[1]), float(each_node[2]))
+# >>>>>>>>>>
+
+
 meshinfo = {
     "horizontalElementLength": float(pi * cage_diameter / float(NT)),
     "verticalElementLength": float(cage_height / float(NN)),
