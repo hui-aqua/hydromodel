@@ -162,7 +162,7 @@ def get_velocity(cwd, length_velocity, time_aster):
     velocity_dict, time_foam = read_velocity(cwd_foam_root, length_velocity)
     time_foam = velocity_dict['time_record'][-1]
     while float(time_aster) > float(time_foam) or str(time_foam) == str(0):
-        time.sleep(1)
+        time.sleep(0.1)
         velocity_dict, time_foam = read_velocity(cwd_foam_root, length_velocity)
     else:
         # velocity_dict, time_foam = read_velocity(cwd_foam_root, length_velocity)
@@ -181,7 +181,7 @@ def read_velocity(cwd_foam_root, length_velocity):
     """
     while not os.path.isfile(cwd_foam_root + "/velocity_on_elements.txt"):
         print("Wait for velocity from OpenFoam......")
-        time.sleep(2)
+        time.sleep(0.1)
     else:
         f = open(cwd_foam_root + "/velocity_on_elements.txt", "r")
         lines = f.readlines()
