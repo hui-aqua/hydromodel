@@ -20,66 +20,43 @@ import salome
 
 salome.salome_init()
 
-point_netting = []  # points on netting
-con_netting = []  # lines on netting
-sur_netting = []  # surface on netting
-mcon1 = []  # lines on mooring
-mcon2 = []  # lines on weight lines
 cwd = os.getcwd()
 
 with open(str(sys.argv[1]), 'r') as f:
     content = f.read()
     cageInfo = ast.literal_eval(content)
 
+water_depth = cageInfo['Environment']['waterDepth']  # number of section along the cone, thus, the nodes should be NN+1
 NT = cageInfo['CageShape']['elementOverCir']  # Number of the nodes in circumference
 NN = cageInfo['CageShape']['elementOverHeight']  # number of section in the height, thus, the nodes should be NN+1
 BN = cageInfo['CageShape']['elementOverCone']  # number of section along the cone, thus, the nodes should be NN+1
 
-water_depth = cageInfo['Environment']['waterDepth']  # number of section along the cone, thus, the nodes should be NN+1
-cage_diameter = cageInfo['CageShape']['cageDiameter']
 cage_height = cageInfo['CageShape']['cageHeight']
 cage_cone_height = cageInfo['CageShape']['cageConeHeight']
+netpen_diameter = cageInfo['CageShape']['cageDiameter']
+
+floating_diameter = cageInfo['FloatingCollar']['diameter']
 sinktube_depth = cageInfo['Weight']['pipeDepth']
 
 cage_array = str(cageInfo['Mooring']['cageArray'])
 length_of_frame_line = float(cageInfo['Mooring']['frameLineLength'])
 length_of_mooring_line = float(cageInfo['Mooring']['mooringLineLength'])
 length_of_bouncy_line = float(cageInfo['Mooring']['bouncyLine'])
+number_of_floating_segement = cageInfo['FloatingCollar']['elementOverCir']
 
 number_of_cage_X = int(cage_array.split("-")[0])
 number_of_cage_Y = int(cage_array.split("-")[1])
-
-mooringLines = {}
-nodesInMooring = []
 print("The number of cages in X direction are " + str(number_of_cage_X))
 print("The number of cages in X direction are " + str(number_of_cage_X))
 
 # todo fixed the naming
-# cage array
-number_of_cage_Y = 1
-number_of_cage_X = 1
-water_depth = 50
-cage_diameter = 51
-
-# mooring system
-length_of_frame_line = 100
-length_of_mooring_line = 150
-length_of_bouncy_line = 10
-cage_height = 15
-cage_cone_height = 28
-sinktube_depth = 17.5
-number_of_floating_segement = 16
 
 con_mooring = []
 point_mooring = []  # points on netting
-#  netting
-netpen_diameter = 50
+
 point_netting = []  # points on netting
 con_netting = []  # lines on netting
 sur_netting = []  # surface on netting
-NT = 32
-NN = 5
-BN = 5
 
 nodesInMooring = []
 mooringLines = {}
@@ -136,10 +113,10 @@ for y in range(number_of_cage_Y):
     for x in range(number_of_cage_X):
         for i in range(number_of_floating_segement):
             key_point_bridle_top[y, x, i] = np.array([-length_of_frame_line / 2 * (
-                    number_of_cage_X - 1) + x * length_of_frame_line + cage_diameter / 2 * np.cos(
+                    number_of_cage_X - 1) + x * length_of_frame_line + floating_diameter / 2 * np.cos(
                 i * 2 * np.pi / number_of_floating_segement),
                                                       length_of_frame_line / 2 * (
-                                                              number_of_cage_Y - 1) - y * length_of_frame_line + cage_diameter / 2 * np.sin(
+                                                              number_of_cage_Y - 1) - y * length_of_frame_line + floating_diameter / 2 * np.sin(
                                                           i * 2 * np.pi / number_of_floating_segement),
                                                       0])
             nodesInMooring.append(key_point_bridle_top[y, x, i])
@@ -149,18 +126,15 @@ for y in range(number_of_cage_Y):
     for x in range(number_of_cage_X):
         for i in range(number_of_floating_segement):
             key_point_bridle_bottom[y, x, i] = np.array([-length_of_frame_line / 2 * (
-                    number_of_cage_X - 1) + x * length_of_frame_line + cage_diameter / 2 * np.cos(
+                    number_of_cage_X - 1) + x * length_of_frame_line + floating_diameter / 2 * np.cos(
                 i * 2 * np.pi / number_of_floating_segement),
                                                          length_of_frame_line / 2 * (
-                                                                 number_of_cage_Y - 1) - y * length_of_frame_line + cage_diameter / 2 * np.sin(
+                                                                 number_of_cage_Y - 1) - y * length_of_frame_line + floating_diameter / 2 * np.sin(
                                                              i * 2 * np.pi / number_of_floating_segement),
                                                          -sinktube_depth])
             nodesInMooring.append(key_point_bridle_bottom[y, x, i])
 
-        # 15 elements per each anchor line
-# 10 element per each frame line and bridle
-# 4 element per buoy line
-
+s
 # buoylines
 number_of_buoy = (number_of_cage_Y + 1) * (number_of_cage_X + 1)
 for index in range(number_of_buoy):
@@ -770,7 +744,7 @@ meshinfo = {
     "Lines_mooring": con_mooring,
     "numberOfNodes_mooring": len(point_mooring),
     "numberOfLines_mooring": len(con_mooring),
-    "horizontalElementLength": float(np.pi * cage_diameter / float(NT)),  # for lamda1
+    "horizontalElementLength": float(np.pi * floating_diameter / float(NT)),  # for lamda1
     "verticalElementLength": float(cage_height / float(NN)),  # for lamda2
     "NN": NN,
     "NT": NT,
