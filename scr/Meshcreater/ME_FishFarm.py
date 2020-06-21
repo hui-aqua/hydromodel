@@ -16,9 +16,6 @@ import os
 import numpy as np
 from numpy import pi
 import ast
-import salome
-
-salome.salome_init()
 
 cwd = os.getcwd()
 
@@ -134,7 +131,7 @@ for y in range(number_of_cage_Y):
                                                          -sinktube_depth])
             nodesInMooring.append(key_point_bridle_bottom[y, x, i])
 
-s
+
 # buoylines
 number_of_buoy = (number_of_cage_Y + 1) * (number_of_cage_X + 1)
 for index in range(number_of_buoy):
@@ -255,13 +252,16 @@ for y in range(number_of_cage_Y):
 ###
 ### GEOM component
 ###
+import salome
 
+salome.salome_init()
+theStudy = salome.myStudy
 import GEOM
 from salome.geom import geomBuilder
 import math
 import SALOMEDS
 
-geompy = geomBuilder.New()
+geompy = geomBuilder.New(theStudy)
 Ver = ["none"] * len(nodesInMooring)
 for index, vertex in enumerate(nodesInMooring):
     Ver[index] = geompy.MakeVertex(vertex[0], vertex[1], vertex[2])
@@ -332,7 +332,7 @@ geompy.addToStudyInFather(Fuse_1, bottomring, 'bottomring')
 import SMESH, SALOMEDS
 from salome.smesh import smeshBuilder
 
-smesh = smeshBuilder.New()
+smesh = smeshBuilder.New(theStudy)
 Mesh_1 = smesh.Mesh(Fuse_1)
 
 Regular_6 = Mesh_1.Segment()
@@ -355,12 +355,12 @@ Sub_mesh_3 = Regular_6.GetSubMesh()
 Sub_mesh_4 = Regular_10.GetSubMesh()
 
 try:
-    Mesh_1.ExportDAT("E:\\UbuntuFiles\\astertest\\fishFarm\\mooring.dat")
+    Mesh_1.ExportDAT(cwd+"/mooring.dat")
     pass
 except:
     print('ExportDAT() failed. Invalid file name?')
 
-f = open("E:\\UbuntuFiles\\astertest\\fishFarm\\mooring.dat", "r")
+f = open(cwd+"/mooring.dat", "r")
 lines = f.readlines()
 f.close()
 number_of_nodes_mooring = int(lines[0].split(" ")[0])
