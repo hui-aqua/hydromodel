@@ -44,7 +44,7 @@ number_of_floating_segement = cageInfo['FloatingCollar']['elementOverCir']
 number_of_cage_X = int(cage_array.split("-")[0])
 number_of_cage_Y = int(cage_array.split("-")[1])
 print("The number of cages in X direction are " + str(number_of_cage_X))
-print("The number of cages in X direction are " + str(number_of_cage_X))
+print("The number of cages in Y direction are " + str(number_of_cage_Y))
 
 # todo fixed the naming
 
