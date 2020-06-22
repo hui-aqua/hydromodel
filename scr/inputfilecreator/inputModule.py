@@ -82,7 +82,7 @@ elemprop = AFFE_CARA_ELEM(CABLE=(_F(GROUP_MA=('twines'),
                           POUTRE=_F(GROUP_MA=('topRings','bottomRings','links' ),
                                     SECTION='CERCLE',
                                     CARA=('R', 'EP'),
-                                    VALE=(0.125, 0.125)),                                   
+                                    VALE=(0.25, 0.25)),                                   
                           MODELE=model)
 
 net = DEFI_MATERIAU(CABLE=_F(EC_SUR_E=0.0001),
@@ -134,14 +134,14 @@ sealevel = AFFE_CHAR_MECA(DDL_IMPO=_F(GROUP_NO=("net_top","buoy"),
 sinkF1= AFFE_CHAR_MECA(FORCE_NODALE=_F(GROUP_NO=("net_tip"),
                                       FX=0,
                                       FY=0,
-                                      FZ=981,
+                                      FZ=-981,
                                       ),
                       MODELE=model)
 
 sinkF2= AFFE_CHAR_MECA(FORCE_NODALE=_F(GROUP_NO=("plate"),
                                       FX=0,
                                       FY=0,
-                                      FZ=98.1,
+                                      FZ=-98.1,
                                       ),
                       MODELE=model)                                                                   
              
