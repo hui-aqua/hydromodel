@@ -58,6 +58,96 @@ model = AFFE_MODELE(AFFE=(_F(GROUP_MA=('twines'),
         print("Warning!!! >>>>>AFFE_MODELE")
 
 
+def define_model_fishFarm(handel, twine_section, Fb_node):
+    handel.write('''
+model = AFFE_MODELE(AFFE=(_F(GROUP_MA=('twines','anchorLines','frameLines','bridlesH','bridlesV','buoyLines'),
+                             MODELISATION=('CABLE'),
+                             PHENOMENE='MECANIQUE'),
+                          _F(GROUP_MA=('topRings','bottomRings','links'),
+                             MODELISATION=('POU_D_E'),
+                             PHENOMENE='MECANIQUE')
+                          ),
+                    MAILLAGE=mesh)
+                    
+elemprop = AFFE_CARA_ELEM(CABLE=(_F(GROUP_MA=('twines'),
+                                   N_INIT=10.0,
+                                   SECTION=''' + str(twine_section) + '''),
+                                _F(GROUP_MA=('anchorLines','frameLines'),
+                                   N_INIT=60000.0,
+                                   SECTION=0.002),
+                                _F(GROUP_MA=('bridlesH','bridlesV','buoyLines'),
+                                   N_INIT=10.0,
+                                   SECTION=0.002),   
+                                ),
+                          POUTRE=_F(GROUP_MA=('topRings','bottomRings','links' ),
+                                    SECTION='CERCLE',
+                                    CARA=('R', 'EP'),
+                                    VALE=(0.125, 0.125)),                                   
+                          MODELE=model)
+
+net = DEFI_MATERIAU(CABLE=_F(EC_SUR_E=0.0001),
+                     ELAS=_F(E=100000000, NU=0.2,RHO=1125.0)) 
+                      
+rope = DEFI_MATERIAU(CABLE=_F(EC_SUR_E=0.0001),
+                     ELAS=_F(E=1000000000, NU=0.2,RHO=1040.0))  
+
+hdpe1 = DEFI_MATERIAU(ELAS=_F(E=900000000,
+                           NU=0.3,
+                           RHO=989.0))   
+                              
+hdpe2 = DEFI_MATERIAU(ELAS=_F(E=900000000,
+                           NU=0.3,
+                           RHO=1038.0)) 
+                                                                                          
+fieldmat = AFFE_MATERIAU(AFFE=(_F(GROUP_MA=('twines',),
+                                 MATER=(net)),
+                               _F(GROUP_MA=('anchorLines','frameLines','bridlesH','bridlesV','buoyLines'),
+                                 MATER=(rope)),                                 
+                               _F(GROUP_MA=('topRings','links',),
+                                 MATER=(hdpe1)),
+                               _F(GROUP_MA=('bottomRings',),
+                                 MATER=(hdpe2)),  
+                               ),
+                         MODELE=model)
+                                              
+# load
+gF = AFFE_CHAR_MECA(PESANTEUR=_F(DIRECTION=(0.0, 0.0, -1.0),
+                                       GRAVITE=9.81,
+                                       GROUP_MA=('topRings','bottomRings','links','twines','anchorLines','frameLines','bridlesH','bridlesV','buoyLines')),
+                      MODELE=model)
+
+buoyF= AFFE_CHAR_MECA(FORCE_NODALE=_F(GROUP_NO=("net_nodes"),
+                                      FX=0,
+                                      FY=0,
+                                      FZ=''' + str(Fb_node) + ''',
+                                      ),
+                      MODELE=model)
+            
+fixed = AFFE_CHAR_MECA(DDL_IMPO=_F(GROUP_NO=("anchor"),
+                                   LIAISON='ENCASTRE'),
+                             MODELE=model)
+
+sealevel = AFFE_CHAR_MECA(DDL_IMPO=_F(GROUP_NO=("net_top","buoy"),
+                                      DZ=0.0,),
+                             MODELE=model)       
+                                                
+sinkF1= AFFE_CHAR_MECA(FORCE_NODALE=_F(GROUP_NO=("net_tip"),
+                                      FX=0,
+                                      FY=0,
+                                      FZ=981,
+                                      ),
+                      MODELE=model)
+
+sinkF2= AFFE_CHAR_MECA(FORCE_NODALE=_F(GROUP_NO=("plate"),
+                                      FX=0,
+                                      FY=0,
+                                      FZ=98.1,
+                                      ),
+                      MODELE=model)                                                                   
+             
+    ''')
+
+
 # >>>>>>>>>>>>>>>    AFFE_CARA_ELEM       >>>>>>>>>>>>
 def define_element(handel, weight_type, twine_section, bottom_radius=0):
     if weight_type in ['sinkers', 'allfixed']:
@@ -196,10 +286,100 @@ listr = DEFI_LIST_REEL(DEBUT=0.0,
 times = DEFI_LIST_INST(DEFI_LIST=_F(LIST_INST=listr,PAS_MINI=1e-8),
                        METHODE='AUTO')
 
-NODEnumber=meshinfo['numberOfNodes']
 ''')
-def set_hydrodynamic_model(handel,hydroModel, wake_model, Sn, dwh, dw0, velocities,fluidDensity):
+
+
+def set_hydrodynamic_model_fishFarm(handel, velocities, fluidDensity, Sn, dwh, dw0):
     handel.write('''
+Uinput = ''' + str(velocities) + '''
+hdm.row = ''' + str(fluidDensity) + '''  # [kg/m3]   sea water density
+
+Fnh= []
+NODEnumber=meshinfo['numberOfNodes_netting']+meshinfo['numberOfNodes_mooring']
+l=['None']*((NODEnumber+1))
+con_mooring = meshinfo['Lines_mooring']
+sur_netting = meshinfo['surfs_netting']
+
+
+hydroModel_netting=hdm.screenModel.forceModel("S1",sur_netting,+ ''' + str(Sn) + ''',''' + str(dwh) + ''',''' + str(
+        dw0) + ''')
+hydroModel_mooring=hdm.morisonModel.forceModel("M4",con_mooring,0.5,0.05,0.05)
+netWakeModel=hdm.wakeModel.net2net("factor-1",meshinfo['Nodes_mooring']+meshinfo['Nodes_netting'],sur_netting,Uinput[0],[0,0,0],0.002,0.27)
+        
+with open(cwd+'/positionOutput/element_in_wake.txt', "w") as file:
+    file.write(str(netWakeModel.get_element_in_wake()))
+file.close()
+with open(cwd+'/positionOutput/hydro_elements.txt', "w") as file:
+    file.write(str(hydroModel_netting.output_hydro_element()))
+file.close()
+
+for k in range(0,itimes):
+    INCLUDE(UNITE=91,INFO=0)
+
+IMPR_RESU(FORMAT='MED',
+          RESU=_F(CARA_ELEM=elemprop,
+                  LIST_INST=listr,
+                  NOM_CHAM=('DEPL' ,'SIEF_ELGA'),
+                  # TOUT_CMP=(DEPL','ACCE','VITE' ),
+                  RESULTAT=resn,
+                  TOUT_CMP='OUI'),
+          UNITE=80)
+
+stat = CALC_CHAMP(CONTRAINTE=('SIEF_ELNO', ),
+                  FORCE=('REAC_NODA', ),
+                  RESULTAT=resn)
+
+reac1 = POST_RELEVE_T(ACTION=_F(GROUP_NO=("anchor"),
+                               INTITULE='sum reactions',
+                               MOMENT=('DRX', 'DRY', 'DRZ'),
+                               NOM_CHAM=('REAC_NODA'),
+                               OPERATION=('EXTRACTION', ),
+                               POINT=(0.0, 0.0, 0.0),
+                               RESULTANTE=('DX', 'DY', 'DZ'),
+                               RESULTAT=stat))
+
+IMPR_TABLE(FORMAT_R='1PE12.3',
+           TABLE=reac1,
+           UNITE=8)
+
+reac2 = POST_RELEVE_T(ACTION=_F(GROUP_NO=("net_top"),
+                               INTITULE='sum reactions',
+                               MOMENT=('DRX', 'DRY', 'DRZ'),
+                               NOM_CHAM=('REAC_NODA'),
+                               OPERATION=('EXTRACTION', ),
+                               POINT=(0.0, 0.0, 0.0),
+                               RESULTANTE=('DX', 'DY', 'DZ'),
+                               RESULTAT=stat))
+                               
+IMPR_TABLE(FORMAT_R='1PE12.3',
+           TABLE=reac2,
+           UNITE=9)  
+
+reac3 = POST_RELEVE_T(ACTION=_F(GROUP_NO=("buoy"),
+                               INTITULE='sum reactions',
+                               MOMENT=('DRX', 'DRY', 'DRZ'),
+                               NOM_CHAM=('REAC_NODA'),
+                               OPERATION=('EXTRACTION', ),
+                               POINT=(0.0, 0.0, 0.0),
+                               RESULTANTE=('DX', 'DY', 'DZ'),
+                               RESULTAT=stat))
+                               
+IMPR_TABLE(FORMAT_R='1PE12.3',
+           TABLE=reac3,
+           UNITE=10)                    
+
+FIN()
+            
+    
+    
+    
+    
+    ''')
+
+
+def set_hydrodynamic_model(handel, hydroModel, wake_model, Sn, dwh, dw0, velocities, fluidDensity):
+    handel.write('''
+NODEnumber=meshinfo['numberOfNodes']
 Uinput = ''' + str(velocities) + '''
 Fnh= []
 l=['None']*((NODEnumber+1))
@@ -262,7 +442,7 @@ IMPR_RESU(FORMAT='MED',
 stat = CALC_CHAMP(CONTRAINTE=('SIEF_ELNO', ),
                   FORCE=('REAC_NODA', ),
                   RESULTAT=resn)
-''')
+        ''')
 
 
 # >>>>>>>>> reaction force >>>>>>>>>>>>
@@ -526,6 +706,189 @@ if k!=0:
             DETRUIRE(CONCEPT=_F( NOM=(l[i])))
         ''')
 
+
+def set_dyna_solver_fishFarm(handel, alpha, time_thread, coupling_switcher):
+    handel.write('''
+loadr=[]               
+loadr.append( _F(CHARGE=gF), )       
+loadr.append( _F(CHARGE=fixed), )       
+loadr.append( _F(CHARGE=buoyF), )
+loadr.append( _F(CHARGE=sealevel), )
+loadr.append( _F(CHARGE=sinkF1), )
+loadr.append( _F(CHARGE=sinkF2), )
+        
+if k == 0:
+    resn = DYNA_NON_LINE(CARA_ELEM=elemprop,
+                    CHAM_MATER=fieldmat,
+                    COMPORTEMENT=(_F(DEFORMATION='GROT_GDEP',
+                                    GROUP_MA=('twines','anchorLines','frameLines','bridlesH','bridlesV','buoyLines'),
+                                    RELATION='CABLE'),
+                                  _F(DEFORMATION='PETIT',
+                                    GROUP_MA=('topRings','bottomRings','links'),
+                                    RELATION='ELAS')
+                                 ),
+                    CONVERGENCE=_F(ITER_GLOB_MAXI=1000 ,
+                                   RESI_GLOB_RELA=2e-05 ),
+                    EXCIT=(loadr),
+                    OBSERVATION=_F(GROUP_MA='twines',
+                                    NOM_CHAM='DEPL',
+                                    NOM_CMP=('DX','DY','DZ'),
+                                    INST=k+dt,
+                                    OBSE_ETAT_INIT='NON'),
+                    SCHEMA_TEMPS=_F(FORMULATION='DEPLACEMENT',
+                                   SCHEMA="HHT",
+                                   ALPHA=-0.1,
+                                   ),
+                                   #add damping stablize the oscilations Need to study in the future
+                    INCREMENT=_F(LIST_INST=times,INST_FIN=(1+k)*dt),
+                    MODELE=model)
+else:
+    Fnh=tuple(Fnh)
+    for i in range (1,NODEnumber+1):
+        grpno = 'node%01g' %i
+        l[i]=AFFE_CHAR_MECA( FORCE_NODALE=_F(GROUP_NO= (grpno),
+                         FX= Fnh[i-1][0],
+                         FY= Fnh[i-1][1],
+                         FZ= Fnh[i-1][2],),
+                         MODELE=model)
+    for i in range (1,NODEnumber+1):
+        loadr.append( _F(CHARGE=l[i],), )
+
+    resn = DYNA_NON_LINE(CARA_ELEM=elemprop,
+    				     CHAM_MATER=fieldmat,
+    				     reuse=resn,
+                    ETAT_INIT=_F(EVOL_NOLI=resn),
+                    COMPORTEMENT=(_F(DEFORMATION='GROT_GDEP',
+                                    GROUP_MA=('twines','anchorLines','frameLines','bridlesH','bridlesV','buoyLines'),
+                                    RELATION='CABLE'),
+                                  _F(DEFORMATION='PETIT',
+                                    GROUP_MA=('topRings','bottomRings','links'),
+                                    RELATION='ELAS')
+                                 ),
+                    CONVERGENCE=_F(ITER_GLOB_MAXI=1000 ,
+                                   RESI_GLOB_RELA=2e-05 ),
+                    EXCIT=(loadr),
+                    OBSERVATION=_F(GROUP_MA='twines',
+                                    NOM_CHAM='DEPL',
+                                    NOM_CMP=('DX','DY','DZ'),
+                                    INST=k+dt,
+                                    OBSE_ETAT_INIT='NON'),
+                    SCHEMA_TEMPS=_F(FORMULATION='DEPLACEMENT',
+                                   SCHEMA="HHT",
+                                    ALPHA=-''' + str(alpha) + '''
+                                   ),
+                                   #add damping stablize the oscilations Need to study in the future
+                    INCREMENT=_F(LIST_INST=times,INST_FIN=(1+k)*dt),
+                    MODELE=model,
+                    )
+        
+tblp = POST_RELEVE_T(ACTION=(_F(OPERATION='EXTRACTION',      # For Extraction of values
+                          INTITULE='Nodal Displacements',    # Name of the table in .resu file
+                          RESULTAT=resn,                     # The result from which values will be extracted(STAT_NON_LINE)
+                          NOM_CHAM=('DEPL'),                 # Field to extract. DEPL = Displacements
+                          #TOUT_CMP='OUI',
+                          NOM_CMP=('DX','DY','DZ'),          # Components of DISP to extract
+                          GROUP_NO='allnodes',               # Extract only for nodes of group DISP
+                          INST=(1+k)*dt,                     # STAT_NON_LINE calculates for 10 INST. I want only last INST
+                           ),),
+                  )
+tblp2 = POST_RELEVE_T(ACTION=(_F(OPERATION='EXTRACTION',      # For Extraction of values
+                          INTITULE='Nodal Displacements',    # Name of the table in .resu file
+                          RESULTAT=resn,                     # The result from which values will be extracted(STAT_NON_LINE)
+                          NOM_CHAM=('VITE'),                 # Field to extract. VITE = velocity,
+                          #TOUT_CMP='OUI',
+                          NOM_CMP=('DX','DY','DZ'),          # Components of DISP to extract
+                          GROUP_NO='allnodes',               # Extract only for nodes of group DISP
+                          INST=(1+k)*dt,                     # STAT_NON_LINE calculates for 10 INST. I want only last INST
+                           ),),
+                  )
+
+posi=fsi.get_position_aster(tblp)
+velo_nodes=fsi.get_velocity_aster(tblp2)
+
+
+if k < itimes-1:
+    del Fnh
+        ''')
+
+    if time_thread in ["0", "false", "no"]:
+        handel.write('''
+force_increasing_factor=1.0
+            ''')
+    else:
+        handel.write('''
+if k*dt< ''' + str(time_thread) + ''':
+    force_increasing_factor=k*dt/''' + str(time_thread) + '''
+else:
+    force_increasing_factor=1.0    
+                ''')
+
+    if coupling_switcher in ["False"]:
+        handel.write('''
+U=Uinput[int(k*dt/duration)]
+
+force_on_netting=hydroModel_netting.force_on_element(netWakeModel,posi,U)
+force_on_mooring=hydroModel_mooring.force_on_element(netWakeModel,posi,U)
+
+Fnh=hydroModel_netting.distribute_force(NODEnumber,force_increasing_factor)+hydroModel_mooring.distribute_force(NODEnumber)
+with open(cwd+'/positionOutput/posi'+str(round((k)*dt,3))+'.txt', "w") as file:
+    file.write(str(posi))
+file.close()
+    ''')
+    elif coupling_switcher in ["simiFSI"]:
+        handel.write('''
+if k == 0:
+    hydro_element=hydroModel_netting.output_hydro_element()
+    fsi.write_element(hydro_element,cwd)
+    
+timeFE=dt*k
+U=Uinput[int(k*dt/duration)]
+force_on_netting=hydroModel_netting.force_on_element(netWakeModel,posi,U,velo_nodes)
+force_on_mooring=hydroModel_mooring.force_on_element(netWakeModel,posi,U)
+Fnh=hydroModel_netting.distribute_force(NODEnumber,force_increasing_factor)+hydroModel_mooring.distribute_force(NODEnumber)
+
+fsi.write_position(posi,cwd)
+fsi.write_fh(force_on_netting,timeFE,cwd)
+
+with open(cwd+'/positionOutput/posi_'+str(round((k)*dt,3))+'.txt', "w") as file:
+    file.write(str(posi))
+file.close()
+            ''')
+
+    elif coupling_switcher in ["FSI"]:
+        handel.write('''
+timeFE=dt*k
+if k == 0:
+    hydro_element=hydroModel_netting.output_hydro_element()
+    force_on_netting=hydroModel_netting.force_on_elements
+    Fnh=hydroModel_netting.distribute_force(NODEnumber,force_increasing_factor)+hydroModel_mooring.distribute_force(NODEnumber)
+    
+    fsi.write_fh(force_on_netting,timeFE,cwd)
+    fsi.write_element(hydro_element,cwd)
+    fsi.write_position(posi,cwd)
+else:
+
+    U=fsi.get_velocity(cwd,len(hydro_element),timeFE)
+    force_on_netting=hydroModel.screen_fsi(posi,U,velo_nodes)
+    force_on_mooring=hydroModel_mooring.force_on_element(netWakeModel,posi,Uinput[int(k*dt/duration)])
+    
+    Fnh=hydroModel_netting.distribute_force(NODEnumber,force_increasing_factor)+hydroModel_mooring.distribute_force(NODEnumber)
+
+    fsi.write_position(posi,cwd)
+    fsi.write_fh(force_on_netting,timeFE,cwd)
+    with open(cwd+'/positionOutput/posi_'+str(round((k)*dt,3))+'.txt', "w") as file:
+        file.write(str(posi))
+    file.close()
+        ''')
+
+    handel.write('''      
+DETRUIRE(CONCEPT=_F( NOM=(tblp)))
+DETRUIRE(CONCEPT=_F( NOM=(tblp2)))
+if k!=0:
+    if k < itimes-1:
+        for i in range (1,NODEnumber+1):
+            DETRUIRE(CONCEPT=_F( NOM=(l[i])))
+    ''')
 
 # >>>>>>>>>>>>>>>    ASTERRUN.export       >>>>>>>>>>>>
 def set_export(handel, rdnumber, hostname, username, cwd, solver_version, mesh_name):

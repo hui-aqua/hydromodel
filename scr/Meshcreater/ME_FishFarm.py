@@ -406,7 +406,7 @@ for each_node in point_netting:
 start_node = number_of_nodes_mooring
 for y in range(number_of_cage_Y):
     for x in range(number_of_cage_X):
-        print("startpointis" + str(start_node))
+        # print("startpointis" + str(start_node))
         for i in range(1, NT + 1):
             for j in range(0, BN + NN):
                 # the last horizontal line
@@ -739,6 +739,8 @@ nbAdd = link.Add([i for i in range(number_of_segment_mooring + len(con_netting) 
     con_netting) + 1 + NT * 2 * number_of_cage_Y * number_of_cage_X)])
 smesh.SetName(link, 'links')
 
+meshname = "fishFarm_" + str(number_of_cage_X) + "_" + str(number_of_cage_Y) + ".med"
+
 meshinfo = {
     "Nodes_mooring": point_mooring,
     "Lines_mooring": con_mooring,
@@ -754,6 +756,7 @@ meshinfo = {
     "numberOfNodes_netting": len(point_netting),
     "numberOfLines_netting": len(con_netting),
     "numberOfsurfs_netting": len(sur_netting),
+    "meshName": meshname,
 }
 
 print("\n"
@@ -771,13 +774,13 @@ print("Number of node on netting is " + str(meshinfo["numberOfNodes_netting"]) +
 print("Number of line on netting is " + str(meshinfo["numberOfLines_netting"]) + ".")
 print("Number of surface on netting is " + str(meshinfo["numberOfsurfs_netting"]) + ".\n")
 
-with open(cwd + "/mesh_netting.py", 'w') as f:
+with open(cwd + "/meshInformation.py", 'w') as f:
     f.write("meshinfo=")
     f.write(str(meshinfo))
 f.close()
 
 try:
-    Mesh_1.ExportMED(cwd + "/FishFarm.med")
+    Mesh_1.ExportMED(cwd + "/" + meshname)
     pass
 except:
     print('ExportMED() failed. Invalid file name?')

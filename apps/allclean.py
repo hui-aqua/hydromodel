@@ -24,5 +24,6 @@ for folder in folders_need_clean:
 
 files = os.listdir(cwd)
 for file in files:
-    if file.endswith(".txt") or file.endswith(".comm") or file.endswith(".med") or file.endswith(".export"):
+    if file.endswith(".txt") or file.endswith(".comm") or file.endswith(".med") or file.endswith(
+            ".export") or file.endswith(".dat"):
         os.remove(os.path.join(cwd, file))
