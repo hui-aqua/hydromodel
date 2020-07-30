@@ -908,7 +908,7 @@ P mode interactif
 P mpi_nbcpu 1
 P mpi_nbnoeud 1
 P nbmaxnook 5
-P ncpus 10
+P ncpus 2
 P noeud ''' + str(hostname) + '''
 P nomjob astk
 P origine ASTK 2019.0.final
