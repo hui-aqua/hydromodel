@@ -1,5 +1,5 @@
-import morisonModel as morisonModel
-import screenModel as screenModel
+import hydrodynamicModels.morisonModel as morisonModel
+import hydrodynamicModels.screenModel as screenModel
 import wakeModel as wakeModel
 
 row = 1025  # [kg/m3]   sea water density
