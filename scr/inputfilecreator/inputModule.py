@@ -88,8 +88,8 @@ elemprop = AFFE_CARA_ELEM(CABLE=(_F(GROUP_MA=('twines'),
 net = DEFI_MATERIAU(CABLE=_F(EC_SUR_E=0.0001),
                      ELAS=_F(E=100000000, NU=0.2,RHO=1125.0)) 
                       
-rope = DEFI_MATERIAU(CABLE=_F(EC_SUR_E=0.0001),
-                     ELAS=_F(E=1000000000, NU=0.2,RHO=1040.0))  
+rope = DEFI_MATERIAU(CABLE=_F(EC_SUR_E=0.001963495),
+                     ELAS=_F(E=1000000000, NU=0.2,RHO=1100.0))  
 
 hdpe1 = DEFI_MATERIAU(ELAS=_F(E=900000000,
                            NU=0.3,
