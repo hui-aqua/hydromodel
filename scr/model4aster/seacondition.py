@@ -14,5 +14,6 @@ In order to use this module, we recommend ``import seacondition as sc`` in the b
 
 reference: 2000linearwavetheory_NTNU.pdf
 """
-from scr.model4aster.waves import Airywave
+# from scr.model4aster.waves import Airywave
+import waves.Airywave as Airywave
 # from scr.model4aster.waves import stokeswave

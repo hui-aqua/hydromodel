@@ -4,8 +4,8 @@
 
 This is a project within the Ocean Technology Innovation Cluster Stavanger (OTICS) at the University of Stavanger. 
 This program it is not ready for release now.
-
-[Document](/docs/_build/html/index.html)
+----
+User Guide for this program can be found here: [Document](/docs/readme.md)
 
 If you have any questions about this program, please email: hui.cheng@uis.no
 

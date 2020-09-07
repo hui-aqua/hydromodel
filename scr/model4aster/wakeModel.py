@@ -43,6 +43,7 @@ class net2net:
         self.wake_type = str(model_index).split("-")[0]
         self.wake_value = str(model_index).split("-")[1]
         self.wake_element_indexes = self.get_element_in_wake()
+        print("\n net2net weak effect is initialized.\n")
 
     def __str__(self):
         s0 = "The selected wake model is " + str(self.wake_type) + "\n"
