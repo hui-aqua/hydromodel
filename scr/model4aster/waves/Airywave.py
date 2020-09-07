@@ -59,7 +59,6 @@ class Airywave:
                 self.wave_k * self.waterDepth)
 
             if self.waterDepth > self.waveLength * 0.5:  # if it is deep water
-                print("here")
                 horizonvelocity = self.pi_h_t * np.exp(self.wave_k * posi[2]) * np.cos(zeta)
                 vericalvelocity = self.pi_h_t * np.exp(self.wave_k * posi[2]) * np.sin(zeta)
         else:
